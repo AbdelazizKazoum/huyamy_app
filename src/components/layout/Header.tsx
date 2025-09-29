@@ -1,3 +1,5 @@
+"use client";
+
 import { currencies, initialCartItems } from "@/data";
 import { CartItem, Language } from "@/types";
 import {

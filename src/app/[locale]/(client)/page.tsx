@@ -1,9 +1,5 @@
-"use client";
 import React, { Fragment } from "react";
 
-// --- Type Imports ---
-
-// --- Data Imports ---
 import { categories, products } from "../../../data";
 import NoticeBar from "@/components/layout/NoticeBar";
 import Header from "@/components/layout/Header";

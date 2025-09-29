@@ -14,7 +14,7 @@ const NewsletterSection: React.FC = () => {
         </p>
         <form
           className="max-w-md mx-auto flex"
-          onSubmit={(e) => e.preventDefault()}
+          //   onSubmit={(e) => e.preventDefault()}
         >
           <input
             type="email"
