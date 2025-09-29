@@ -4,6 +4,50 @@ export default function Home() {
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        {/* Font Testing Section */}
+        <div className="w-full max-w-2xl mb-8 p-6 border rounded-lg bg-gray-50 dark:bg-gray-800">
+          <h2 className="text-xl font-bold mb-4">Font Testing</h2>
+
+          {/* English with Geist */}
+          <div className="mb-4">
+            <h3 className="font-semibold text-sm text-gray-600 dark:text-gray-400 mb-2">
+              English (Geist Sans)
+            </h3>
+            <p
+              className="text-lg"
+              style={{ fontFamily: "var(--font-geist-sans)" }}
+            >
+              Hello, this is English text using Geist Sans font.
+            </p>
+          </div>
+
+          {/* French with Inter */}
+          <div className="mb-4">
+            <h3 className="font-semibold text-sm text-gray-600 dark:text-gray-400 mb-2">
+              French (Inter)
+            </h3>
+            <p className="text-lg" style={{ fontFamily: "var(--font-inter)" }}>
+              Bonjour, ceci est du texte français utilisant la police Inter.
+              Éléments avec accents: café, résumé, naïve.
+            </p>
+          </div>
+
+          {/* Arabic with Noto Sans Arabic */}
+          <div className="mb-4">
+            <h3 className="font-semibold text-sm text-gray-600 dark:text-gray-400 mb-2">
+              Arabic (Noto Sans Arabic)
+            </h3>
+            <p
+              className="text-lg text-right"
+              style={{ fontFamily: "var(--font-noto-arabic)" }}
+              dir="rtl"
+            >
+              مرحبا، هذا نص عربي باستخدام خط Noto Sans Arabic. هذا مثال على النص
+              العربي.
+            </p>
+          </div>
+        </div>
+
         <Image
           className="dark:invert"
           src="/next.svg"
