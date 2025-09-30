@@ -1,19 +1,19 @@
+import Image from "next/image";
+
 const Footer: React.FC = () => {
   return (
     <footer className="bg-neutral-50 text-neutral-800 border-t border-neutral-200">
       <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-right">
           <div className="md:col-span-1">
-            <a href="#" className="flex flex-col items-start leading-none">
-              <span
-                className="text-4xl font-bold text-secondary-500"
-                style={{ fontFamily: "'Cairo', sans-serif" }}
-              >
-                Huyamy
-              </span>
-              <span className="text-sm text-neutral-600 font-semibold -mt-1 tracking-wider">
-                Coopérative
-              </span>
+            <a href="#" className="flex items-center justify-start mb-4">
+              <Image
+                src="/images/huyami_logo.jpeg"
+                alt="Huyamy Coopérative"
+                width={160}
+                height={80}
+                className="h-16 w-auto object-contain"
+              />
             </a>
             <p className="text-neutral-600 mt-4">
               متجرك الأول لمنتجات التجميل الطبيعية والعناية بالبشرة. نؤمن بقوة

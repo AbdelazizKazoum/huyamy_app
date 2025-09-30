@@ -4,6 +4,7 @@ import { currencies, initialCartItems } from "@/data";
 import { CartItem, Language } from "@/types";
 import { Menu, Search, ShoppingCart, X } from "lucide-react";
 import { useState } from "react";
+import Image from "next/image";
 import CartSidebar from "../CartSidebar";
 import { LanguageSelector } from "../ui";
 
@@ -61,16 +62,15 @@ const Header: React.FC<HeaderProps> = () => {
             <div className="flex items-center justify-between h-20">
               {/* Logo */}
               <div className="flex-shrink-0">
-                <a href="#" className="flex flex-col items-start leading-none">
-                  <span
-                    className="text-4xl font-bold text-secondary-500"
-                    style={{ fontFamily: "'Cairo', sans-serif" }}
-                  >
-                    Huyamy
-                  </span>
-                  <span className="text-sm text-primary-800 font-semibold -mt-1 tracking-wider">
-                    Coopérative
-                  </span>
+                <a href="#" className="flex items-center">
+                  <Image
+                    src="/images/huyami_logo.jpeg"
+                    alt="Huyamy Coopérative"
+                    width={160}
+                    height={80}
+                    className="h-12 w-auto object-contain"
+                    priority
+                  />
                 </a>
               </div>
 
