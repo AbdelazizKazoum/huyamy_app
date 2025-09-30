@@ -14,12 +14,10 @@ export default function EcommerceLandingPage() {
   return (
     <>
       <div
-        dir="rtl"
         className="bg-white"
         // style={{ fontFamily: "'Cairo', sans-serif" }}
       >
-        <NoticeBar />
-        <Header />
+
         <main>
           <HeroSection />
           <CategoriesSection categories={categories} />
@@ -38,7 +36,6 @@ export default function EcommerceLandingPage() {
           />
         </main>
         <NewsletterSection />
-        <Footer />
 
         {/* WhatsApp Floating Button */}
         <WhatsAppFloatingButton
