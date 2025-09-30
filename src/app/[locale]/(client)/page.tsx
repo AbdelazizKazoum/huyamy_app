@@ -1,4 +1,3 @@
-"use client";
 import React, { Fragment } from "react";
 
 import { categories, products } from "../../../data";
@@ -43,7 +42,7 @@ export default function EcommerceLandingPage() {
 
         {/* WhatsApp Floating Button */}
         <WhatsAppFloatingButton
-          phoneNumber="212612345678" // Replace with your actual phone number
+          phoneNumber="212636739071" // Replace with your actual phone number
           message="مرحبا، أريد الاستفسار عن منتجاتكم الطبيعية"
         />
       </div>
