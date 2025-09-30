@@ -9,17 +9,13 @@ import ProductSection from "@/components/ProductSection";
 import Footer from "@/components/layout/Footer";
 import NewsletterSection from "@/components/NewsletterSection";
 
-// --- Components ---
-
-// --- Main App Component ---
-// This would be your `app/page.jsx` in a Next.js 15 project.
 export default function EcommerceLandingPage() {
   return (
     <>
       <div
         dir="rtl"
         className="bg-white"
-        style={{ fontFamily: "'Cairo', sans-serif" }}
+        // style={{ fontFamily: "'Cairo', sans-serif" }}
       >
         <NoticeBar />
         <Header />

@@ -1,6 +1,89 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1d4ed8; /* Blue */
-  --color-secondary: #f59e0b; /* Amber */
+  /* Primary Brand Colors - Green Palette */
+  --color-primary-50: #f0fdf4; /* Very light green for subtle backgrounds */
+  --color-primary-100: #dcfce7; /* Light green for subtle highlights */
+  --color-primary-200: #bbf7d0; /* Light green */
+  --color-primary-300: #86efac; /* Medium light green */
+  --color-primary-400: #4ade80; /* Medium green */
+  --color-primary-500: #22c55e; /* Standard green */
+  --color-primary-600: #16a34a; /* Medium dark green */
+  --color-primary-700: #15803d; /* Dark green - main brand color */
+  --color-primary-800: #166534; /* Very dark green - primary buttons */
+  --color-primary-900: #14532d; /* Darkest green - text and accents */
+
+  /* Secondary Brand Colors - Amber Palette */
+  --color-secondary-50: #fffbeb; /* Very light amber background */
+  --color-secondary-100: #fef3c7; /* Light amber background */
+  --color-secondary-200: #fde68a; /* Light amber */
+  --color-secondary-300: #fcd34d; /* Medium light amber */
+  --color-secondary-400: #fbbf24; /* Medium amber - logo color */
+  --color-secondary-500: #f59e0b; /* Standard amber - badges/highlights */
+  --color-secondary-600: #d97706; /* Medium dark amber */
+  --color-secondary-700: #b45309; /* Dark amber */
+  --color-secondary-800: #92400e; /* Very dark amber */
+  --color-secondary-900: #78350f; /* Darkest amber */
+
+  /* Neutral Colors - Gray Palette */
+  --color-neutral-50: #f9fafb; /* Very light background */
+  --color-neutral-100: #f3f4f6; /* Light background */
+  --color-neutral-200: #e5e7eb; /* Light borders */
+  --color-neutral-300: #d1d5db; /* Medium light borders */
+  --color-neutral-400: #9ca3af; /* Medium gray text */
+  --color-neutral-500: #6b7280; /* Standard gray text */
+  --color-neutral-600: #4b5563; /* Medium dark text */
+  --color-neutral-700: #374151; /* Dark text */
+  --color-neutral-800: #1f2937; /* Very dark text/backgrounds */
+  --color-neutral-900: #111827; /* Darkest text */
+
+  /* Background Colors */
+  --color-background-primary: #ffffff; /* Main white background */
+  --color-background-secondary: #f7f6f2; /* Warm off-white background */
+  --color-background-tertiary: #f5f5f4; /* Stone background */
+  --color-background-accent: #fffbeb; /* Light amber background */
+
+  /* Text Colors */
+  --color-text-primary: var(--color-neutral-800); /* Main dark text */
+  --color-text-secondary: var(--color-neutral-600); /* Secondary text */
+  --color-text-muted: var(--color-neutral-500); /* Muted text */
+  --color-text-light: var(--color-neutral-400); /* Light text */
+  --color-text-inverse: #ffffff; /* White text on dark backgrounds */
+
+  /* Brand Specific Colors */
+  --color-brand-primary: var(--color-primary-800); /* Main brand green */
+  --color-brand-secondary: var(--color-secondary-500); /* Brand amber */
+  --color-brand-accent: var(--color-primary-700); /* Accent green */
+
+  /* Interactive Colors */
+  --color-hover-primary: var(--color-primary-900); /* Green hover state */
+  --color-hover-secondary: var(--color-secondary-600); /* Amber hover state */
+  --color-focus: var(--color-primary-700); /* Focus ring color */
+
+  /* Status Colors */
+  --color-success: var(--color-primary-600); /* Success green */
+  --color-warning: var(--color-secondary-500); /* Warning amber */
+  --color-error: #dc2626; /* Error red */
+  --color-info: #2563eb; /* Info blue */
+
+  /* Utility Colors */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-transparent: transparent;
+
+  /* Border Colors */
+  --color-border-light: var(--color-neutral-200);
+  --color-border-medium: var(--color-neutral-300);
+  --color-border-dark: var(--color-neutral-400);
+  --color-border-accent: var(--color-primary-700);
+
+  /* Shadow Colors */
+  --color-shadow-light: rgba(0, 0, 0, 0.05);
+  --color-shadow-medium: rgba(0, 0, 0, 0.1);
+  --color-shadow-dark: rgba(0, 0, 0, 0.15);
+
+  /* Overlay Colors */
+  --color-overlay-light: rgba(0, 0, 0, 0.1);
+  --color-overlay-medium: rgba(0, 0, 0, 0.3);
+  --color-overlay-dark: rgba(0, 0, 0, 0.5);
 }

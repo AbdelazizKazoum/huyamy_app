@@ -55,16 +55,16 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
           leaveTo="-translate-x-full"
         >
           <div className="fixed top-0 left-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-neutral-200">
               <h2
-                className="text-2xl font-bold text-gray-800"
+                className="text-2xl font-bold text-neutral-800"
                 style={{ fontFamily: "'Cairo', sans-serif" }}
               >
                 سلة التسوق
               </h2>
               <button
                 onClick={onClose}
-                className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full"
+                className="p-2 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-full"
               >
                 <X size={24} />
               </button>
@@ -83,19 +83,19 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                         alt={item.product.name[lang || "ar"]}
                         width={80}
                         height={80}
-                        className="w-20 h-20 object-cover rounded-md border border-gray-200"
+                        className="w-20 h-20 object-cover rounded-md border border-neutral-200"
                         style={{ width: "80px", height: "80px" }}
                         unoptimized={false}
                       />
                       <div className="flex-grow">
-                        <h3 className="font-semibold text-gray-800">
+                        <h3 className="font-semibold text-neutral-800">
                           {item.product.name[lang || "ar"]}
                         </h3>
-                        <p className="text-green-800 text-sm font-semibold">
+                        <p className="text-primary-800 text-sm font-semibold">
                           {item.product.price.toFixed(2)} {currency}
                         </p>
                         <div className="flex items-center mt-2">
-                          <div className="flex items-center border border-gray-200 rounded-full">
+                          <div className="flex items-center border border-neutral-200 rounded-full">
                             <button
                               onClick={() =>
                                 onUpdateQuantity(
@@ -103,7 +103,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                                   item.quantity - 1
                                 )
                               }
-                              className="p-2 text-gray-500 hover:bg-gray-100 rounded-r-full"
+                              className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-r-full"
                             >
                               <Minus size={16} />
                             </button>
@@ -117,7 +117,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                                   item.quantity + 1
                                 )
                               }
-                              className="p-2 text-gray-500 hover:bg-gray-100 rounded-l-full"
+                              className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-l-full"
                             >
                               <Plus size={16} />
                             </button>
@@ -134,21 +134,21 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                   ))}
                 </div>
 
-                <div className="p-6 border-t border-gray-200 bg-gray-50">
+                <div className="p-6 border-t border-neutral-200 bg-neutral-50">
                   <div className="flex justify-between items-center mb-4">
-                    <span className="text-lg text-gray-600">
+                    <span className="text-lg text-neutral-600">
                       المجموع الفرعي
                     </span>
-                    <span className="text-2xl font-bold text-green-800">
+                    <span className="text-2xl font-bold text-primary-800">
                       {subtotal.toFixed(2)} {currency}
                     </span>
                   </div>
-                  <button className="w-full bg-green-800 text-white font-bold py-4 px-6 rounded-full text-lg hover:bg-green-900 transition-all duration-300">
+                  <button className="w-full bg-primary-800 text-white font-bold py-4 px-6 rounded-full text-lg hover:bg-primary-900 transition-all duration-300">
                     إتمام الشراء
                   </button>
                   <button
                     onClick={onClose}
-                    className="w-full text-center mt-3 text-green-800 font-semibold hover:underline"
+                    className="w-full text-center mt-3 text-primary-800 font-semibold hover:underline"
                   >
                     أو متابعة التسوق
                   </button>
@@ -156,16 +156,16 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
               </>
             ) : (
               <div className="flex-grow flex flex-col items-center justify-center text-center p-6">
-                <ShoppingCart size={64} className="text-gray-300 mb-4" />
-                <h3 className="text-xl font-semibold text-gray-800">
+                <ShoppingCart size={64} className="text-neutral-300 mb-4" />
+                <h3 className="text-xl font-semibold text-neutral-800">
                   سلة التسوق فارغة
                 </h3>
-                <p className="text-gray-500 mt-2">
+                <p className="text-neutral-500 mt-2">
                   لم تقم بإضافة أي منتجات بعد.
                 </p>
                 <button
                   onClick={onClose}
-                  className="mt-6 bg-green-800 text-white font-bold py-3 px-8 rounded-full hover:bg-green-900 transition-all duration-300"
+                  className="mt-6 bg-primary-800 text-white font-bold py-3 px-8 rounded-full hover:bg-primary-900 transition-all duration-300"
                 >
                   ابدأ التسوق
                 </button>

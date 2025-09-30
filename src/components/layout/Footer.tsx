@@ -1,32 +1,34 @@
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-gray-800 text-white">
+    <footer className="bg-neutral-50 text-neutral-800 border-t border-neutral-200">
       <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-right">
           <div className="md:col-span-1">
             <a href="#" className="flex flex-col items-start leading-none">
               <span
-                className="text-4xl font-bold text-amber-400"
+                className="text-4xl font-bold text-secondary-500"
                 style={{ fontFamily: "'Cairo', sans-serif" }}
               >
                 Huyamy
               </span>
-              <span className="text-sm text-gray-300 font-semibold -mt-1 tracking-wider">
+              <span className="text-sm text-neutral-600 font-semibold -mt-1 tracking-wider">
                 Coopérative
               </span>
             </a>
-            <p className="text-gray-400 mt-4">
+            <p className="text-neutral-600 mt-4">
               متجرك الأول لمنتجات التجميل الطبيعية والعناية بالبشرة. نؤمن بقوة
               الطبيعة لتعزيز جمالك.
             </p>
           </div>
           <div>
-            <h3 className="text-lg font-semibold mb-4">خدمة العملاء</h3>
+            <h3 className="text-lg font-semibold mb-4 text-neutral-800">
+              خدمة العملاء
+            </h3>
             <ul className="space-y-2">
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
                   عن المتجر
                 </a>
@@ -34,7 +36,7 @@ const Footer: React.FC = () => {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
                   الشحن والتسليم
                 </a>
@@ -42,7 +44,7 @@ const Footer: React.FC = () => {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
                   تواصل معنا
                 </a>
@@ -50,7 +52,7 @@ const Footer: React.FC = () => {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
                   اتصل بنا
                 </a>
@@ -58,12 +60,14 @@ const Footer: React.FC = () => {
             </ul>
           </div>
           <div>
-            <h3 className="text-lg font-semibold mb-4">معلومات هامة</h3>
+            <h3 className="text-lg font-semibold mb-4 text-neutral-800">
+              معلومات هامة
+            </h3>
             <ul className="space-y-2">
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
                   الأسئلة المتكررة
                 </a>
@@ -71,7 +75,7 @@ const Footer: React.FC = () => {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
                   ثقة و ضمان
                 </a>
@@ -79,7 +83,7 @@ const Footer: React.FC = () => {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
                   شروط الاستخدام
                 </a>
@@ -87,7 +91,7 @@ const Footer: React.FC = () => {
               <li>
                 <a
                   href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
+                  className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
                   سياسة الخصوصية
                 </a>
@@ -95,7 +99,7 @@ const Footer: React.FC = () => {
             </ul>
           </div>
         </div>
-        <div className="border-t border-gray-700 mt-12 pt-8 text-center text-gray-500">
+        <div className="border-t border-neutral-300 mt-12 pt-8 text-center text-neutral-500">
           <p className="mb-4">
             &copy; {new Date().getFullYear()} Huyamy. جميع الحقوق محفوظة.
           </p>
@@ -103,14 +107,14 @@ const Footer: React.FC = () => {
             <a
               href="#"
               aria-label="Facebook"
-              className="text-gray-400 hover:text-white transition-transform hover:scale-110"
+              className="text-neutral-500 hover:text-primary-800 transition-transform hover:scale-110"
             >
               <i className="fab fa-facebook-f text-xl"></i>
             </a>
             <a
               href="#"
               aria-label="Instagram"
-              className="text-gray-400 hover:text-white transition-transform hover:scale-110"
+              className="text-neutral-500 hover:text-primary-800 transition-transform hover:scale-110"
             >
               <i className="fab fa-instagram text-xl"></i>
             </a>

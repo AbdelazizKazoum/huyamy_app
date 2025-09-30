@@ -5,17 +5,17 @@ import React from "react";
 const HeroSection: React.FC = () => {
   const features = [
     {
-      icon: <Truck size={40} className="text-green-800 mb-4" />,
+      icon: <Truck size={40} className="text-primary-800 mb-4" />,
       title: "شحن مجاني",
       description: "لجميع الطلبات في المغرب",
     },
     {
-      icon: <Clock size={40} className="text-green-800 mb-4" />,
+      icon: <Clock size={40} className="text-primary-800 mb-4" />,
       title: "توصيل في الوقت المحدد",
       description: "خلال 24 إلى 48 ساعة",
     },
     {
-      icon: <HandCoins size={40} className="text-green-800 mb-4" />,
+      icon: <HandCoins size={40} className="text-primary-800 mb-4" />,
       title: "الدفع عند الاستلام",
       description: "الدفع نقداً عند وصول طلبك",
     },
@@ -24,7 +24,10 @@ const HeroSection: React.FC = () => {
   return (
     <section className="relative">
       {/* Promotional Banner */}
-      <div className="w-full bg-[#f7f6f2]">
+      <div
+        className="w-full"
+        style={{ backgroundColor: "var(--color-background-secondary)" }}
+      >
         <a href="#" className="block">
           <Image
             src="https://placehold.co/1600x450/f7f6f2/166534?text=منتجات+طبيعية+بجودة+عالية"
@@ -45,18 +48,18 @@ const HeroSection: React.FC = () => {
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="bg-white p-8 rounded-lg shadow-lg text-center flex flex-col items-center border border-gray-100"
+                className="bg-white p-8 rounded-lg shadow-lg text-center flex flex-col items-center border border-neutral-100"
               >
                 {feature.icon}
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                <h3 className="text-xl font-bold text-neutral-800 mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-gray-500">{feature.description}</p>
+                <p className="text-neutral-500">{feature.description}</p>
               </div>
             ))}
           </div>
           {/* Mobile View: Single compact card */}
-          <div className="md:hidden bg-white p-4 rounded-lg shadow-lg border border-gray-100">
+          <div className="md:hidden bg-white p-4 rounded-lg shadow-lg border border-neutral-100">
             <div className="flex justify-around items-start text-center">
               {features.map((feature, index) => (
                 <div
@@ -65,9 +68,9 @@ const HeroSection: React.FC = () => {
                 >
                   {React.cloneElement(feature.icon, {
                     size: 32,
-                    className: "text-green-800 mb-2",
+                    className: "text-primary-800 mb-2",
                   })}
-                  <h3 className="text-xs sm:text-sm font-bold text-gray-800 leading-tight">
+                  <h3 className="text-xs sm:text-sm font-bold text-neutral-800 leading-tight">
                     {feature.title}
                   </h3>
                 </div>
