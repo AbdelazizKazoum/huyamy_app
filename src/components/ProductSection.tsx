@@ -1,6 +1,7 @@
 import { Language, Product } from "@/types";
 import SectionTitle from "./SectionTitle";
 import ProductCard from "./ProductCard";
+import { ButtonPrimary, ButtonSecondary } from "./ui";
 
 interface ProductSectionProps {
   title: string;
@@ -42,9 +43,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({
         </div>
         {showButton && (
           <div className="text-center mt-16">
-            <button className="bg-primary-800 text-white font-bold py-3 px-10 rounded-full hover:bg-primary-900 transition-all duration-300 shadow-md">
-              عرض كل المنتجات
-            </button>
+            <ButtonSecondary>عرض كل المنتجات</ButtonSecondary>
           </div>
         )}
       </div>

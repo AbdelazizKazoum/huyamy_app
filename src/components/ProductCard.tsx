@@ -1,5 +1,6 @@
 import { Language, Product } from "@/types";
 import Image from "next/image";
+import { ButtonPrimary } from "./ui";
 
 interface ProductCardProps {
   product: Product;
@@ -58,9 +59,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </p>
           )}
         </div>
-        <button className="w-full bg-primary-800 text-white font-bold py-3 px-6 rounded-full text-md hover:bg-primary-900 transition-all duration-300 mt-auto">
+        <ButtonPrimary className="w-full mt-auto">
           {(lang || "ar") === "ar" ? "اشتر الآن" : "Acheter"}
-        </button>
+        </ButtonPrimary>
       </div>
     </div>
   );
