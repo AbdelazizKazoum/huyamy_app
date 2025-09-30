@@ -2,16 +2,10 @@
 
 import { currencies, initialCartItems } from "@/data";
 import { CartItem, Language } from "@/types";
-import {
-  ChevronDown,
-  Globe,
-  Menu,
-  Search,
-  ShoppingCart,
-  X,
-} from "lucide-react";
+import { Menu, Search, ShoppingCart, X } from "lucide-react";
 import { useState } from "react";
 import CartSidebar from "../CartSidebar";
+import { LanguageSelector } from "../ui";
 
 type HeaderProps = Record<string, never>;
 
@@ -43,6 +37,11 @@ const Header: React.FC<HeaderProps> = () => {
     setCartItems((currentItems) =>
       currentItems.filter((item) => item.product.id !== productId)
     );
+  };
+
+  const handleLanguageChange = (newLang: Language) => {
+    setLang(newLang);
+    setIsLangMenuOpen(false);
   };
 
   return (
@@ -113,48 +112,13 @@ const Header: React.FC<HeaderProps> = () => {
                 </button>
 
                 {/* Language Selector */}
-                <div className="relative hidden md:block">
-                  <button
-                    onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
-                    className="flex items-center p-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300"
-                  >
-                    <Globe size={24} />
-                    <span className="font-semibold mx-1 text-sm">
-                      {lang.toUpperCase()}
-                    </span>
-                    <ChevronDown
-                      size={16}
-                      className={`transition-transform duration-200 ${
-                        isLangMenuOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {isLangMenuOpen && (
-                    <div className="absolute top-full right-0 mt-2 w-40 bg-white rounded-lg shadow-xl border border-neutral-200 z-50">
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setLang("ar");
-                          setIsLangMenuOpen(false);
-                        }}
-                        className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100"
-                      >
-                        العربية (AR)
-                      </a>
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setLang("fr");
-                          setIsLangMenuOpen(false);
-                        }}
-                        className="block px-4 py-2 text-neutral-700 hover:bg-neutral-100"
-                      >
-                        Français (FR)
-                      </a>
-                    </div>
-                  )}
+                <div className="hidden md:block">
+                  <LanguageSelector
+                    lang={lang}
+                    onLanguageChange={handleLanguageChange}
+                    isOpen={isLangMenuOpen}
+                    onToggle={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                  />
                 </div>
 
                 <button
@@ -216,49 +180,13 @@ const Header: React.FC<HeaderProps> = () => {
                   <span className="mr-3">بحث</span>
                 </button>
 
-                <div className="w-full">
-                  <button
-                    onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
-                    className="w-full flex items-center justify-between p-2 text-neutral-600 hover:text-primary-800 rounded-lg hover:bg-neutral-100 transition-colors duration-300"
-                  >
-                    <div className="flex items-center">
-                      <Globe size={22} />
-                      <span className="mr-3">اللغة: {lang.toUpperCase()}</span>
-                    </div>
-                    <ChevronDown
-                      size={16}
-                      className={`transition-transform duration-200 ${
-                        isLangMenuOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {isLangMenuOpen && (
-                    <div className="pl-8 rtl:pr-8 rtl:pl-0 pt-2 space-y-2 text-right">
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setLang("ar");
-                          setIsLangMenuOpen(false);
-                        }}
-                        className="block text-neutral-700 hover:text-primary-800"
-                      >
-                        العربية (AR)
-                      </a>
-                      <a
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setLang("fr");
-                          setIsLangMenuOpen(false);
-                        }}
-                        className="block text-neutral-700 hover:text-primary-800"
-                      >
-                        Français (FR)
-                      </a>
-                    </div>
-                  )}
-                </div>
+                <LanguageSelector
+                  lang={lang}
+                  onLanguageChange={handleLanguageChange}
+                  isOpen={isLangMenuOpen}
+                  onToggle={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                  isMobile={true}
+                />
               </div>
             </div>
           )}
