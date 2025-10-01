@@ -1,12 +1,25 @@
 import Image from "next/image";
+import { useTranslations, useLocale } from "next-intl";
 
 const Footer: React.FC = () => {
+  const t = useTranslations("footer");
+  const locale = useLocale();
+
   return (
     <footer className="bg-neutral-50 text-neutral-800 border-t border-neutral-200">
       <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-right">
+        <div
+          className={`grid grid-cols-1 md:grid-cols-3 gap-8 ${
+            locale === "ar" ? "text-right" : "text-left"
+          }`}
+        >
           <div className="md:col-span-1">
-            <a href="#" className="flex items-center justify-start mb-4">
+            <a
+              href="#"
+              className={`flex items-center mb-4 ${
+                locale === "ar" ? "justify-start" : "justify-start"
+              }`}
+            >
               <Image
                 src="/images/huyami_logo.jpeg"
                 alt="Huyamy Coopérative"
@@ -15,14 +28,11 @@ const Footer: React.FC = () => {
                 className="h-16 w-auto object-contain"
               />
             </a>
-            <p className="text-neutral-600 mt-4">
-              متجرك الأول لمنتجات التجميل الطبيعية والعناية بالبشرة. نؤمن بقوة
-              الطبيعة لتعزيز جمالك.
-            </p>
+            <p className="text-neutral-600 mt-4">{t("description")}</p>
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-4 text-neutral-800">
-              خدمة العملاء
+              {t("customerService.title")}
             </h3>
             <ul className="space-y-2">
               <li>
@@ -30,7 +40,7 @@ const Footer: React.FC = () => {
                   href="#"
                   className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
-                  عن المتجر
+                  {t("customerService.aboutStore")}
                 </a>
               </li>
               <li>
@@ -38,7 +48,7 @@ const Footer: React.FC = () => {
                   href="#"
                   className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
-                  الشحن والتسليم
+                  {t("customerService.shipping")}
                 </a>
               </li>
               <li>
@@ -46,7 +56,7 @@ const Footer: React.FC = () => {
                   href="#"
                   className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
-                  تواصل معنا
+                  {t("customerService.contact")}
                 </a>
               </li>
               <li>
@@ -54,14 +64,14 @@ const Footer: React.FC = () => {
                   href="#"
                   className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
-                  اتصل بنا
+                  {t("customerService.callUs")}
                 </a>
               </li>
             </ul>
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-4 text-neutral-800">
-              معلومات هامة
+              {t("importantInfo.title")}
             </h3>
             <ul className="space-y-2">
               <li>
@@ -69,7 +79,7 @@ const Footer: React.FC = () => {
                   href="#"
                   className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
-                  الأسئلة المتكررة
+                  {t("importantInfo.faq")}
                 </a>
               </li>
               <li>
@@ -77,7 +87,7 @@ const Footer: React.FC = () => {
                   href="#"
                   className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
-                  ثقة و ضمان
+                  {t("importantInfo.trustWarranty")}
                 </a>
               </li>
               <li>
@@ -85,7 +95,7 @@ const Footer: React.FC = () => {
                   href="#"
                   className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
-                  شروط الاستخدام
+                  {t("importantInfo.terms")}
                 </a>
               </li>
               <li>
@@ -93,7 +103,7 @@ const Footer: React.FC = () => {
                   href="#"
                   className="text-neutral-600 hover:text-primary-800 transition-colors"
                 >
-                  سياسة الخصوصية
+                  {t("importantInfo.privacy")}
                 </a>
               </li>
             </ul>
@@ -101,9 +111,9 @@ const Footer: React.FC = () => {
         </div>
         <div className="border-t border-neutral-300 mt-12 pt-8 text-center text-neutral-500">
           <p className="mb-4">
-            &copy; {new Date().getFullYear()} Huyamy. جميع الحقوق محفوظة.
+            &copy; {new Date().getFullYear()} Huyamy. {t("copyright")}
           </p>
-          <div className="flex justify-center space-x-6 rtl:space-x-reverse">
+          <div className="flex justify-center gap-6">
             <a
               href="#"
               aria-label="Facebook"

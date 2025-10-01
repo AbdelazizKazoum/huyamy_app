@@ -11,7 +11,7 @@ export default function RootLayout({
     <>
       <NoticeBar />
       <Header />
-      <main className={``}>{children}</main>;
+      <main className={``}>{children}</main>
       <Footer />
     </>
   );

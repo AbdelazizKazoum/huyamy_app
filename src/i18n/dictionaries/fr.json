@@ -51,5 +51,23 @@
     "defaultMessage": "Bonjour, je souhaiterais me renseigner sur vos produits",
     "contactLabel": "Contactez-nous sur WhatsApp",
     "tooltip": "Contactez-nous sur WhatsApp"
+  },
+  "footer": {
+    "description": "Votre premier magasin pour les produits de beauté naturels et les soins de la peau. Nous croyons au pouvoir de la nature pour sublimer votre beauté.",
+    "customerService": {
+      "title": "Service client",
+      "aboutStore": "À propos du magasin",
+      "shipping": "Livraison et expédition",
+      "contact": "Contactez-nous",
+      "callUs": "Appelez-nous"
+    },
+    "importantInfo": {
+      "title": "Informations importantes",
+      "faq": "Questions fréquentes",
+      "trustWarranty": "Confiance et garantie",
+      "terms": "Conditions d'utilisation",
+      "privacy": "Politique de confidentialité"
+    },
+    "copyright": "Tous droits réservés."
   }
 }
