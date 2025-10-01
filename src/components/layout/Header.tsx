@@ -5,10 +5,42 @@ import { CartItem, Language } from "@/types";
 import { Menu, Search, ShoppingCart, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import CartSidebar from "../CartSidebar";
 import { LanguageSelector } from "../ui";
 
 type HeaderProps = Record<string, never>;
+
+// Menu items configuration
+interface MenuItem {
+  label: string;
+  href: string;
+  arLabel: string;
+}
+
+const menuItems: MenuItem[] = [
+  {
+    label: "Home",
+    href: "/",
+    arLabel: "الرئيسية",
+  },
+  {
+    label: "Products",
+    href: "/products",
+    arLabel: "المتجر",
+  },
+  {
+    label: "Offers",
+    href: "/offers",
+    arLabel: "عروض",
+  },
+  {
+    label: "Contact",
+    href: "/contact",
+    arLabel: "تواصل معنا",
+  },
+];
 
 const Header: React.FC<HeaderProps> = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -17,6 +49,7 @@ const Header: React.FC<HeaderProps> = () => {
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
   const [lang, setLang] = useState<Language>("ar");
+  const pathname = usePathname();
 
   const currency = currencies[lang];
 
@@ -62,7 +95,7 @@ const Header: React.FC<HeaderProps> = () => {
             <div className="flex items-center justify-between h-20">
               {/* Logo */}
               <div className="flex-shrink-0">
-                <a href="#" className="flex items-center">
+                <Link href="/" className="flex items-center">
                   <Image
                     src="/images/huyami_logo.jpeg"
                     alt="Huyamy Coopérative"
@@ -71,35 +104,27 @@ const Header: React.FC<HeaderProps> = () => {
                     className="h-12 w-auto object-contain"
                     priority
                   />
-                </a>
+                </Link>
               </div>
 
               {/* Desktop Navigation */}
               <nav className="hidden md:flex md:items-center md:space-x-8 md:rtl:space-x-reverse">
-                <a
-                  href="#"
-                  className="text-neutral-600 hover:text-primary-800 transition-colors duration-300"
-                >
-                  الرئيسية
-                </a>
-                <a
-                  href="#"
-                  className="text-primary-800 font-semibold border-b-2 border-primary-700 pb-1"
-                >
-                  المتجر
-                </a>
-                <a
-                  href="#"
-                  className="text-neutral-600 hover:text-primary-800 transition-colors duration-300"
-                >
-                  عروض
-                </a>
-                <a
-                  href="#"
-                  className="text-neutral-600 hover:text-primary-800 transition-colors duration-300"
-                >
-                  تواصل معنا
-                </a>
+                {menuItems.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`transition-colors duration-300 ${
+                        isActive
+                          ? "text-primary-800 font-semibold border-b-2 border-primary-700 pb-1"
+                          : "text-neutral-600 hover:text-primary-800"
+                      }`}
+                    >
+                      {item.arLabel}
+                    </Link>
+                  );
+                })}
               </nav>
 
               {/* Icons */}
@@ -145,27 +170,23 @@ const Header: React.FC<HeaderProps> = () => {
           {isMenuOpen && (
             <div className="md:hidden bg-white border-t border-neutral-200">
               <div className="flex flex-col items-center p-4 space-y-4">
-                <a
-                  href="#"
-                  className="text-neutral-600 hover:text-primary-800 transition-colors duration-300"
-                >
-                  الرئيسية
-                </a>
-                <a href="#" className="text-primary-800 font-semibold">
-                  المتجر
-                </a>
-                <a
-                  href="#"
-                  className="text-neutral-600 hover:text-primary-800 transition-colors duration-300"
-                >
-                  عروض
-                </a>
-                <a
-                  href="#"
-                  className="text-neutral-600 hover:text-primary-800 transition-colors duration-300"
-                >
-                  تواصل معنا
-                </a>
+                {menuItems.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`transition-colors duration-300 ${
+                        isActive
+                          ? "text-primary-800 font-semibold"
+                          : "text-neutral-600 hover:text-primary-800"
+                      }`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {item.arLabel}
+                    </Link>
+                  );
+                })}
 
                 <div className="border-t border-neutral-200 w-full my-2"></div>
 

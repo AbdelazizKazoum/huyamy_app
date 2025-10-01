@@ -5,6 +5,8 @@ export type LocalizedString = {
 
 export type Language = "ar" | "fr";
 
+export type Locale = "ar" | "fr";
+
 export type Currency = {
   ar: string;
   fr: string;
