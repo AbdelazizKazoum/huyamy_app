@@ -1,12 +1,12 @@
 "use client";
 
 import { currencies, initialCartItems } from "@/data";
-import { CartItem, Language } from "@/types";
+import { CartItem, Locale, LocalizedString } from "@/types";
 import { Menu, Search, ShoppingCart, X } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/config";
+import { useLocale } from "next-intl";
 import CartSidebar from "../CartSidebar";
 import { LanguageSelector } from "../ui";
 
@@ -14,31 +14,38 @@ type HeaderProps = Record<string, never>;
 
 // Menu items configuration
 interface MenuItem {
-  label: string;
   href: string;
-  arLabel: string;
+  label: LocalizedString;
 }
 
 const menuItems: MenuItem[] = [
   {
-    label: "Home",
     href: "/",
-    arLabel: "الرئيسية",
+    label: {
+      ar: "الرئيسية",
+      fr: "Accueil",
+    },
   },
   {
-    label: "Products",
     href: "/products",
-    arLabel: "المتجر",
+    label: {
+      ar: "المتجر",
+      fr: "Produits",
+    },
   },
   {
-    label: "Offers",
     href: "/offers",
-    arLabel: "عروض",
+    label: {
+      ar: "عروض",
+      fr: "Offres",
+    },
   },
   {
-    label: "Contact",
     href: "/contact",
-    arLabel: "تواصل معنا",
+    label: {
+      ar: "تواصل معنا",
+      fr: "Contact",
+    },
   },
 ];
 
@@ -48,10 +55,23 @@ const Header: React.FC<HeaderProps> = () => {
   const [isLangMenuOpen, setIsLangMenuOpen] = useState<boolean>(false);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
-  const [lang, setLang] = useState<Language>("ar");
-  const pathname = usePathname();
 
-  const currency = currencies[lang];
+  const currentLocale = useLocale() as Locale;
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const currency = currencies[currentLocale];
+
+  // Locale-aware text
+  const searchText = {
+    ar: "بحث",
+    fr: "Rechercher",
+  };
+
+  const searchPlaceholder = {
+    ar: "ابحث عن منتجك المفضل...",
+    fr: "Recherchez votre produit préféré...",
+  };
 
   const handleUpdateQuantity = (productId: number, newQuantity: number) => {
     if (newQuantity < 1) {
@@ -73,8 +93,8 @@ const Header: React.FC<HeaderProps> = () => {
     );
   };
 
-  const handleLanguageChange = (newLang: Language) => {
-    setLang(newLang);
+  const handleLanguageChange = (newLocale: Locale) => {
+    router.replace(pathname, { locale: newLocale });
     setIsLangMenuOpen(false);
   };
 
@@ -86,7 +106,7 @@ const Header: React.FC<HeaderProps> = () => {
         items={cartItems}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
-        lang={lang}
+        lang={currentLocale}
         currency={currency}
       />
       <div className="sticky top-0 z-40">
@@ -108,7 +128,7 @@ const Header: React.FC<HeaderProps> = () => {
               </div>
 
               {/* Desktop Navigation */}
-              <nav className="hidden md:flex md:items-center md:space-x-8 md:rtl:space-x-reverse">
+              <nav className="hidden md:flex md:items-center gap-8">
                 {menuItems.map((item) => {
                   const isActive = pathname === item.href;
                   return (
@@ -121,7 +141,7 @@ const Header: React.FC<HeaderProps> = () => {
                           : "text-neutral-600 hover:text-primary-800"
                       }`}
                     >
-                      {item.arLabel}
+                      {item.label[currentLocale]}
                     </Link>
                   );
                 })}
@@ -139,7 +159,7 @@ const Header: React.FC<HeaderProps> = () => {
                 {/* Language Selector */}
                 <div className="hidden md:block">
                   <LanguageSelector
-                    lang={lang}
+                    lang={currentLocale}
                     onLanguageChange={handleLanguageChange}
                     isOpen={isLangMenuOpen}
                     onToggle={() => setIsLangMenuOpen(!isLangMenuOpen)}
@@ -176,14 +196,14 @@ const Header: React.FC<HeaderProps> = () => {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`transition-colors duration-300 ${
+                      className={`transition-colors duration-300 py-1 ${
                         isActive
                           ? "text-primary-800 font-semibold"
                           : "text-neutral-600 hover:text-primary-800"
                       }`}
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      {item.arLabel}
+                      {item.label[currentLocale]}
                     </Link>
                   );
                 })}
@@ -198,11 +218,15 @@ const Header: React.FC<HeaderProps> = () => {
                   className="w-full flex items-center justify-center p-2 text-neutral-600 hover:text-primary-800 rounded-lg hover:bg-neutral-100 transition-colors duration-300"
                 >
                   <Search size={22} />
-                  <span className="mr-3">بحث</span>
+                  <span
+                    className={`${currentLocale === "ar" ? "mr-3" : "ml-3"}`}
+                  >
+                    {searchText[currentLocale]}
+                  </span>
                 </button>
 
                 <LanguageSelector
-                  lang={lang}
+                  lang={currentLocale}
                   onLanguageChange={handleLanguageChange}
                   isOpen={isLangMenuOpen}
                   onToggle={() => setIsLangMenuOpen(!isLangMenuOpen)}
@@ -225,7 +249,7 @@ const Header: React.FC<HeaderProps> = () => {
               >
                 <input
                   type="text"
-                  placeholder="...ابحث عن منتجك المفضل"
+                  placeholder={searchPlaceholder[currentLocale]}
                   autoFocus
                   className="w-full h-12 text-lg bg-neutral-100 border-2 border-transparent rounded-full pl-14 pr-12 focus:outline-none focus:ring-2 focus:ring-primary-700"
                 />

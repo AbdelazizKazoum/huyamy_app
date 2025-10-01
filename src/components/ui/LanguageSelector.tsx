@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
 import { ChevronDown, Globe } from "lucide-react";
-import { Language } from "@/types";
+import { Locale } from "@/types";
 import useClickOutside from "@/hooks/useClickOutside";
 
 interface LanguageSelectorProps {
-  lang: Language;
-  onLanguageChange: (lang: Language) => void;
+  lang: Locale;
+  onLanguageChange: (lang: Locale) => void;
   isOpen: boolean;
   onToggle: () => void;
   isMobile?: boolean;
@@ -26,7 +26,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     }
   });
 
-  const handleLanguageSelect = (selectedLang: Language) => {
+  const handleLanguageSelect = (selectedLang: Locale) => {
     onLanguageChange(selectedLang);
     onToggle(); // Close the dropdown
   };

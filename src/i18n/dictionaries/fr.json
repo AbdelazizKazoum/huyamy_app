@@ -2,5 +2,16 @@
   "home": {
     "hello": "Bonjour",
     "welcome": "Bienvenue sur notre site"
+  },
+  "cart": {
+    "title": "Panier",
+    "subtotal": "Sous-total",
+    "checkout": "Passer la commande",
+    "continueShopping": "ou continuer vos achats",
+    "empty": {
+      "title": "Votre panier est vide",
+      "description": "Vous n'avez encore ajouté aucun produit.",
+      "startShopping": "Commencer les achats"
+    }
   }
 }

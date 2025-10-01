@@ -2,5 +2,16 @@
   "home": {
     "hello": "مرحبا",
     "welcome": "أهلاً بك في موقعنا"
+  },
+  "cart": {
+    "title": "سلة التسوق",
+    "subtotal": "المجموع الفرعي",
+    "checkout": "إتمام الشراء",
+    "continueShopping": "أو متابعة التسوق",
+    "empty": {
+      "title": "سلة التسوق فارغة",
+      "description": "لم تقم بإضافة أي منتجات بعد.",
+      "startShopping": "ابدأ التسوق"
+    }
   }
 }
