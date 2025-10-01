@@ -1,14 +1,14 @@
-import { Language, Product } from "@/types";
+import { Locale, Product } from "@/types";
 import SectionTitle from "./SectionTitle";
 import ProductCard from "./ProductCard";
-import { ButtonPrimary, ButtonSecondary } from "./ui";
+import { ButtonSecondary } from "./ui";
+import { useLocale, useTranslations } from "next-intl";
+import { currencies } from "@/data";
 
 interface ProductSectionProps {
   title: string;
   subtitle?: string;
   products: Product[];
-  lang?: Language;
-  currency?: string;
   showButton?: boolean;
   bgColor?: string;
 }
@@ -17,11 +17,13 @@ const ProductSection: React.FC<ProductSectionProps> = ({
   title,
   subtitle,
   products,
-  lang = "ar",
-  currency = "د.م.",
   showButton = false,
   bgColor = "bg-neutral-50",
 }) => {
+  const t = useTranslations("products");
+  const currentLocale = useLocale() as Locale;
+  const currency = currencies[currentLocale];
+
   return (
     <div className={`${bgColor} py-16 sm:py-24`}>
       <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,14 +38,14 @@ const ProductSection: React.FC<ProductSectionProps> = ({
             <ProductCard
               key={product.id}
               product={product}
-              lang={lang}
+              lang={currentLocale}
               currency={currency}
             />
           ))}
         </div>
         {showButton && (
           <div className="text-center mt-16">
-            <ButtonSecondary>عرض كل المنتجات</ButtonSecondary>
+            <ButtonSecondary>{t("viewAll")}</ButtonSecondary>
           </div>
         )}
       </div>

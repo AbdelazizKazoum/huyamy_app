@@ -1,25 +1,12 @@
-import { Clock, HandCoins, Truck } from "lucide-react";
 import Image from "next/image";
 import React from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { heroFeatures, getFeatureIcon } from "@/data/heroFeatures";
+import { Locale } from "@/types";
 
 const HeroSection: React.FC = () => {
-  const features = [
-    {
-      icon: <Truck size={40} className="text-primary-800 mb-4" />,
-      title: "شحن مجاني",
-      description: "لجميع الطلبات في المغرب",
-    },
-    {
-      icon: <Clock size={40} className="text-primary-800 mb-4" />,
-      title: "توصيل في الوقت المحدد",
-      description: "خلال 24 إلى 48 ساعة",
-    },
-    {
-      icon: <HandCoins size={40} className="text-primary-800 mb-4" />,
-      title: "الدفع عند الاستلام",
-      description: "الدفع نقداً عند وصول طلبك",
-    },
-  ];
+  const t = useTranslations("hero");
+  const currentLocale = useLocale() as Locale;
 
   return (
     <section className="relative">
@@ -31,7 +18,7 @@ const HeroSection: React.FC = () => {
         <a href="#" className="block">
           <Image
             src="https://placehold.co/1600x450/f7f6f2/166534?text=منتجات+طبيعية+بجودة+عالية"
-            alt="عرض ترويجي"
+            alt={t("promoAlt")}
             width={1600}
             height={450}
             className="w-full h-auto object-cover"
@@ -44,34 +31,37 @@ const HeroSection: React.FC = () => {
       <div className="bg-white">
         <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 md:-mt-16 relative z-10">
           {/* Desktop View: Grid */}
-          <div className="hidden md:grid md:grid-cols-3 md:gap-8">
-            {features.map((feature, index) => (
+          <div className="hidden md:grid md:grid-cols-3 gap-8">
+            {heroFeatures.map((feature) => (
               <div
-                key={index}
+                key={feature.id}
                 className="bg-white p-8 rounded-lg shadow-lg text-center flex flex-col items-center border border-neutral-100"
               >
-                {feature.icon}
+                {getFeatureIcon(feature.iconName, 40, "text-primary-800 mb-4")}
                 <h3 className="text-xl font-bold text-neutral-800 mb-2">
-                  {feature.title}
+                  {feature.title[currentLocale]}
                 </h3>
-                <p className="text-neutral-500">{feature.description}</p>
+                <p className="text-neutral-500">
+                  {feature.description[currentLocale]}
+                </p>
               </div>
             ))}
           </div>
           {/* Mobile View: Single compact card */}
           <div className="md:hidden bg-white p-4 rounded-lg shadow-lg border border-neutral-100">
             <div className="flex justify-around items-start text-center">
-              {features.map((feature, index) => (
+              {heroFeatures.map((feature) => (
                 <div
-                  key={index}
+                  key={feature.id}
                   className="flex flex-col items-center px-1 w-1/3"
                 >
-                  {React.cloneElement(feature.icon, {
-                    size: 32,
-                    className: "text-primary-800 mb-2",
-                  })}
+                  {getFeatureIcon(
+                    feature.iconName,
+                    32,
+                    "text-primary-800 mb-2"
+                  )}
                   <h3 className="text-xs sm:text-sm font-bold text-neutral-800 leading-tight">
-                    {feature.title}
+                    {feature.title[currentLocale]}
                   </h3>
                 </div>
               ))}

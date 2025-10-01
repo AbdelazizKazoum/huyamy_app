@@ -1,10 +1,11 @@
-import { Language, Product } from "@/types";
+import { Locale, Product } from "@/types";
 import Image from "next/image";
 import { ButtonPrimary } from "./ui";
+import { useTranslations } from "next-intl";
 
 interface ProductCardProps {
   product: Product;
-  lang?: Language;
+  lang?: Locale;
   currency?: string;
 }
 
@@ -13,6 +14,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   lang = "ar",
   currency = "د.م.",
 }) => {
+  const t = useTranslations("products");
   const originalPriceNum = product.originalPrice || 0;
   let discountPercentage = 0;
 
@@ -40,7 +42,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {discountPercentage > 0 && (
           <span className="absolute top-3 right-3 bg-secondary-500 text-white text-sm font-extrabold px-4 py-1.5 rounded-full shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6">
             {lang === "ar"
-              ? `خصم ${discountPercentage}%`
+              ? `${t("discount")} ${discountPercentage}%`
               : `-${discountPercentage}%`}
           </span>
         )}
@@ -49,7 +51,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <h3 className="text-lg font-semibold text-neutral-800 truncate mb-2 h-14 flex items-center justify-center">
           {product.name[lang || "ar"]}
         </h3>
-        <div className="flex items-baseline justify-center space-x-2 rtl:space-x-reverse mb-4">
+        <div className="flex items-baseline justify-center gap-2 mb-4">
           <p className="text-xl font-bold text-primary-900">
             {product.price.toFixed(2)} {currency}
           </p>
@@ -60,7 +62,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
         <ButtonPrimary className="w-full mt-auto">
-          {(lang || "ar") === "ar" ? "اشتر الآن" : "Acheter"}
+          {t("addToCart")}
         </ButtonPrimary>
       </div>
     </div>

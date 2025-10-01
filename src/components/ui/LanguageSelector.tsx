@@ -3,6 +3,7 @@ import React from "react";
 import { ChevronDown, Globe } from "lucide-react";
 import { Locale } from "@/types";
 import useClickOutside from "@/hooks/useClickOutside";
+import { useTranslations } from "next-intl";
 
 interface LanguageSelectorProps {
   lang: Locale;
@@ -19,6 +20,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onToggle,
   isMobile = false,
 }) => {
+  const t = useTranslations("languageSelector");
+
   // Hook to handle clicks outside the component
   const dropdownRef = useClickOutside(() => {
     if (isOpen) {
@@ -40,7 +43,9 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         >
           <div className="flex items-center">
             <Globe size={22} />
-            <span className="mr-3">اللغة: {lang.toUpperCase()}</span>
+            <span className="mr-3">
+              {t("language")}: {lang.toUpperCase()}
+            </span>
           </div>
           <ChevronDown
             size={16}
@@ -55,13 +60,13 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               onClick={() => handleLanguageSelect("ar")}
               className="block text-neutral-700 hover:text-primary-800 w-full text-right"
             >
-              العربية (AR)
+              {t("arabic")}
             </button>
             <button
               onClick={() => handleLanguageSelect("fr")}
               className="block text-neutral-700 hover:text-primary-800 w-full text-right"
             >
-              Français (FR)
+              {t("french")}
             </button>
           </div>
         )}
@@ -90,13 +95,13 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             onClick={() => handleLanguageSelect("ar")}
             className="block w-full text-left px-4 py-2 text-neutral-700 hover:bg-neutral-100"
           >
-            العربية (AR)
+            {t("arabic")}
           </button>
           <button
             onClick={() => handleLanguageSelect("fr")}
             className="block w-full text-left px-4 py-2 text-neutral-700 hover:bg-neutral-100"
           >
-            Français (FR)
+            {t("french")}
           </button>
         </div>
       )}

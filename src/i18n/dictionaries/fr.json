@@ -1,7 +1,16 @@
 {
   "home": {
     "hello": "Bonjour",
-    "welcome": "Bienvenue sur notre site"
+    "welcome": "Bienvenue sur notre site",
+    "popularProducts": {
+      "title": "Nos collections les plus demandées",
+      "subtitle": "Découvrez les produits qui ont reçu les meilleures évaluations de nos clients."
+    },
+    "featuredProducts": {
+      "title": "Notre sélection de produits phares",
+      "subtitle": "Parcourez notre sélection soigneusement choisie de produits naturels qui ont gagné la confiance de nos clients."
+    },
+    "whatsappMessage": "Bonjour, je souhaiterais me renseigner sur vos produits naturels"
   },
   "cart": {
     "title": "Panier",
@@ -13,5 +22,34 @@
       "description": "Vous n'avez encore ajouté aucun produit.",
       "startShopping": "Commencer les achats"
     }
+  },
+  "hero": {
+    "promoAlt": "Offre promotionnelle - Produits naturels de haute qualité"
+  },
+  "categories": {
+    "title": "Parcourir par catégorie",
+    "description": "Découvrez nos collections variées qui répondent à tous vos besoins de beauté."
+  },
+  "products": {
+    "viewAll": "Voir tous les produits",
+    "addToCart": "Ajouter au panier",
+    "discount": "Réduction",
+    "originalPrice": "Prix original"
+  },
+  "newsletter": {
+    "title": "Rejoignez notre newsletter",
+    "description": "Abonnez-vous maintenant pour être la première à connaître nos derniers produits, offres exclusives et conseils beauté.",
+    "placeholder": "Entrez votre adresse e-mail",
+    "subscribe": "S'abonner"
+  },
+  "languageSelector": {
+    "language": "Langue",
+    "arabic": "العربية (AR)",
+    "french": "Français (FR)"
+  },
+  "whatsapp": {
+    "defaultMessage": "Bonjour, je souhaiterais me renseigner sur vos produits",
+    "contactLabel": "Contactez-nous sur WhatsApp",
+    "tooltip": "Contactez-nous sur WhatsApp"
   }
 }

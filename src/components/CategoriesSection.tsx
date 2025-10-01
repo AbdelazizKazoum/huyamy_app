@@ -1,27 +1,30 @@
-import { Category, Language } from "@/types";
+import { Category, Locale } from "@/types";
 import SectionTitle from "./SectionTitle";
 import Image from "next/image";
+import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/config";
 
 interface CategoriesSectionProps {
   categories: Category[];
-  lang?: Language;
 }
 
 const CategoriesSection: React.FC<CategoriesSectionProps> = ({
   categories,
-  lang = "ar",
 }) => {
+  const t = useTranslations("categories");
+  const currentLocale = useLocale() as Locale;
+
   return (
     <div className="bg-white pt-16 sm:pt-24 pb-16 sm:pb-24">
       <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionTitle>تصفح حسب الفئة</SectionTitle>
+        <SectionTitle>{t("title")}</SectionTitle>
         <p className="text-center text-neutral-600 max-w-2xl mx-auto -mt-12 mb-12">
-          اكتشفي مجموعاتنا المتنوعة التي تلبي كل احتياجات جمالك.
+          {t("description")}
         </p>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-8">
           {categories.map((category) => (
-            <a
-              href={`/collections/${category.name.fr
+            <Link
+              href={`/products?category=${category.name.fr
                 .toLowerCase()
                 .replace(/\s+/g, "-")}`}
               key={category.id}
@@ -30,7 +33,7 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({
               <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-4">
                 <Image
                   src={category.image}
-                  alt={category.name[lang || "ar"]}
+                  alt={category.name[currentLocale]}
                   fill
                   sizes="(max-width: 768px) 128px, 160px"
                   className="object-cover rounded-full border-2 border-neutral-200 group-hover:border-primary-700 transition-all duration-300 shadow-sm"
@@ -39,9 +42,9 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({
                 <div className="absolute inset-0 bg-black/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               <h3 className="text-md font-semibold text-neutral-800 group-hover:text-primary-800 transition-colors duration-300">
-                {category.name[lang || "ar"]}
+                {category.name[currentLocale]}
               </h3>
-            </a>
+            </Link>
           ))}
         </div>
       </div>
