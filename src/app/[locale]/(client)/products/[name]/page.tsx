@@ -1,23 +1,6 @@
 "use client";
-import React, { useState, Fragment, useEffect } from "react";
-import {
-  Search,
-  ShoppingCart,
-  Menu,
-  X,
-  Plus,
-  Minus,
-  Trash2,
-  Globe,
-  ChevronDown,
-  Truck,
-  Clock,
-  HandCoins,
-  Sun,
-  Moon,
-  Star,
-} from "lucide-react";
-import { Transition } from "@headlessui/react";
+import React, { useState, useEffect } from "react";
+import { ShoppingCart, Star } from "lucide-react";
 
 // --- Type Definitions ---
 
@@ -27,7 +10,6 @@ type LocalizedString = {
 };
 
 type Language = "ar" | "fr";
-type Theme = "light" | "dark";
 
 type Currency = {
   ar: string;
@@ -52,11 +34,6 @@ type Product = {
   category: Category;
   subImages: string[];
   keywords: string[];
-};
-
-type CartItem = {
-  product: Product;
-  quantity: number;
 };
 
 // --- Mock Data ---
@@ -109,7 +86,7 @@ const ProductImageGallery: React.FC<{ product: Product; lang: Language }> = ({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="w-full h-96 bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+      <div className="w-full h-96 bg-gray-100 rounded-lg overflow-hidden">
         <img
           src={mainImage}
           alt={product.name[lang]}
@@ -140,8 +117,8 @@ const ProductImageGallery: React.FC<{ product: Product; lang: Language }> = ({
 const CheckoutForm: React.FC<{ lang: Language }> = ({ lang }) => {
   return (
     <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-2xl border-[5px] border-green-700 dark:border-green-600 space-y-4">
-        <h2 className="text-xl font-bold text-center text-gray-800 dark:text-gray-200">
+      <div className="bg-white p-6 rounded-3xl shadow-2xl border-[5px] border-green-700 space-y-4">
+        <h2 className="text-xl font-bold text-center text-gray-800">
           {lang === "ar" ? "معلومات الزبون" : "Informations client"}
         </h2>
         <div className="flex flex-col md:flex-row gap-4">
@@ -151,13 +128,13 @@ const CheckoutForm: React.FC<{ lang: Language }> = ({ lang }) => {
             placeholder={
               lang === "ar" ? "الاسم الكامل 🧑🏻‍" : "Prénom et Nom 🧑🏻‍"
             }
-            className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 dark:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
+            className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
           />
           <input
             type="text"
             name="phone"
             placeholder={lang === "ar" ? "الهاتف 📞" : "Téléphone 📞"}
-            className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 dark:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
+            className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
           />
         </div>
         <div className="form-group">
@@ -165,13 +142,13 @@ const CheckoutForm: React.FC<{ lang: Language }> = ({ lang }) => {
             type="text"
             name="city"
             placeholder={lang === "ar" ? "العنوان 🏡" : "Adresse 🏡"}
-            className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 dark:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
+            className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
           />
         </div>
       </div>
       <button
         type="submit"
-        className="w-full bg-green-800 text-white font-bold py-4 px-6 rounded-full text-lg hover:bg-green-900 dark:bg-green-600 dark:hover:bg-green-700 transition-all duration-300 relative overflow-hidden animate-slide animate-shiny"
+        className="w-full bg-green-800 text-white font-bold py-4 px-6 rounded-full text-lg hover:bg-green-900 transition-all duration-300 relative overflow-hidden animate-slide animate-shiny"
       >
         <span className="flex items-center justify-center">
           {lang === "ar"
@@ -234,12 +211,10 @@ const CountdownTimer: React.FC<{ expiryTimestamp: number; lang: Language }> = ({
     label,
   }) => (
     <div className="text-center">
-      <span className="text-3xl font-bold text-green-800 dark:text-green-300">
+      <span className="text-3xl font-bold text-green-800">
         {String(value).padStart(2, "0")}
       </span>
-      <span className="text-xs text-gray-500 dark:text-gray-400 block">
-        {label}
-      </span>
+      <span className="text-xs text-gray-500 block">{label}</span>
     </div>
   );
 
@@ -248,23 +223,17 @@ const CountdownTimer: React.FC<{ expiryTimestamp: number; lang: Language }> = ({
   }
 
   return (
-    <div className="bg-green-50 dark:bg-gray-800 p-4 rounded-lg my-4 flex items-center justify-between">
-      <h3 className="font-bold text-green-800 dark:text-green-300 text-sm md:text-base">
+    <div className="bg-green-50 p-4 rounded-lg my-4 flex items-center justify-between">
+      <h3 className="font-bold text-green-800 text-sm md:text-base">
         {lang === "ar" ? "العرض ينتهي في:" : "L'offre se termine dans :"}
       </h3>
       <div className="flex justify-center items-center gap-3" dir="ltr">
         <TimeSlot value={timeLeft.days} label={labels[lang].days} />
-        <span className="text-3xl font-bold text-green-800 dark:text-green-300">
-          :
-        </span>
+        <span className="text-3xl font-bold text-green-800">:</span>
         <TimeSlot value={timeLeft.hours} label={labels[lang].hours} />
-        <span className="text-3xl font-bold text-green-800 dark:text-green-300">
-          :
-        </span>
+        <span className="text-3xl font-bold text-green-800">:</span>
         <TimeSlot value={timeLeft.minutes} label={labels[lang].minutes} />
-        <span className="text-3xl font-bold text-green-800 dark:text-green-300">
-          :
-        </span>
+        <span className="text-3xl font-bold text-green-800">:</span>
         <TimeSlot value={timeLeft.seconds} label={labels[lang].seconds} />
       </div>
     </div>
@@ -273,7 +242,7 @@ const CountdownTimer: React.FC<{ expiryTimestamp: number; lang: Language }> = ({
 
 // --- Main Page Component ---
 export default function ProductDetailsPage() {
-  const [lang, setLang] = useState<Language>("ar");
+  const [lang] = useState<Language>("ar");
   const currency = currencies[lang];
   // Set offer to end 3 days from now for demonstration
   const offerEndDate = new Date().getTime() + 3 * 24 * 60 * 60 * 1000;
@@ -347,7 +316,7 @@ export default function ProductDetailsPage() {
       </style>
       <div
         dir={lang === "ar" ? "rtl" : "ltr"}
-        className="bg-white dark:bg-gray-900"
+        className="bg-white"
         style={{ fontFamily: "'Cairo', sans-serif" }}
       >
         <main className="py-12">
@@ -359,11 +328,11 @@ export default function ProductDetailsPage() {
               </div>
               {/* Left Side: Product Details & Form */}
               <div className="space-y-6">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                <h1 className="text-3xl font-bold text-gray-900">
                   {product.name[lang]}
                 </h1>
                 <div className="flex items-center">
-                  <p className="text-3xl font-bold text-green-800 dark:text-green-400">
+                  <p className="text-3xl font-bold text-green-800">
                     {product.price.toFixed(2)} {currency}
                   </p>
                   {product.originalPrice && (
@@ -389,7 +358,7 @@ export default function ProductDetailsPage() {
                     />
                   )}
 
-                <div className="text-gray-700 dark:text-gray-300 space-y-2">
+                <div className="text-gray-700 space-y-2">
                   <p>{product.description[lang]}</p>
                 </div>
 

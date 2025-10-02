@@ -30,14 +30,15 @@ const inter = Inter({
 });
 
 type Props = {
-  params: { locale: Locale };
+  params: Promise<{ locale: string }>;
 };
 
 // Generate metadata based on locale
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
+  const typedLocale = locale as Locale;
 
-  const isArabic = locale === "ar";
+  const isArabic = typedLocale === "ar";
 
   const titles = {
     ar: "هيوامي - زيت الأرغان العضوي والعسل الطبيعي ومنتجات الجمال المغربية",
@@ -85,10 +86,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     metadataBase: new URL("https://huyamy.com"),
     title: {
       template: "%s | Huyamy - Argan Oil, Amlou & Moroccan Bio Products",
-      default: titles[locale],
+      default: titles[typedLocale],
     },
-    description: descriptions[locale],
-    keywords: keywords[locale],
+    description: descriptions[typedLocale],
+    keywords: keywords[typedLocale],
     authors: [{ name: "Huyamy" }],
     creator: "Huyamy",
     publisher: "Huyamy",
@@ -107,10 +108,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "website",
       locale: isArabic ? "ar_MA" : "fr_MA",
       alternateLocale: isArabic ? "fr_MA" : "ar_MA",
-      url: `https://huyamy.com/${locale}`,
+      url: `https://huyamy.com/${typedLocale}`,
       siteName: "Huyamy",
-      title: titles[locale],
-      description: descriptions[locale],
+      title: titles[typedLocale],
+      description: descriptions[typedLocale],
       images: [
         {
           url: "/images/huyami_logo.jpeg",
@@ -122,13 +123,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: titles[locale],
-      description: descriptions[locale],
+      title: titles[typedLocale],
+      description: descriptions[typedLocale],
       images: ["/images/huyami_logo.jpeg"],
       creator: "@huyamy",
     },
     alternates: {
-      canonical: `https://huyamy.com/${locale}`,
+      canonical: `https://huyamy.com/${typedLocale}`,
       languages: {
         "ar-MA": "https://huyamy.com/ar",
         "fr-MA": "https://huyamy.com/fr",
@@ -146,22 +147,23 @@ export default async function LocaleLayout({
   params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale: Locale };
+  params: Promise<{ locale: string }>;
 }>) {
   const { locale } = await params;
+  const typedLocale = locale as Locale;
 
-  if (!routing.locales.includes(locale)) {
+  if (!routing.locales.includes(typedLocale)) {
     notFound();
   }
 
   const messages = await getMessages();
 
   return (
-    <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
+    <html lang={typedLocale} dir={typedLocale === "ar" ? "rtl" : "ltr"}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${notoSansArabic.variable} ${inter.variable} antialiased`}
       >
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={typedLocale} messages={messages}>
           {children}
         </NextIntlClientProvider>
       </body>
