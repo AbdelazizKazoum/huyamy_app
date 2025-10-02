@@ -13,7 +13,8 @@ export const products: Product[] = [
       ar: "كريم غني بخلاصة الصبار الطبيعي لترطيب عميق وتهدئة البشرة الحساسة. مثالي للاستخدام اليومي.",
       fr: "Crème riche en extrait naturel d'aloe vera pour une hydratation profonde et apaiser les peaux sensibles. Idéale pour un usage quotidien.",
     },
-    category: categories[0],
+    category: categories[0], 
+
     subImages: [
       "https://placehold.co/400x400/d1e4d1/ffffff?text=صورة+2",
       "https://placehold.co/400x400/d1e4d1/ffffff?text=صورة+3",
