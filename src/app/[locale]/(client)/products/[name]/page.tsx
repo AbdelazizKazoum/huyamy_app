@@ -1,6 +1,23 @@
 "use client";
 import React, { useState, Fragment, useEffect } from "react";
-import { ShoppingCart, Star } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  Menu,
+  X,
+  Plus,
+  Minus,
+  Trash2,
+  Globe,
+  ChevronDown,
+  Truck,
+  Clock,
+  HandCoins,
+  Sun,
+  Moon,
+  Star,
+} from "lucide-react";
+import { Transition } from "@headlessui/react";
 
 // --- Type Definitions ---
 
@@ -10,6 +27,7 @@ type LocalizedString = {
 };
 
 type Language = "ar" | "fr";
+type Theme = "light" | "dark";
 
 type Currency = {
   ar: string;
@@ -34,6 +52,11 @@ type Product = {
   category: Category;
   subImages: string[];
   keywords: string[];
+};
+
+type CartItem = {
+  product: Product;
+  quantity: number;
 };
 
 // --- Mock Data ---
@@ -148,7 +171,7 @@ const CheckoutForm: React.FC<{ lang: Language }> = ({ lang }) => {
       </div>
       <button
         type="submit"
-        className="w-full bg-green-800 text-white font-bold py-4 px-6 rounded-full text-lg hover:bg-green-900 dark:bg-green-600 dark:hover:bg-green-700 transition-all duration-300 animate-slide"
+        className="w-full bg-green-800 text-white font-bold py-4 px-6 rounded-full text-lg hover:bg-green-900 dark:bg-green-600 dark:hover:bg-green-700 transition-all duration-300 relative overflow-hidden animate-slide animate-shiny"
       >
         <span className="flex items-center justify-center">
           {lang === "ar"
@@ -295,6 +318,26 @@ export default function ProductDetailsPage() {
               }
               .animate-slide {
                 animation: slide-right-left 2.5s ease-in-out infinite;
+              }
+              
+              @keyframes shiny-effect {
+                0% { transform: translateX(-150%) skewX(-25deg); }
+                100% { transform: translateX(250%) skewX(-25deg); }
+              }
+              .animate-shiny::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 50%;
+                height: 100%;
+                background: linear-gradient(
+                  to right,
+                  rgba(255, 255, 255, 0) 0%,
+                  rgba(255, 255, 255, 0.3) 50%,
+                  rgba(255, 255, 255, 0) 100%
+                );
+                animation: shiny-effect 3s infinite linear;
               }
 
               input:focus::placeholder {
