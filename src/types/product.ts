@@ -2,7 +2,7 @@ import { LocalizedString } from "./common";
 import { Category } from "./category";
 
 export type Product = {
-  id: number;
+  id: string; // Changed from number to string for Firestore compatibility
   name: LocalizedString;
   price: number;
   originalPrice?: number;

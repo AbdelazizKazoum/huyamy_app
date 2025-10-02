@@ -87,6 +87,39 @@ async function seed() {
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 
+  // 4) Landing page sections
+  const landingSection1 = db.collection("sections").doc("landing-featured");
+  batch.set(landingSection1, {
+    id: "landing-featured",
+    type: "landing-page",
+    data: {
+      title: { ar: "المنتجات المميزة", fr: "Produits en vedette" },
+      subtitle: {
+        ar: "اكتشف تشكيلتنا المختارة من أفضل المنتجات",
+        fr: "Découvrez notre sélection des meilleurs produits",
+      },
+      ctaProductIds: ["prod-2", "prod-5", "prod-8", "prod-10"],
+    },
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  const landingSection2 = db.collection("sections").doc("landing-popular");
+  batch.set(landingSection2, {
+    id: "landing-popular",
+    type: "landing-page",
+    data: {
+      title: { ar: "الأكثر مبيعاً", fr: "Les plus vendus" },
+      subtitle: {
+        ar: "المنتجات التي يحبها عملاؤنا أكثر",
+        fr: "Les produits que nos clients préfèrent",
+      },
+      ctaProductIds: ["prod-3", "prod-6", "prod-7"],
+    },
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
   // commit
   await batch.commit();
   console.log("Categories, products and sections created.");
