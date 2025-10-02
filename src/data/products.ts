@@ -3,7 +3,7 @@ import { categories } from "./categories";
 
 export const products: Product[] = [
   {
-    id: 1,
+    id: "1",
     name: { ar: "كريم مرطب بالصبار", fr: "Crème hydratante à l'aloe vera" },
     price: 85.0,
     originalPrice: 120.0,
@@ -13,7 +13,7 @@ export const products: Product[] = [
       ar: "كريم غني بخلاصة الصبار الطبيعي لترطيب عميق وتهدئة البشرة الحساسة. مثالي للاستخدام اليومي.",
       fr: "Crème riche en extrait naturel d'aloe vera pour une hydratation profonde et apaiser les peaux sensibles. Idéale pour un usage quotidien.",
     },
-    category: categories[0], 
+    category: categories[0],
 
     subImages: [
       "https://placehold.co/400x400/d1e4d1/ffffff?text=صورة+2",
@@ -30,7 +30,7 @@ export const products: Product[] = [
     ],
   },
   {
-    id: 2,
+    id: "2",
     name: { ar: "زيت الأرغان الأصلي", fr: "Huile d'argan authentique" },
     price: 150.0,
     image: "https://placehold.co/400x400/e4d8c8/ffffff?text=منتج+2",
@@ -53,7 +53,7 @@ export const products: Product[] = [
     ],
   },
   {
-    id: 3,
+    id: "3",
     name: { ar: "صابون الطين المغربي", fr: "Savon à l'argile marocaine" },
     price: 45.0,
     image: "https://placehold.co/400x400/c7b7a7/ffffff?text=منتج+3",
@@ -67,7 +67,7 @@ export const products: Product[] = [
     keywords: ["صابون", "طين مغربي", "غاسول", "تنظيف"],
   },
   {
-    id: 4,
+    id: "4",
     name: { ar: "عطر العود الفاخر", fr: "Parfum de Oud luxueux" },
     price: 250.0,
     originalPrice: 300.0,
@@ -82,7 +82,7 @@ export const products: Product[] = [
     keywords: ["عطر", "عود", "فاخر", "شرقي"],
   },
   {
-    id: 5,
+    id: "5",
     name: { ar: "مقشر الجسم بالقهوة", fr: "Gommage corporel au café" },
     price: 70.0,
     image: "https://placehold.co/400x400/d6c2b1/ffffff?text=منتج+5",
@@ -96,7 +96,7 @@ export const products: Product[] = [
     keywords: ["مقشر", "قهوة", "جسم", "تقشير"],
   },
   {
-    id: 6,
+    id: "6",
     name: { ar: "ماء الورد الطبيعي", fr: "Eau de rose naturelle" },
     price: 35.0,
     image: "https://placehold.co/400x400/f3e0e6/ffffff?text=منتج+6",
@@ -110,7 +110,7 @@ export const products: Product[] = [
     keywords: ["ماء ورد", "تونر", "بشرة"],
   },
   {
-    id: 7,
+    id: "7",
     name: {
       ar: "بلسم الشعر بزبدة الشيا",
       fr: "Après-shampooing au beurre de karité",
@@ -127,7 +127,7 @@ export const products: Product[] = [
     keywords: ["بلسم", "شيا", "شعر جاف", "ترطيب"],
   },
   {
-    id: 8,
+    id: "8",
     name: { ar: "ماسك الفحم النشط", fr: "Masque au charbon actif" },
     price: 60.0,
     originalPrice: 80.0,
@@ -142,7 +142,7 @@ export const products: Product[] = [
     keywords: ["ماسك", "فحم", "رؤوس سوداء", "بشرة دهنية"],
   },
   {
-    id: 9,
+    id: "9",
     name: { ar: "سيروم فيتامين سي", fr: "Sérum à la vitamine C" },
     price: 110.0,
     image: "https://placehold.co/400x400/f8c98d/ffffff?text=منتج+9",
@@ -156,7 +156,7 @@ export const products: Product[] = [
     keywords: ["سيروم", "فيتامين سي", "نضارة", "تفتيح"],
   },
   {
-    id: 10,
+    id: "10",
     name: {
       ar: "كريم العين بالخيار",
       fr: "Crème contour des yeux au concombre",

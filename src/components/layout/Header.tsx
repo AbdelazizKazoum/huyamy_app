@@ -73,7 +73,7 @@ const Header: React.FC<HeaderProps> = () => {
     fr: "Recherchez votre produit préféré...",
   };
 
-  const handleUpdateQuantity = (productId: number, newQuantity: number) => {
+  const handleUpdateQuantity = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) {
       handleRemoveItem(productId);
       return;
@@ -87,7 +87,7 @@ const Header: React.FC<HeaderProps> = () => {
     );
   };
 
-  const handleRemoveItem = (productId: number) => {
+  const handleRemoveItem = (productId: string) => {
     setCartItems((currentItems) =>
       currentItems.filter((item) => item.product.id !== productId)
     );

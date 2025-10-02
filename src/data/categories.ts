@@ -2,7 +2,7 @@ import { Category } from "../types";
 
 export const categories: Category[] = [
   {
-    id: 1,
+    id: "1",
     name: { ar: "أنواع العسل", fr: "Types de Miel" },
     description: {
       ar: "عسل طبيعي 100% من أجود أنواع العسل المغربي الأصيل",
@@ -11,7 +11,7 @@ export const categories: Category[] = [
     image: "https://placehold.co/200x200/f4a261/ffffff?text=عسل",
   },
   {
-    id: 2,
+    id: "2",
     name: { ar: "منتجات الخلية", fr: "Produits de la Ruche" },
     description: {
       ar: "منتجات طبيعية من الخلية: شمع العسل، غذاء ملكات النحل والبروبوليس",
@@ -20,7 +20,7 @@ export const categories: Category[] = [
     image: "https://placehold.co/200x200/e76f51/ffffff?text=خلية",
   },
   {
-    id: 3,
+    id: "3",
     name: { ar: "أملو والمنتجات المحلية", fr: "Amlou et Produits Locaux" },
     description: {
       ar: "أملو تقليدي مغربي وزيت الأركان والمنتجات المحلية الأصيلة",
@@ -29,7 +29,7 @@ export const categories: Category[] = [
     image: "https://placehold.co/200x200/2a9d8f/ffffff?text=أملو",
   },
   {
-    id: 4,
+    id: "4",
     name: { ar: "منتجات التجميل الطبيعية", fr: "Produits de Beauté Naturels" },
     description: {
       ar: "مستحضرات تجميل طبيعية من زيت الأركان والأعشاب المغربية",
@@ -38,7 +38,7 @@ export const categories: Category[] = [
     image: "https://placehold.co/200x200/264653/ffffff?text=تجميل",
   },
   {
-    id: 5,
+    id: "5",
     name: { ar: "زيت الأركان", fr: "Huile d'Argan" },
     description: {
       ar: "زيت الأركان المغربي الأصلي للعناية بالبشرة والشعر",
@@ -47,7 +47,7 @@ export const categories: Category[] = [
     image: "https://placehold.co/200x200/e9c46a/ffffff?text=أركان",
   },
   {
-    id: 6,
+    id: "6",
     name: { ar: "الأعشاب الطبيعية", fr: "Herbes Naturelles" },
     description: {
       ar: "أعشاب طبيعية مغربية للصحة والجمال",
