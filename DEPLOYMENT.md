@@ -7,11 +7,13 @@ This project uses Firebase Admin SDK for server-side operations. For security re
 ### 🔧 Setup for Vercel Deployment
 
 1. **Extract Firebase Credentials**
+
    ```bash
    node scripts/extractFirebaseEnv.js
    ```
 
 2. **Add Environment Variables to Vercel**
+
    - Go to your [Vercel Dashboard](https://vercel.com/dashboard)
    - Select your project
    - Go to Settings → Environment Variables
@@ -65,20 +67,23 @@ Then copy the output to your `.env.local` file.
 ### 🔍 Troubleshooting
 
 **Error: "Module not found: Can't resolve serviceAccountKey.json"**
+
 - ✅ Fixed: App now uses environment variables for production
 
 **Error: "Firebase credentials not found"**
+
 - Check that all three environment variables are set in Vercel
 - Ensure the private key includes the full content with newlines
 
 **Error: "Invalid private key"**
+
 - Make sure the private key is wrapped in quotes
 - Ensure newlines are properly escaped as `\\n`
 
 ### 🌍 Environment Variables Reference
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `FIREBASE_PROJECT_ID` | Your Firebase project ID | `huyamy-6923a` |
-| `FIREBASE_CLIENT_EMAIL` | Service account email | `firebase-adminsdk-xxx@project.iam.gserviceaccount.com` |
-| `FIREBASE_PRIVATE_KEY` | Private key with escaped newlines | `"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n"` |
+| Variable                | Description                       | Example                                                              |
+| ----------------------- | --------------------------------- | -------------------------------------------------------------------- |
+| `FIREBASE_PROJECT_ID`   | Your Firebase project ID          | `huyamy-6923a`                                                       |
+| `FIREBASE_CLIENT_EMAIL` | Service account email             | `firebase-adminsdk-xxx@project.iam.gserviceaccount.com`              |
+| `FIREBASE_PRIVATE_KEY`  | Private key with escaped newlines | `"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n"` |

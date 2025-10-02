@@ -4,7 +4,11 @@ import admin from "firebase-admin";
 // Function to get Firebase credentials
 function getFirebaseCredentials() {
   // First try environment variables (preferred for production)
-  if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+  if (
+    process.env.FIREBASE_PROJECT_ID &&
+    process.env.FIREBASE_CLIENT_EMAIL &&
+    process.env.FIREBASE_PRIVATE_KEY
+  ) {
     return {
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
@@ -25,7 +29,7 @@ function getFirebaseCredentials() {
 
 if (!admin.apps.length) {
   const credentials = getFirebaseCredentials();
-  
+
   admin.initializeApp({
     credential: admin.credential.cert(credentials),
   });
