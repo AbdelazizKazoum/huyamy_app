@@ -12,11 +12,13 @@ src/lib/cache/
 ## 🏷️ Available Cache Tags
 
 ### Individual Tags
+
 - `products` - Product data cache
-- `categories` - Category data cache  
+- `categories` - Category data cache
 - `sections` - Section data cache
 
 ### Master Tags
+
 - `landing-page` - Invalidates ALL landing page data at once
 - `all-content` - Reserved for future site-wide invalidation
 
@@ -27,17 +29,18 @@ All cache configurations are centralized in `src/lib/cache/tags.ts`:
 ```typescript
 export const CACHE_CONFIG = {
   PRODUCTS: {
-    tags: ['products', 'landing-page', 'all-content'],
+    tags: ["products", "landing-page", "all-content"],
     revalidate: 604800, // 7 days
-    key: ['products'],
+    key: ["products"],
   },
   // ... other configs
-}
+};
 ```
 
 ## 🚀 API Endpoints
 
 ### 1. Quick Revalidation (Recommended)
+
 **Endpoint**: `POST /api/revalidate/now`
 **Purpose**: One-click invalidation of ALL landing page data
 
@@ -48,6 +51,7 @@ curl -X POST http://localhost:3000/api/revalidate/now \
 ```
 
 ### 2. Individual Tag Revalidation
+
 **Endpoint**: `POST /api/revalidate/tag`
 **Purpose**: Invalidate specific data types
 
@@ -59,6 +63,7 @@ curl -X POST http://localhost:3000/api/revalidate/tag \
 ```
 
 ### 3. Landing Page Revalidation
+
 **Endpoint**: `POST /api/revalidate/landing-page`
 **Purpose**: Invalidate all landing page tags individually
 
@@ -69,6 +74,7 @@ curl -X POST http://localhost:3000/api/revalidate/landing-page \
 ```
 
 ### 4. Advanced Revalidation
+
 **Endpoint**: `POST /api/revalidate/advanced`
 **Purpose**: Choose between tag-based or path-based revalidation
 
@@ -96,34 +102,36 @@ REVALIDATION_SECRET=your-super-secret-revalidation-key-change-this
 ## 🎯 Usage Examples
 
 ### Frontend Integration
+
 You can create admin buttons that call these endpoints:
 
 ```typescript
 const revalidateLandingPage = async () => {
-  const response = await fetch('/api/revalidate/now', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ secret: process.env.REVALIDATION_SECRET })
+  const response = await fetch("/api/revalidate/now", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ secret: process.env.REVALIDATION_SECRET }),
   });
-  
+
   if (response.ok) {
-    alert('Landing page cache cleared!');
+    alert("Landing page cache cleared!");
   }
 };
 ```
 
 ### Webhook Integration
+
 Connect to your CMS or admin panel:
 
 ```typescript
 // When a product is updated in your CMS
-await fetch('https://your-site.com/api/revalidate/tag', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ 
-    tag: 'products', 
-    secret: process.env.REVALIDATION_SECRET 
-  })
+await fetch("https://your-site.com/api/revalidate/tag", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    tag: "products",
+    secret: process.env.REVALIDATION_SECRET,
+  }),
 });
 ```
 
