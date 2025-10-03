@@ -16,6 +16,7 @@ export const CACHE_TAGS = {
 export const MASTER_CACHE_TAGS = {
   LANDING_PAGE: "landing-page",
   ALL_CONTENT: "all-content",
+  SEO_META: "seo-meta",
 } as const;
 
 /**
@@ -63,6 +64,7 @@ export const CACHE_CONFIG = {
       CACHE_TAGS.PRODUCTS,
       MASTER_CACHE_TAGS.LANDING_PAGE,
       MASTER_CACHE_TAGS.ALL_CONTENT,
+      MASTER_CACHE_TAGS.SEO_META,
     ],
     revalidate: 604800, // 7 days
     key: ["products"],
@@ -72,6 +74,7 @@ export const CACHE_CONFIG = {
       CACHE_TAGS.CATEGORIES,
       MASTER_CACHE_TAGS.LANDING_PAGE,
       MASTER_CACHE_TAGS.ALL_CONTENT,
+      MASTER_CACHE_TAGS.SEO_META,
     ],
     revalidate: 604800, // 7 days
     key: ["categories"],
@@ -81,6 +84,7 @@ export const CACHE_CONFIG = {
       CACHE_TAGS.SECTIONS,
       MASTER_CACHE_TAGS.LANDING_PAGE,
       MASTER_CACHE_TAGS.ALL_CONTENT,
+      MASTER_CACHE_TAGS.SEO_META,
     ],
     revalidate: 604800, // 7 days
     key: ["landing-page-sections"],
