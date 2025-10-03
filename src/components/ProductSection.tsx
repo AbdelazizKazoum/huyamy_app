@@ -25,31 +25,78 @@ const ProductSection: React.FC<ProductSectionProps> = ({
   const currency = currencies[currentLocale];
 
   return (
-    <div className={`${bgColor} py-16 sm:py-24`}>
+    <section
+      className={`${bgColor} py-16 sm:py-24`}
+      itemScope
+      itemType="https://schema.org/CollectionPage"
+      role="region"
+      aria-labelledby="section-title"
+    >
+      {/* Hidden SEO metadata */}
+      <meta itemProp="name" content={title} />
+      {subtitle && <meta itemProp="description" content={subtitle} />}
+      <meta itemProp="numberOfItems" content={products.length.toString()} />
+
       <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionTitle>{title}</SectionTitle>
-        {subtitle && (
-          <p className="text-center text-neutral-600 max-w-2xl mx-auto -mt-12 mb-12">
-            {subtitle}
-          </p>
-        )}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {products.map((product) => (
-            <ProductCard
+        {/* Section Title with improved SEO */}
+        <header className="text-center mb-12">
+          <div id="section-title">
+            <SectionTitle>{title}</SectionTitle>
+          </div>
+          {subtitle && (
+            <p
+              className="text-center text-neutral-600 max-w-2xl mx-auto -mt-12 mb-12"
+              itemProp="description"
+            >
+              {subtitle}
+            </p>
+          )}
+        </header>
+
+        {/* Products Grid with Schema.org ItemList */}
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+          itemProp="mainEntity"
+          itemScope
+          itemType="https://schema.org/ItemList"
+          role="list"
+          aria-label={`${t("productsList")} - ${title}`}
+        >
+          <meta itemProp="numberOfItems" content={products.length.toString()} />
+
+          {products.map((product, index) => (
+            <div
               key={product.id}
-              product={product}
-              lang={currentLocale}
-              currency={currency}
-            />
+              itemProp="itemListElement"
+              itemScope
+              itemType="https://schema.org/ListItem"
+              role="listitem"
+            >
+              <meta itemProp="position" content={(index + 1).toString()} />
+              <div itemProp="item">
+                <ProductCard
+                  product={product}
+                  lang={currentLocale}
+                  currency={currency}
+                />
+              </div>
+            </div>
           ))}
         </div>
+
+        {/* View All Button with enhanced SEO */}
         {showButton && (
-          <div className="text-center mt-16">
-            <ButtonSecondary>{t("viewAll")}</ButtonSecondary>
-          </div>
+          <footer className="text-center mt-16">
+            <ButtonSecondary
+              aria-label={`${t("viewAll")} ${title.toLowerCase()}`}
+              role="button"
+            >
+              {t("viewAll")}
+            </ButtonSecondary>
+          </footer>
         )}
       </div>
-    </div>
+    </section>
   );
 };
 
