@@ -1,17 +1,13 @@
 import React, { Fragment } from "react";
 import { getTranslations } from "next-intl/server";
 
-import { categories } from "../../../data";
 import HeroSection from "@/components/HeroSection";
 import CategoriesSection from "@/components/CategoriesSection";
 import ProductSection from "@/components/ProductSection";
 import NewsletterSection from "@/components/NewsletterSection";
 import { WhatsAppFloatingButton } from "@/components/ui";
-import { getAllProducts } from "@/lib/services/productService";
-import {
-  getAllSectionsWithProducts,
-  getLandingPageSectionsWithProducts,
-} from "@/lib/services/sectionService";
+import { getAllProducts, getCategories } from "@/lib/services/productService";
+import { getLandingPageSectionsWithProducts } from "@/lib/services/sectionService";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -22,6 +18,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
   const t = await getTranslations({ locale, namespace: "home" });
 
   const products = await getAllProducts(); // runs on server
+  const categories = await getCategories(); // fetch categories from Firebase
 
   // Get only landing-page type sections with their products
   const landingPageSections = await getLandingPageSectionsWithProducts();
