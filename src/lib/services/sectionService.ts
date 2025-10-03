@@ -24,12 +24,16 @@ export async function getSectionById(
   try {
     const doc = await adminDb.collection("sections").doc(sectionId).get();
     if (!doc.exists) {
-      console.log(`Section with ID ${sectionId} not found`);
+      if (process.env.NODE_ENV !== "production") {
+        console.log(`Section with ID ${sectionId} not found`);
+      }
       return null;
     }
 
     const data = doc.data();
-    console.log(`Found section ${sectionId}:`, data);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`Found section ${sectionId}:`, data);
+    }
 
     return {
       id: doc.id,
@@ -47,16 +51,24 @@ export async function getSectionWithProducts(
   const section = await getSectionById(sectionId);
   if (!section) return null;
 
-  console.log(`Section data structure:`, section.data);
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`Section data structure:`, section.data);
+  }
 
   // Get products if ctaProductIds exist
   let products: Product[] = [];
   if (section.data?.ctaProductIds && section.data.ctaProductIds.length > 0) {
-    console.log(`Fetching products for IDs:`, section.data.ctaProductIds);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`Fetching products for IDs:`, section.data.ctaProductIds);
+    }
     products = await getProductsByIds(section.data.ctaProductIds);
-    console.log(`Found ${products.length} products for section ${sectionId}`);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`Found ${products.length} products for section ${sectionId}`);
+    }
   } else {
-    console.log(`No ctaProductIds found in section ${sectionId}`);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`No ctaProductIds found in section ${sectionId}`);
+    }
   }
 
   return {
@@ -145,21 +157,40 @@ export async function getSectionsByType(
   );
 }
 
-export async function getLandingPageSectionsWithProducts(): Promise<SectionWithProducts[]> {
+export async function getLandingPageSectionsWithProducts(): Promise<
+  SectionWithProducts[]
+> {
   const sections = await getSectionsByType("landing-page");
-  
+
   // Process all landing-page sections and get their products
   const sectionsWithProducts = await Promise.all(
     sections.map(async (section) => {
       let products: Product[] = [];
-      if (section.data?.ctaProductIds && section.data.ctaProductIds.length > 0) {
-        console.log(`Fetching products for landing-page section ${section.id}:`, section.data.ctaProductIds);
+      if (
+        section.data?.ctaProductIds &&
+        section.data.ctaProductIds.length > 0
+      ) {
+        // Only log in development or during build
+        if (process.env.NODE_ENV !== "production") {
+          console.log(
+            `Fetching products for landing-page section ${section.id}:`,
+            section.data.ctaProductIds
+          );
+        }
         products = await getProductsByIds(section.data.ctaProductIds);
-        console.log(`Found ${products.length} products for landing-page section ${section.id}`);
+        if (process.env.NODE_ENV !== "production") {
+          console.log(
+            `Found ${products.length} products for landing-page section ${section.id}`
+          );
+        }
       } else {
-        console.log(`No ctaProductIds found in landing-page section ${section.id}`);
+        if (process.env.NODE_ENV !== "production") {
+          console.log(
+            `No ctaProductIds found in landing-page section ${section.id}`
+          );
+        }
       }
-      
+
       return {
         ...section,
         products,

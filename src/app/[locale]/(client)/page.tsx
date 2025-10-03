@@ -1,5 +1,6 @@
 import React, { Fragment } from "react";
 import { getTranslations } from "next-intl/server";
+import { unstable_cache } from "next/cache";
 
 import HeroSection from "@/components/HeroSection";
 import CategoriesSection from "@/components/CategoriesSection";
@@ -17,6 +18,45 @@ export async function generateStaticParams() {
   return [{ locale: "ar" }, { locale: "fr" }];
 }
 
+// Cache the data fetching functions
+const getCachedProducts = unstable_cache(
+  async () => {
+    console.log(`[CACHE] Fetching products at ${new Date().toISOString()}`);
+    return getAllProducts();
+  },
+  ["products"],
+  {
+    revalidate: 604800, // 7 days
+    tags: ["products", "landing-page"],
+  }
+);
+
+const getCachedCategories = unstable_cache(
+  async () => {
+    console.log(`[CACHE] Fetching categories at ${new Date().toISOString()}`);
+    return getCategories();
+  },
+  ["categories"],
+  {
+    revalidate: 604800, // 7 days
+    tags: ["categories", "landing-page"],
+  }
+);
+
+const getCachedLandingPageSections = unstable_cache(
+  async () => {
+    console.log(
+      `[CACHE] Fetching landing page sections at ${new Date().toISOString()}`
+    );
+    return getLandingPageSectionsWithProducts();
+  },
+  ["landing-page-sections"],
+  {
+    revalidate: 604800, // 7 days
+    tags: ["sections", "landing-page"],
+  }
+);
+
 type Props = {
   params: Promise<{ locale: string }>;
 };
@@ -25,11 +65,9 @@ export default async function EcommerceLandingPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "home" });
 
-  const products = await getAllProducts(); // runs on server
-  const categories = await getCategories(); // fetch categories from Firebase
-
-  // Get only landing-page type sections with their products
-  const landingPageSections = await getLandingPageSectionsWithProducts();
+  const products = await getCachedProducts();
+  const categories = await getCachedCategories();
+  const landingPageSections = await getCachedLandingPageSections();
 
   return (
     <>
