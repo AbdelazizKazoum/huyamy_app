@@ -9,6 +9,14 @@ import { WhatsAppFloatingButton } from "@/components/ui";
 import { getAllProducts, getCategories } from "@/lib/services/productService";
 import { getLandingPageSectionsWithProducts } from "@/lib/services/sectionService";
 
+// ISR Configuration - Revalidate every week (604800 seconds = 7 days)
+export const revalidate = 604800;
+
+// Generate static params for supported locales
+export async function generateStaticParams() {
+  return [{ locale: "ar" }, { locale: "fr" }];
+}
+
 type Props = {
   params: Promise<{ locale: string }>;
 };
