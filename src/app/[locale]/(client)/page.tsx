@@ -9,6 +9,7 @@ import NewsletterSection from "@/components/NewsletterSection";
 import { WhatsAppFloatingButton } from "@/components/ui";
 import { getAllProducts, getCategories } from "@/lib/services/productService";
 import { getLandingPageSectionsWithProducts } from "@/lib/services/sectionService";
+import { CACHE_CONFIG } from "@/lib/cache/tags";
 
 // ISR Configuration - Revalidate every week (604800 seconds = 7 days)
 export const revalidate = 604800;
@@ -24,10 +25,10 @@ const getCachedProducts = unstable_cache(
     console.log(`[CACHE] Fetching products at ${new Date().toISOString()}`);
     return getAllProducts();
   },
-  ["products"],
+  CACHE_CONFIG.PRODUCTS.key,
   {
-    revalidate: 604800, // 7 days
-    tags: ["products", "landing-page"],
+    revalidate: CACHE_CONFIG.PRODUCTS.revalidate,
+    tags: CACHE_CONFIG.PRODUCTS.tags,
   }
 );
 
@@ -36,10 +37,10 @@ const getCachedCategories = unstable_cache(
     console.log(`[CACHE] Fetching categories at ${new Date().toISOString()}`);
     return getCategories();
   },
-  ["categories"],
+  CACHE_CONFIG.CATEGORIES.key,
   {
-    revalidate: 604800, // 7 days
-    tags: ["categories", "landing-page"],
+    revalidate: CACHE_CONFIG.CATEGORIES.revalidate,
+    tags: CACHE_CONFIG.CATEGORIES.tags,
   }
 );
 
@@ -50,10 +51,10 @@ const getCachedLandingPageSections = unstable_cache(
     );
     return getLandingPageSectionsWithProducts();
   },
-  ["landing-page-sections"],
+  CACHE_CONFIG.SECTIONS.key,
   {
-    revalidate: 604800, // 7 days
-    tags: ["sections", "landing-page"],
+    revalidate: CACHE_CONFIG.SECTIONS.revalidate,
+    tags: CACHE_CONFIG.SECTIONS.tags,
   }
 );
 

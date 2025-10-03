@@ -1,5 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { NextRequest } from "next/server";
+import { getLandingPageTags } from "@/lib/cache/tags";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Revalidate all landing page related tags at once
-    const landingPageTags = ["products", "categories", "sections"];
+    const landingPageTags = getLandingPageTags();
 
     landingPageTags.forEach((tag) => {
       revalidateTag(tag);

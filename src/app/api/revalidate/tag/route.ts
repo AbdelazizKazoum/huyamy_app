@@ -1,5 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { NextRequest } from "next/server";
+import { getValidTags, isValidTag } from "@/lib/cache/tags";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,12 +13,11 @@ export async function POST(request: NextRequest) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Validate the tag
-    const validTags = ["products", "categories", "sections"];
-    if (!tag || !validTags.includes(tag)) {
+    // Validate the tag using centralized validation
+    if (!tag || !isValidTag(tag)) {
       return Response.json(
         {
-          error: "Invalid tag. Must be one of: products, categories, sections",
+          error: `Invalid tag. Must be one of: ${getValidTags().join(", ")}`,
         },
         { status: 400 }
       );
@@ -39,16 +39,17 @@ export async function POST(request: NextRequest) {
 
 // GET endpoint to show usage instructions
 export async function GET() {
+  const validTags = getValidTags();
   return Response.json({
     message: "Cache revalidation endpoint",
     usage: {
       method: "POST",
       body: {
-        tag: "products | categories | sections",
+        tag: validTags.join(" | "),
         secret: "your-secret-key",
       },
     },
-    availableTags: ["products", "categories", "sections"],
+    availableTags: validTags,
     example: {
       curl: `curl -X POST ${
         process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"

@@ -1,5 +1,6 @@
 import { revalidateTag } from "next/cache";
 import { NextRequest } from "next/server";
+import { MASTER_CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,9 +13,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Revalidate the master "landing-page" tag (invalidates ALL landing page data)
-    revalidateTag("landing-page");
+    revalidateTag(MASTER_CACHE_TAGS.LANDING_PAGE);
     console.log(
-      `[REVALIDATION] Invalidated all landing page cache using master tag`
+      `[REVALIDATION] Invalidated all landing page cache using master tag: ${MASTER_CACHE_TAGS.LANDING_PAGE}`
     );
 
     return Response.json({
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
       message: "🎉 Landing page cache completely invalidated!",
       description:
         "All products, categories, and sections will be refetched on next visit",
-      masterTag: "landing-page",
+      masterTag: MASTER_CACHE_TAGS.LANDING_PAGE,
       timestamp: new Date().toISOString(),
       nextSteps: [
         "Visit /ar or /fr to see fresh data",

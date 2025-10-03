@@ -1,5 +1,6 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest } from "next/server";
+import { getLandingPageTags } from "@/lib/cache/tags";
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,7 +26,7 @@ export async function POST(request: NextRequest) {
       });
     } else {
       // Method 2: Revalidate by tags (more granular)
-      const tags = ["products", "categories", "sections"];
+      const tags = getLandingPageTags();
       tags.forEach((tag) => {
         revalidateTag(tag);
         console.log(`[REVALIDATION] Invalidated cache for tag: ${tag}`);
