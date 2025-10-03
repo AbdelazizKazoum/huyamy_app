@@ -34,7 +34,8 @@
     "viewAll": "Voir tous les produits",
     "addToCart": "Ajouter au panier",
     "discount": "Réduction",
-    "originalPrice": "Prix original"
+    "originalPrice": "Prix original",
+    "productsList": "Liste des produits"
   },
   "newsletter": {
     "title": "Rejoignez notre newsletter",

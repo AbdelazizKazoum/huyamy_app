@@ -34,7 +34,8 @@
     "viewAll": "عرض كل المنتجات",
     "addToCart": "أضف للسلة",
     "discount": "خصم",
-    "originalPrice": "السعر الأصلي"
+    "originalPrice": "السعر الأصلي",
+    "productsList": "قائمة المنتجات"
   },
   "newsletter": {
     "title": "انضمي إلى قائمتنا البريدية",

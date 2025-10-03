@@ -14,7 +14,7 @@
   aria-label="Product Name - Price"
 >
 ```
-
+ 
 **Benefits:**
 
 - ✅ **Rich Snippets in Search Results** - Products show with prices, availability, ratings

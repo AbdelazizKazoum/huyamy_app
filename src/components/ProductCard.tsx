@@ -32,26 +32,46 @@ const ProductCard: React.FC<ProductCardProps> = ({
     .replace(/[^\w\-\u0600-\u06FF]/g, ""); // Keep Arabic characters and Latin letters/numbers
 
   // SEO-optimized alt text
-  const seoAltText = `${product.name[lang || "ar"]} - ${product.price.toFixed(2)} ${currency}${
-    product.originalPrice ? ` (${lang === "ar" ? "كان" : "était"} ${product.originalPrice.toFixed(2)} ${currency})` : ""
-  } - ${lang === "ar" ? "منتج مغربي طبيعي من هيوامي" : "Produit marocain naturel de Huyamy"}`;
+  const seoAltText = `${product.name[lang || "ar"]} - ${product.price.toFixed(
+    2
+  )} ${currency}${
+    product.originalPrice
+      ? ` (${lang === "ar" ? "كان" : "était"} ${product.originalPrice.toFixed(
+          2
+        )} ${currency})`
+      : ""
+  } - ${
+    lang === "ar"
+      ? "منتج مغربي طبيعي من هيوامي"
+      : "Produit marocain naturel de Huyamy"
+  }`;
 
   return (
-    <Link href={`/products/${productSlug}`} className="block">
+    <Link href={`/products/${product.slug}`} className="block">
       {/* Schema.org Product Microdata */}
-      <article 
+      <article
         className="group bg-white rounded-lg shadow-sm border border-neutral-200/60 overflow-hidden flex flex-col h-full transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer"
-        itemScope 
+        itemScope
         itemType="https://schema.org/Product"
         role="article"
-        aria-label={`${product.name[lang || "ar"]} - ${product.price.toFixed(2)} ${currency}`}
+        aria-label={`${product.name[lang || "ar"]} - ${product.price.toFixed(
+          2
+        )} ${currency}`}
       >
         {/* Product URL for SEO */}
-        <meta itemProp="url" content={`https://huyamy.com/products/${productSlug}`} />
+        <meta
+          itemProp="url"
+          content={`https://huyamy.com/products/${productSlug}`}
+        />
         <meta itemProp="productID" content={product.id} />
-        
+
         {/* Product Image with Enhanced SEO */}
-        <div className="relative overflow-hidden" itemProp="image" itemScope itemType="https://schema.org/ImageObject">
+        <div
+          className="relative overflow-hidden"
+          itemProp="image"
+          itemScope
+          itemType="https://schema.org/ImageObject"
+        >
           <Image
             src={product.image}
             alt={seoAltText}
@@ -64,10 +84,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
           />
           <meta itemProp="width" content="400" />
           <meta itemProp="height" content="224" />
-          
+
           {/* Product Status Badges */}
           {product.isNew && (
-            <span 
+            <span
               className="absolute top-3 left-3 bg-secondary-500 text-white text-xs font-semibold px-3 py-1 rounded-full"
               aria-label={lang === "ar" ? "منتج جديد" : "Nouveau produit"}
             >
@@ -75,9 +95,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </span>
           )}
           {discountPercentage > 0 && (
-            <span 
+            <span
               className="absolute top-3 right-3 bg-secondary-500 text-white text-sm font-extrabold px-4 py-1.5 rounded-full shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6"
-              aria-label={lang === "ar" ? `خصم ${discountPercentage} بالمئة` : `Réduction de ${discountPercentage} pourcent`}
+              aria-label={
+                lang === "ar"
+                  ? `خصم ${discountPercentage} بالمئة`
+                  : `Réduction de ${discountPercentage} pourcent`
+              }
             >
               {lang === "ar"
                 ? `${t("discount")} ${discountPercentage}%`
@@ -85,37 +109,54 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </span>
           )}
         </div>
-        
+
         {/* Product Information */}
         <div className="p-4 text-center flex flex-col flex-grow">
           {/* Product Name with Schema */}
-          <h3 
+          <h3
             className="text-lg font-semibold text-neutral-800 truncate mb-2 h-14 flex items-center justify-center"
             itemProp="name"
           >
             {product.name[lang || "ar"]}
           </h3>
-          
+
           {/* Hidden description for SEO */}
-          <meta itemProp="description" content={product.description?.[lang || "ar"] || product.name[lang || "ar"]} />
-          
+          <meta
+            itemProp="description"
+            content={
+              product.description?.[lang || "ar"] || product.name[lang || "ar"]
+            }
+          />
+
           {/* Brand Information */}
-          <div itemProp="brand" itemScope itemType="https://schema.org/Brand" className="sr-only">
+          <div
+            itemProp="brand"
+            itemScope
+            itemType="https://schema.org/Brand"
+            className="sr-only"
+          >
             <meta itemProp="name" content="Huyamy" />
           </div>
-          
+
           {/* Price Information with Schema */}
-          <div 
+          <div
             className="flex items-baseline justify-center gap-2 mb-4"
-            itemProp="offers" 
-            itemScope 
+            itemProp="offers"
+            itemScope
             itemType="https://schema.org/Offer"
           >
             <meta itemProp="priceCurrency" content="MAD" />
-            <meta itemProp="availability" content="https://schema.org/InStock" />
-            <meta itemProp="seller" itemType="https://schema.org/Organization" content="Huyamy" />
-            
-            <p 
+            <meta
+              itemProp="availability"
+              content="https://schema.org/InStock"
+            />
+            <meta
+              itemProp="seller"
+              itemType="https://schema.org/Organization"
+              content="Huyamy"
+            />
+
+            <p
               className="text-xl font-bold text-primary-900"
               itemProp="price"
               content={product.price.toFixed(2)}
@@ -123,19 +164,22 @@ const ProductCard: React.FC<ProductCardProps> = ({
               {product.price.toFixed(2)} {currency}
             </p>
             {product.originalPrice && (
-              <p 
+              <p
                 className="text-sm text-neutral-400 line-through"
                 itemProp="priceSpecification"
                 itemScope
                 itemType="https://schema.org/PriceSpecification"
               >
-                <meta itemProp="price" content={product.originalPrice.toFixed(2)} />
+                <meta
+                  itemProp="price"
+                  content={product.originalPrice.toFixed(2)}
+                />
                 <meta itemProp="priceCurrency" content="MAD" />
                 {product.originalPrice.toFixed(2)} {currency}
               </p>
             )}
           </div>
-          
+
           {/* Add to Cart Button */}
           <ButtonPrimary
             className="w-full mt-auto"

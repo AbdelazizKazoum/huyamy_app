@@ -5,6 +5,7 @@ export const products: Product[] = [
   {
     id: "1",
     name: { ar: "كريم مرطب بالصبار", fr: "Crème hydratante à l'aloe vera" },
+    slug: "كريم-مرطب-بالصبار",
     price: 85.0,
     originalPrice: 120.0,
     image: "https://placehold.co/400x400/d1e4d1/ffffff?text=منتج+1",
@@ -32,6 +33,7 @@ export const products: Product[] = [
   {
     id: "2",
     name: { ar: "زيت الأرغان الأصلي", fr: "Huile d'argan authentique" },
+    slug: "زيت-الأرغان-الأصلي",
     price: 150.0,
     image: "https://placehold.co/400x400/e4d8c8/ffffff?text=منتج+2",
     isNew: false,
@@ -55,6 +57,7 @@ export const products: Product[] = [
   {
     id: "3",
     name: { ar: "صابون الطين المغربي", fr: "Savon à l'argile marocaine" },
+    slug: "صابون-الطين-المغربي",
     price: 45.0,
     image: "https://placehold.co/400x400/c7b7a7/ffffff?text=منتج+3",
     isNew: false,
@@ -69,6 +72,7 @@ export const products: Product[] = [
   {
     id: "4",
     name: { ar: "عطر العود الفاخر", fr: "Parfum de Oud luxueux" },
+    slug: "عطر-العود-الفاخر",
     price: 250.0,
     originalPrice: 300.0,
     image: "https://placehold.co/400x400/b4a69a/ffffff?text=منتج+4",
@@ -84,6 +88,7 @@ export const products: Product[] = [
   {
     id: "5",
     name: { ar: "مقشر الجسم بالقهوة", fr: "Gommage corporel au café" },
+    slug: "مقشر-الجسم-بالقهوة",
     price: 70.0,
     image: "https://placehold.co/400x400/d6c2b1/ffffff?text=منتج+5",
     isNew: false,
@@ -98,6 +103,7 @@ export const products: Product[] = [
   {
     id: "6",
     name: { ar: "ماء الورد الطبيعي", fr: "Eau de rose naturelle" },
+    slug: "ماء-الورد-الطبيعي",
     price: 35.0,
     image: "https://placehold.co/400x400/f3e0e6/ffffff?text=منتج+6",
     isNew: false,
@@ -115,6 +121,7 @@ export const products: Product[] = [
       ar: "بلسم الشعر بزبدة الشيا",
       fr: "Après-shampooing au beurre de karité",
     },
+    slug: "بلسم-الشعر-بزبدة-الشيا",
     price: 95.0,
     image: "https://placehold.co/400x400/f0e6d3/ffffff?text=منتج+7",
     isNew: true,
@@ -129,6 +136,7 @@ export const products: Product[] = [
   {
     id: "8",
     name: { ar: "ماسك الفحم النشط", fr: "Masque au charbon actif" },
+    slug: "ماسك-الفحم-النشط",
     price: 60.0,
     originalPrice: 80.0,
     image: "https://placehold.co/400x400/a3a3a3/ffffff?text=منتج+8",
@@ -144,6 +152,7 @@ export const products: Product[] = [
   {
     id: "9",
     name: { ar: "سيروم فيتامين سي", fr: "Sérum à la vitamine C" },
+    slug: "سيروم-فيتامين-سي",
     price: 110.0,
     image: "https://placehold.co/400x400/f8c98d/ffffff?text=منتج+9",
     isNew: true,
@@ -161,6 +170,7 @@ export const products: Product[] = [
       ar: "كريم العين بالخيار",
       fr: "Crème contour des yeux au concombre",
     },
+    slug: "كريم-العين-بالخيار",
     price: 75.0,
     originalPrice: 90.0,
     image: "https://placehold.co/400x400/b3e6e0/ffffff?text=منتج+10",

@@ -11,11 +11,44 @@ export async function getAllProducts(): Promise<Product[]> {
 }
 
 export async function getProductBySlug(slug: string) {
-  const q = adminDb.collection("products").where("slug", "==", slug).limit(1);
-  const snap = await q.get();
-  if (snap.empty) return null;
-  const doc = snap.docs[0];
-  return { id: doc.id, ...doc.data() };
+  // First, try to find by slug
+  const slugQuery = adminDb
+    .collection("products")
+    .where("slug", "==", slug)
+    .limit(1);
+  const slugSnap = await slugQuery.get();
+
+  if (!slugSnap.empty) {
+    const doc = slugSnap.docs[0];
+    return { id: doc.id, ...doc.data() };
+  }
+
+  // If not found by slug, search by Arabic name
+  const arNameQuery = adminDb
+    .collection("products")
+    .where("name.ar", "==", slug)
+    .limit(1);
+  const arNameSnap = await arNameQuery.get();
+
+  if (!arNameSnap.empty) {
+    const doc = arNameSnap.docs[0];
+    return { id: doc.id, ...doc.data() };
+  }
+
+  // If not found by Arabic name, search by French name
+  const frNameQuery = adminDb
+    .collection("products")
+    .where("name.fr", "==", slug)
+    .limit(1);
+  const frNameSnap = await frNameQuery.get();
+
+  if (!frNameSnap.empty) {
+    const doc = frNameSnap.docs[0];
+    return { id: doc.id, ...doc.data() };
+  }
+
+  // If not found in any field, return null
+  return null;
 }
 
 export async function getProductById(
