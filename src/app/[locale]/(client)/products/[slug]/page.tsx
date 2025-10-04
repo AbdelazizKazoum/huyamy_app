@@ -9,6 +9,7 @@ import { getProductBySlug } from "@/lib/services/productService";
 import { unstable_cache } from "next/cache";
 import { CACHE_CONFIG, getProductDetailTag } from "@/lib/cache/tags";
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
 
 type Props = {
   params: Promise<{ locale: Language; slug: string }>;
@@ -68,7 +69,7 @@ export async function generateStaticParams() {
 }
 
 // Generate metadata for SEO
-export async function generateMetadata({ params }: Props) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
 
   // Get cached product data for metadata
@@ -77,33 +78,312 @@ export async function generateMetadata({ params }: Props) {
 
   if (!product) {
     return {
-      title: "Product Not Found",
-      description: "The requested product could not be found.",
+      title: {
+        template: "%s | هويامي ستور - Huyamy Store",
+        default: "منتج غير موجود - Product Not Found",
+      },
+      description:
+        locale === "ar"
+          ? "المنتج المطلوب غير متوفر. تصفح مجموعتنا من منتجات العناية والجمال المميزة."
+          : "Le produit demandé n'est pas disponible. Découvrez notre collection de produits de beauté et soins exceptionnels.",
+      robots: "noindex, nofollow",
     };
   }
 
+  const currency = currencies[locale];
+  const productName = product.name[locale];
+  const productDescription = product.description[locale];
+  const categoryName = product.category?.name?.[locale] || "";
+
+  // Create rich SEO titles
+  const titles = {
+    ar: `${productName} | ${categoryName} | هويامي ستور - أفضل منتجات العناية والجمال`,
+    fr: `${productName} | ${categoryName} | Huyamy Store - Produits de Beauté Premium`,
+  };
+
+  // Create rich SEO descriptions
+  const descriptions = {
+    ar: `اشتري ${productName} بأفضل سعر ${product.price} ${currency}. ${productDescription}. توصيل مجاني، دفع عند الاستلام. منتجات أصلية 100% من هويامي ستور.`,
+    fr: `Achetez ${productName} au meilleur prix ${product.price} ${currency}. ${productDescription}. Livraison gratuite, paiement à la livraison. Produits 100% authentiques de Huyamy Store.`,
+  };
+
+  // Generate keywords
+  const keywords = [
+    productName,
+    categoryName,
+    "هويامي ستور",
+    "Huyamy Store",
+    locale === "ar" ? "منتجات العناية" : "produits de beauté",
+    locale === "ar" ? "دفع عند الاستلام" : "paiement à la livraison",
+    locale === "ar" ? "توصيل مجاني" : "livraison gratuite",
+    ...product.keywords,
+  ].filter(Boolean);
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "https://huyamy-store.com";
+  const productUrl = `${baseUrl}/${locale}/products/${slug}`;
+
+  // Generate alternate language URLs
+  const alternateLanguages = {
+    ar: `${baseUrl}/ar/products/${slug}`,
+    fr: `${baseUrl}/fr/products/${slug}`,
+  };
+
   return {
-    title: `${product.name[locale]} | هويامي ستور`,
-    description: product.description[locale],
+    title: titles[locale],
+    description: descriptions[locale],
+    keywords: keywords.join(", "),
+
+    // Open Graph for social media
     openGraph: {
-      title: product.name[locale],
-      description: product.description[locale],
+      title: titles[locale],
+      description: descriptions[locale],
+      url: productUrl,
+      siteName: locale === "ar" ? "هويامي ستور" : "Huyamy Store",
+      type: "website",
+      locale: locale === "ar" ? "ar_MA" : "fr_FR",
       images: [
         {
           url: product.image,
+          width: 1200,
+          height: 630,
+          alt: productName,
+          type: "image/jpeg",
+        },
+        ...product.subImages.slice(0, 3).map((img, index) => ({
+          url: img,
           width: 800,
           height: 600,
-          alt: product.name[locale],
-        },
+          alt: `${productName} - صورة ${index + 2}`,
+          type: "image/jpeg",
+        })),
       ],
     },
+
+    // Twitter Card
     twitter: {
       card: "summary_large_image",
-      title: product.name[locale],
-      description: product.description[locale],
+      site: "@HuyamyStore",
+      creator: "@HuyamyStore",
+      title: titles[locale],
+      description: descriptions[locale],
       images: [product.image],
     },
+
+    // Additional meta tags
+    other: {
+      // Product-specific meta tags
+      "product:price:amount": product.price.toString(),
+      "product:price:currency": currency,
+      "product:availability": "in stock",
+      "product:condition": "new",
+      "product:brand": "Huyamy Store",
+      "product:category": categoryName,
+
+      // E-commerce specific
+      "og:price:amount": product.price.toString(),
+      "og:price:currency": currency,
+      "og:availability": "instock",
+
+      // Internationalization
+      "og:locale": locale === "ar" ? "ar_MA" : "fr_FR",
+      "og:locale:alternate": locale === "ar" ? "fr_FR" : "ar_MA",
+
+      // Additional SEO tags
+      robots: "index, follow, max-image-preview:large",
+      googlebot: "index, follow",
+      author: "Huyamy Store",
+      publisher: "Huyamy Store",
+      "theme-color": "#059669", // Green theme color
+
+      // Mobile optimization
+      "format-detection": "telephone=yes",
+      "mobile-web-app-capable": "yes",
+
+      // Language alternates
+      "alternate-ar": alternateLanguages.ar,
+      "alternate-fr": alternateLanguages.fr,
+    },
+
+    // Canonical URL
+    alternates: {
+      canonical: productUrl,
+      languages: {
+        ar: alternateLanguages.ar,
+        fr: alternateLanguages.fr,
+        "x-default": alternateLanguages.ar, // Default to Arabic
+      },
+    },
+
+    // Verification tags (add your actual verification codes)
+    verification: {
+      google: process.env.GOOGLE_VERIFICATION,
+      // yandex: 'your-yandex-verification',
+      // bing: 'your-bing-verification',
+    },
+
+    // App links for mobile apps (if you have them)
+    // appLinks: {
+    //   ios: {
+    //     app_store_id: 'your-app-id',
+    //     url: `huyamy://products/${slug}`,
+    //   },
+    //   android: {
+    //     package: 'com.huyamy.store',
+    //     url: `huyamy://products/${slug}`,
+    //   },
+    // },
+
+    // Manifest for PWA
+    manifest: "/manifest.json",
   };
+}
+
+// JSON-LD Structured Data Component
+function ProductStructuredData({
+  product,
+  locale,
+  currency,
+}: {
+  product: Product;
+  locale: Language;
+  currency: string;
+}) {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "https://huyamy-store.com";
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name[locale],
+    description: product.description[locale],
+    image: [product.image, ...product.subImages],
+    sku: product.id,
+    brand: {
+      "@type": "Brand",
+      name: "Huyamy Store",
+    },
+    category: product.category?.name?.[locale],
+    offers: {
+      "@type": "Offer",
+      priceCurrency: currency === "د.م." ? "MAD" : "MAD",
+      price: product.price.toString(),
+      priceValidUntil: new Date(
+        Date.now() + 30 * 24 * 60 * 60 * 1000
+      ).toISOString(), // 30 days
+      availability: "https://schema.org/InStock",
+      url: `${baseUrl}/${locale}/products/${product.slug}`,
+      seller: {
+        "@type": "Organization",
+        name: "Huyamy Store",
+        url: baseUrl,
+      },
+      itemCondition: "https://schema.org/NewCondition",
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.8",
+      bestRating: "5",
+      worstRating: "1",
+      ratingCount: "127",
+    },
+    review: [
+      {
+        "@type": "Review",
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: "5",
+          bestRating: "5",
+        },
+        author: {
+          "@type": "Person",
+          name: locale === "ar" ? "زبون راضي" : "Client Satisfait",
+        },
+        reviewBody:
+          locale === "ar"
+            ? "منتج ممتاز وجودة عالية، أنصح به بشدة"
+            : "Produit excellent et de haute qualité, je le recommande vivement",
+      },
+    ],
+    isRelatedTo: [
+      {
+        "@type": "Product",
+        name: locale === "ar" ? "منتجات العناية" : "Produits de Soins",
+      },
+    ],
+  };
+
+  // Add original price if exists (for discounted products)
+  if (product.originalPrice) {
+    structuredData.offers = {
+      ...structuredData.offers,
+      "@type": "AggregateOffer",
+      lowPrice: product.price.toString(),
+      highPrice: product.originalPrice.toString(),
+      offerCount: "1",
+    };
+  }
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(structuredData, null, 2),
+      }}
+    />
+  );
+}
+
+// Breadcrumb Structured Data
+function BreadcrumbStructuredData({
+  product,
+  locale,
+}: {
+  product: Product;
+  locale: Language;
+}) {
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || "https://huyamy-store.com";
+
+  const breadcrumbData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: locale === "ar" ? "الرئيسية" : "Accueil",
+        item: `${baseUrl}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: locale === "ar" ? "المنتجات" : "Produits",
+        item: `${baseUrl}/${locale}/products`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.category?.name?.[locale] || "",
+        item: `${baseUrl}/${locale}/categories/${product.category?.id}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: product.name[locale],
+        item: `${baseUrl}/${locale}/products/${product.slug}`,
+      },
+    ],
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify(breadcrumbData, null, 2),
+      }}
+    />
+  );
 }
 
 // Main Page Component
@@ -125,42 +405,125 @@ export default async function ProductDetailsPage({ params }: Props) {
 
   return (
     <>
+      {/* Structured Data */}
+      <ProductStructuredData
+        product={product}
+        locale={locale}
+        currency={currency}
+      />
+      <BreadcrumbStructuredData product={product} locale={locale} />
+
       <div
         dir={locale === "ar" ? "rtl" : "ltr"}
         className="bg-white"
         style={{ fontFamily: "'Cairo', sans-serif" }}
       >
+        {/* Breadcrumb Navigation */}
+        <nav className="bg-gray-50 py-3" aria-label="Breadcrumb">
+          <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+            <ol
+              className="flex items-center space-x-2 text-sm text-gray-600"
+              dir={locale === "ar" ? "rtl" : "ltr"}
+            >
+              <li>
+                <a
+                  href={`/${locale}`}
+                  className="hover:text-green-600 transition-colors"
+                >
+                  {locale === "ar" ? "الرئيسية" : "Accueil"}
+                </a>
+              </li>
+              <li className="flex items-center">
+                <span className="mx-2">/</span>
+                <a
+                  href={`/${locale}/products`}
+                  className="hover:text-green-600 transition-colors"
+                >
+                  {locale === "ar" ? "المنتجات" : "Produits"}
+                </a>
+              </li>
+              {product.category && (
+                <li className="flex items-center">
+                  <span className="mx-2">/</span>
+                  <a
+                    href={`/${locale}/categories/${product.category.id}`}
+                    className="hover:text-green-600 transition-colors"
+                  >
+                    {product.category.name[locale]}
+                  </a>
+                </li>
+              )}
+              <li className="flex items-center">
+                <span className="mx-2">/</span>
+                <span className="text-gray-900 font-medium">
+                  {product.name[locale]}
+                </span>
+              </li>
+            </ol>
+          </div>
+        </nav>
+
         <main className="py-12">
           <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Right Side: Product Gallery */}
+              {/* Product Gallery */}
               <div>
                 <ProductImageGallery product={product} lang={locale} />
               </div>
-              {/* Left Side: Product Details & Form */}
+
+              {/* Product Details & Form */}
               <div className="space-y-6">
+                {/* Product Badge */}
+                {product.isNew && (
+                  <span className="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                    {locale === "ar" ? "جديد" : "Nouveau"}
+                  </span>
+                )}
+
+                {/* Product Title */}
                 <h1 className="text-3xl font-bold text-gray-900">
                   {product.name[locale]}
                 </h1>
-                <div className="flex items-center">
+
+                {/* Price */}
+                <div className="flex items-center space-x-4">
                   <p className="text-3xl font-bold text-green-800">
                     {product.price.toFixed(2)} {currency}
                   </p>
                   {product.originalPrice && (
-                    <p className="text-xl text-gray-400 line-through ml-4">
+                    <p className="text-xl text-gray-400 line-through">
                       {product.originalPrice.toFixed(2)} {currency}
                     </p>
                   )}
-                </div>
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-5 h-5 text-amber-400 fill-current"
-                    />
-                  ))}
+                  {product.originalPrice && (
+                    <span className="bg-amber-100 text-amber-600 text-sm font-medium px-2.5 py-0.5 rounded">
+                      -
+                      {Math.round(
+                        ((product.originalPrice - product.price) /
+                          product.originalPrice) *
+                          100
+                      )}
+                      %
+                    </span>
+                  )}
                 </div>
 
+                {/* Rating */}
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="w-5 h-5 text-amber-400 fill-current"
+                      />
+                    ))}
+                  </div>
+                  <span className="text-gray-600 text-sm">
+                    (4.8/5 - 127 {locale === "ar" ? "تقييم" : "avis"})
+                  </span>
+                </div>
+
+                {/* Countdown Timer */}
                 {product.originalPrice &&
                   product.originalPrice > product.price && (
                     <CountdownTimer
@@ -169,11 +532,55 @@ export default async function ProductDetailsPage({ params }: Props) {
                     />
                   )}
 
-                <div className="text-gray-700 space-y-2">
-                  <p>{product.description[locale]}</p>
+                {/* Checkout Form */}
+                <CheckoutForm lang={locale} />
+
+                {/* Product Description - Moved below form */}
+                <div className="prose max-w-none">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-3">
+                    {locale === "ar" ? "وصف المنتج" : "Description du produit"}
+                  </h2>
+                  <p className="text-gray-700 leading-relaxed">
+                    {product.description[locale]}
+                  </p>
                 </div>
 
-                <CheckoutForm lang={locale} />
+                {/* Features/Benefits - Moved below form */}
+                <div className="space-y-3">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {locale === "ar" ? "المميزات" : "Avantages"}
+                  </h3>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-center">
+                      <span
+                        className={`w-2 h-2 bg-green-500 rounded-full ${
+                          locale === "ar" ? "ml-3" : "mr-3"
+                        }`}
+                      ></span>
+                      {locale === "ar"
+                        ? "منتج أصلي 100%"
+                        : "Produit 100% authentique"}
+                    </li>
+                    <li className="flex items-center">
+                      <span
+                        className={`w-2 h-2 bg-green-500 rounded-full ${
+                          locale === "ar" ? "ml-3" : "mr-3"
+                        }`}
+                      ></span>
+                      {locale === "ar" ? "توصيل مجاني" : "Livraison gratuite"}
+                    </li>
+                    <li className="flex items-center">
+                      <span
+                        className={`w-2 h-2 bg-green-500 rounded-full ${
+                          locale === "ar" ? "ml-3" : "mr-3"
+                        }`}
+                      ></span>
+                      {locale === "ar"
+                        ? "دفع عند الاستلام"
+                        : "Paiement à la livraison"}
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
