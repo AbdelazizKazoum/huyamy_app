@@ -41,12 +41,14 @@ const product: Product = {
 };
 
 type Props = {
-  params: Promise<{ locale: Language }>;
+  params: Promise<{ locale: Language; slug: string }>;
 };
+
 // --- Main Page Component ---
 export default async function ProductDetailsPage({ params }: Props) {
-  const { locale } = await params;
-  const currency = currencies[locale];
+  const { locale, slug } = await params; // Fixed: Changed from 'lang' to 'locale'
+  const currency = currencies[locale]; // Now 'locale' is properly defined
+
   // Set offer to end 3 days from now for demonstration
   const offerEndDate = new Date().getTime() + 3 * 24 * 60 * 60 * 1000;
 

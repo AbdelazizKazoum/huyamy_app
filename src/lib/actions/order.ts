@@ -4,18 +4,20 @@ import { checkoutSchema, FormState } from "@/lib/schemas";
 import { createGuestOrder } from "@/lib/services/orderService";
 import { revalidatePath } from "next/cache";
 
-// Localized messages
+// Localized messages for order processing
 const messages = {
   ar: {
-    formError: "فشل في إرسال النموذج. يرجى التحقق من الأخطاء.",
-    success: "تم إرسال طلبك بنجاح!",
-    error: "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+    formError: "معلومات ناقصة. يرجى التحقق من بيانات التوصيل.",
+    success: "🎉 تم تأكيد طلبكم! سنتواصل معكم قريباً لترتيب التوصيل.",
+    error: "خطأ في تأكيد الطلب. يرجى المحاولة مرة أخرى أو التواصل معنا.",
   },
   fr: {
     formError:
-      "Échec de soumission du formulaire. Veuillez vérifier les erreurs.",
-    success: "Votre commande a été passée avec succès !",
-    error: "Une erreur inattendue s'est produite. Veuillez réessayer.",
+      "Informations incomplètes. Veuillez vérifier vos données de livraison.",
+    success:
+      "🎉 Commande confirmée ! Nous vous contacterons sous peu pour organiser la livraison.",
+    error:
+      "Erreur lors de la confirmation. Veuillez réessayer ou nous contacter.",
   },
 };
 
