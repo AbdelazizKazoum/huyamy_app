@@ -23,6 +23,24 @@
       "startShopping": "Commencer les achats"
     }
   },
+  "checkout": {
+    "customerInfo": "Informations client",
+    "fullNamePlaceholder": "Prénom et Nom 🧑🏻‍",
+    "phonePlaceholder": "Téléphone 📞",
+    "addressPlaceholder": "Adresse 🏡",
+    "buyNowButton": "Achetez maintenant et payez à la livraison",
+    "processing": "Traitement en cours...",
+    "validation": {
+      "fullNameRequired": "Le nom complet doit contenir au moins 3 caractères.",
+      "phoneRequired": "Veuillez entrer un numéro de téléphone valide (au moins 10 chiffres).",
+      "addressRequired": "L'adresse doit contenir au moins 5 caractères."
+    },
+    "messages": {
+      "formError": "Échec de soumission du formulaire. Veuillez vérifier les erreurs.",
+      "success": "Votre commande a été passée avec succès !",
+      "error": "Une erreur inattendue s'est produite. Veuillez réessayer."
+    }
+  },
   "hero": {
     "promoAlt": "Offre promotionnelle - Produits naturels de haute qualité"
   },

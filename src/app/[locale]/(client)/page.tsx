@@ -12,6 +12,7 @@ import { getCategories } from "@/lib/services/productService";
 import { getLandingPageSectionsWithProducts } from "@/lib/services/sectionService";
 import { CACHE_CONFIG } from "@/lib/cache/tags";
 import { Locale } from "@/types/common";
+import { Language } from "firebase/ai";
 
 // ISR Configuration - Revalidate every week (604800 seconds = 7 days)
 export const revalidate = 604800;
@@ -25,18 +26,18 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const typedLocale = locale as Locale;
-  
+
   // Cache the data for metadata generation - only what we need
   const categories = await getCachedCategories();
   const landingPageSections = await getCachedLandingPageSections();
-  
+
   // Extract products from landing page sections (much lighter than getAllProducts)
   const landingPageProducts = landingPageSections
-    .flatMap(section => section.products || [])
+    .flatMap((section) => section.products || [])
     .slice(0, 10); // Limit to first 10 for SEO
 
   const isArabic = typedLocale === "ar";
-  
+
   // Dynamic content for SEO using only landing page products
   const featuredProductNames = landingPageProducts
     .slice(0, 5)
@@ -44,12 +45,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       (p) =>
         p.name?.[typedLocale] || p.name?.ar || p.name?.fr || "Huyamy Product"
     );
-  
+
   const categoryNames = categories
     .slice(0, 4)
     .map(
       (c) => c.name?.[typedLocale] || c.name?.ar || c.name?.fr || "Category"
-    );  const seoContent = {
+    );
+  const seoContent = {
     ar: {
       title: `متجر هيوامي - ${featuredProductNames
         .slice(0, 3)
@@ -177,7 +179,7 @@ const getCachedLandingPageSections = unstable_cache(
 );
 
 type Props = {
-  params: Promise<{ locale: string }>;
+  params: Promise<{ locale: Language }>;
 };
 
 export default async function EcommerceLandingPage({ params }: Props) {
@@ -186,10 +188,11 @@ export default async function EcommerceLandingPage({ params }: Props) {
 
   const categories = await getCachedCategories();
   const landingPageSections = await getCachedLandingPageSections();
-  
+
   // Extract products from landing page sections only
-  const landingPageProducts = landingPageSections
-    .flatMap(section => section.products || []);
+  const landingPageProducts = landingPageSections.flatMap(
+    (section) => section.products || []
+  );
 
   // Generate structured data for SEO
   const structuredData = {
@@ -236,37 +239,40 @@ export default async function EcommerceLandingPage({ params }: Props) {
       "@type": "ItemList",
       name: locale === "ar" ? "المنتجات المميزة" : "Produits en vedette",
       numberOfItems: landingPageProducts.length,
-      itemListElement: landingPageProducts.slice(0, 10).map((product, index) => ({
-        "@type": "ListItem",
-        position: index + 1,
-        item: {
-          "@type": "Product",
-          "@id": `https://huyamy.com/${locale}/products/${product.id}`,
-          name:
-            product.name?.[locale as "ar" | "fr"] ||
-            product.name?.ar ||
-            product.name?.fr,
-          description:
-            product.description?.[locale as "ar" | "fr"] ||
-            product.description?.ar ||
-            product.description?.fr,
-          image: product.image || "https://huyamy.com/images/huyami_logo.jpeg",
-          brand: {
-            "@type": "Brand",
-            name: "Huyamy",
-          },
-          offers: {
-            "@type": "Offer",
-            price: product.price,
-            priceCurrency: "MAD",
-            availability: "https://schema.org/InStock",
-            seller: {
-              "@type": "Organization",
+      itemListElement: landingPageProducts
+        .slice(0, 10)
+        .map((product, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          item: {
+            "@type": "Product",
+            "@id": `https://huyamy.com/${locale}/products/${product.id}`,
+            name:
+              product.name?.[locale as "ar" | "fr"] ||
+              product.name?.ar ||
+              product.name?.fr,
+            description:
+              product.description?.[locale as "ar" | "fr"] ||
+              product.description?.ar ||
+              product.description?.fr,
+            image:
+              product.image || "https://huyamy.com/images/huyami_logo.jpeg",
+            brand: {
+              "@type": "Brand",
               name: "Huyamy",
             },
+            offers: {
+              "@type": "Offer",
+              price: product.price,
+              priceCurrency: "MAD",
+              availability: "https://schema.org/InStock",
+              seller: {
+                "@type": "Organization",
+                name: "Huyamy",
+              },
+            },
           },
-        },
-      })),
+        })),
     },
   };
 

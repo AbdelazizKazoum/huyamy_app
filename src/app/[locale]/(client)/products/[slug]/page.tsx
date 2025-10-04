@@ -1,51 +1,14 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { ShoppingCart, Star } from "lucide-react";
-
-// --- Type Definitions ---
-
-type LocalizedString = {
-  ar: string;
-  fr: string;
-};
-
-type Language = "ar" | "fr";
-
-type Currency = {
-  ar: string;
-  fr: string;
-};
-
-type Category = {
-  id: number;
-  name: LocalizedString;
-  description: LocalizedString;
-  image: string;
-};
-
-type Product = {
-  id: number;
-  name: LocalizedString;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  isNew: boolean;
-  description: LocalizedString;
-  category: Category;
-  subImages: string[];
-  keywords: string[];
-};
-
-// --- Mock Data ---
-
-const currencies: Currency = {
-  ar: "د.م.",
-  fr: "DHS",
-};
+import React from "react";
+import { Star } from "lucide-react";
+import { Category, Language, Product } from "@/types";
+import { currencies } from "@/data";
+import ProductImageGallery from "@/components/ProductImageGallery";
+import CheckoutForm from "@/components/forms/CheckoutForm";
+import CountdownTimer from "@/components/CountdownTimer";
 
 const categories: Category[] = [
   {
-    id: 1,
+    id: "1",
     name: { ar: "العناية بالبشرة", fr: "Soins de la peau" },
     description: {
       ar: "كل ما تحتاجينه لبشرة نضرة وصحية.",
@@ -56,8 +19,9 @@ const categories: Category[] = [
 ];
 
 const product: Product = {
-  id: 1,
+  id: "1",
   name: { ar: "مجموعة بياض الثلج", fr: "Gamme Snow White" },
+  slug: "snow-white-set",
   price: 300.0,
   originalPrice: 450.0,
   image:
@@ -76,174 +40,13 @@ const product: Product = {
   keywords: ["snow white", "biyad al thalj", "skincare", "anti-aging"],
 };
 
-// --- Components ---
-
-const ProductImageGallery: React.FC<{ product: Product; lang: Language }> = ({
-  product,
-  lang,
-}) => {
-  const [mainImage, setMainImage] = useState(product.image);
-
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="w-full h-96 bg-gray-100 rounded-lg overflow-hidden">
-        <img
-          src={mainImage}
-          alt={product.name[lang]}
-          className="w-full h-full object-cover"
-        />
-      </div>
-      <div className="flex gap-2">
-        {product.subImages.map((img, index) => (
-          <button
-            key={index}
-            onClick={() => setMainImage(img)}
-            className={`w-20 h-20 rounded-md overflow-hidden border-2 ${
-              mainImage === img ? "border-green-700" : "border-transparent"
-            }`}
-          >
-            <img
-              src={img}
-              alt={`${product.name[lang]} ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
-          </button>
-        ))}
-      </div>
-    </div>
-  );
+type Props = {
+  params: Promise<{ locale: Language }>;
 };
-
-const CheckoutForm: React.FC<{ lang: Language }> = ({ lang }) => {
-  return (
-    <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-      <div className="bg-white p-6 rounded-3xl shadow-2xl border-[5px] border-green-700 space-y-4">
-        <h2 className="text-xl font-bold text-center text-gray-800">
-          {lang === "ar" ? "معلومات الزبون" : "Informations client"}
-        </h2>
-        <div className="flex flex-col md:flex-row gap-4">
-          <input
-            type="text"
-            name="first_name"
-            placeholder={
-              lang === "ar" ? "الاسم الكامل 🧑🏻‍" : "Prénom et Nom 🧑🏻‍"
-            }
-            className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
-          />
-          <input
-            type="text"
-            name="phone"
-            placeholder={lang === "ar" ? "الهاتف 📞" : "Téléphone 📞"}
-            className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
-          />
-        </div>
-        <div className="form-group">
-          <input
-            type="text"
-            name="city"
-            placeholder={lang === "ar" ? "العنوان 🏡" : "Adresse 🏡"}
-            className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
-          />
-        </div>
-      </div>
-      <button
-        type="submit"
-        className="w-full bg-green-800 text-white font-bold py-4 px-6 rounded-full text-lg hover:bg-green-900 transition-all duration-300 relative overflow-hidden animate-slide animate-shiny"
-      >
-        <span className="flex items-center justify-center">
-          {lang === "ar"
-            ? "إشتر الآن و إدفع عند الإستلام"
-            : "Achetez maintenant et payez à la livraison"}
-          <ShoppingCart
-            className={
-              lang === "ar" ? "mr-3 animate-ring" : "ml-3 animate-ring"
-            }
-            size={24}
-          />
-        </span>
-      </button>
-    </form>
-  );
-};
-
-const CountdownTimer: React.FC<{ expiryTimestamp: number; lang: Language }> = ({
-  expiryTimestamp,
-  lang,
-}) => {
-  const calculateTimeLeft = () => {
-    const difference = +new Date(expiryTimestamp) - +new Date();
-    let timeLeft = {
-      days: 0,
-      hours: 0,
-      minutes: 0,
-      seconds: 0,
-    };
-
-    if (difference > 0) {
-      timeLeft = {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
-    }
-
-    return timeLeft;
-  };
-
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  });
-
-  const labels = {
-    ar: { days: "أيام", hours: "ساعات", minutes: "دقائق", seconds: "ثواني" },
-    fr: { days: "Jours", hours: "Heures", minutes: "Min", seconds: "Sec" },
-  };
-
-  const TimeSlot: React.FC<{ value: number; label: string }> = ({
-    value,
-    label,
-  }) => (
-    <div className="text-center">
-      <span className="text-3xl font-bold text-green-800">
-        {String(value).padStart(2, "0")}
-      </span>
-      <span className="text-xs text-gray-500 block">{label}</span>
-    </div>
-  );
-
-  if (!Object.values(timeLeft).some((v) => v > 0)) {
-    return null;
-  }
-
-  return (
-    <div className="bg-green-50 p-4 rounded-lg my-4 flex items-center justify-between">
-      <h3 className="font-bold text-green-800 text-sm md:text-base">
-        {lang === "ar" ? "العرض ينتهي في:" : "L'offre se termine dans :"}
-      </h3>
-      <div className="flex justify-center items-center gap-3" dir="ltr">
-        <TimeSlot value={timeLeft.days} label={labels[lang].days} />
-        <span className="text-3xl font-bold text-green-800">:</span>
-        <TimeSlot value={timeLeft.hours} label={labels[lang].hours} />
-        <span className="text-3xl font-bold text-green-800">:</span>
-        <TimeSlot value={timeLeft.minutes} label={labels[lang].minutes} />
-        <span className="text-3xl font-bold text-green-800">:</span>
-        <TimeSlot value={timeLeft.seconds} label={labels[lang].seconds} />
-      </div>
-    </div>
-  );
-};
-
 // --- Main Page Component ---
-export default function ProductDetailsPage() {
-  const [lang] = useState<Language>("ar");
-  const currency = currencies[lang];
+export default async function ProductDetailsPage({ params }: Props) {
+  const { locale } = await params;
+  const currency = currencies[locale];
   // Set offer to end 3 days from now for demonstration
   const offerEndDate = new Date().getTime() + 3 * 24 * 60 * 60 * 1000;
 
@@ -315,7 +118,7 @@ export default function ProductDetailsPage() {
             `}
       </style>
       <div
-        dir={lang === "ar" ? "rtl" : "ltr"}
+        dir={locale === "ar" ? "rtl" : "ltr"}
         className="bg-white"
         style={{ fontFamily: "'Cairo', sans-serif" }}
       >
@@ -324,12 +127,12 @@ export default function ProductDetailsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               {/* Right Side: Product Gallery */}
               <div>
-                <ProductImageGallery product={product} lang={lang} />
+                <ProductImageGallery product={product} lang={locale} />
               </div>
               {/* Left Side: Product Details & Form */}
               <div className="space-y-6">
                 <h1 className="text-3xl font-bold text-gray-900">
-                  {product.name[lang]}
+                  {product.name[locale]}
                 </h1>
                 <div className="flex items-center">
                   <p className="text-3xl font-bold text-green-800">
@@ -354,15 +157,15 @@ export default function ProductDetailsPage() {
                   product.originalPrice > product.price && (
                     <CountdownTimer
                       expiryTimestamp={offerEndDate}
-                      lang={lang}
+                      lang={locale}
                     />
                   )}
 
                 <div className="text-gray-700 space-y-2">
-                  <p>{product.description[lang]}</p>
+                  <p>{product.description[locale]}</p>
                 </div>
 
-                <CheckoutForm lang={lang} />
+                <CheckoutForm lang={locale} />
               </div>
             </div>
           </div>
