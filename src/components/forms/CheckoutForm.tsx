@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { useEffect, useRef } from "react";
 import { createOrderAction } from "@/lib/actions/order";
+import { useTranslations, useLocale } from "next-intl";
 
 const initialState = {
   message: "",
@@ -15,6 +16,7 @@ const initialState = {
 // A separate component for the button to use the `useFormStatus` hook.
 const SubmitButton = ({ lang }: { lang: Language }) => {
   const { pending } = useFormStatus();
+  const t = useTranslations("checkout");
 
   return (
     <button
@@ -26,13 +28,11 @@ const SubmitButton = ({ lang }: { lang: Language }) => {
         {pending ? (
           <>
             <Loader2 className="mr-3 h-6 w-6 animate-spin" />
-            {lang === "ar" ? "جاري الإرسال..." : "Processing..."}
+            {t("processing")}
           </>
         ) : (
           <>
-            {lang === "ar"
-              ? "إشتر الآن و إدفع عند الإستلام"
-              : "Achetez maintenant et payez à la livraison"}
+            {t("buyNowButton")}
             <ShoppingCart
               className={
                 lang === "ar" ? "mr-3 animate-ring" : "ml-3 animate-ring"
@@ -49,6 +49,8 @@ const SubmitButton = ({ lang }: { lang: Language }) => {
 export const CheckoutForm: React.FC<{ lang: Language }> = ({ lang }) => {
   const [state, formAction] = useActionState(createOrderAction, initialState);
   const formRef = useRef<HTMLFormElement>(null);
+  const t = useTranslations("checkout");
+  const locale = useLocale();
 
   // Effect to reset the form after a successful submission
   useEffect(() => {
@@ -57,38 +59,74 @@ export const CheckoutForm: React.FC<{ lang: Language }> = ({ lang }) => {
     }
   }, [state]);
 
+  // Function to get localized error message
+  const getErrorMessage = (
+    field: "fullName" | "phone" | "address",
+    errors: string[]
+  ) => {
+    // Map validation errors to localized messages
+    if (
+      errors[0].includes("at least 3 characters") ||
+      errors[0].includes("3 characters")
+    ) {
+      return t("validation.fullNameRequired");
+    }
+    if (errors[0].includes("valid phone number") || errors[0].includes("10")) {
+      return t("validation.phoneRequired");
+    }
+    if (
+      errors[0].includes("at least 5 characters") ||
+      errors[0].includes("5 characters")
+    ) {
+      return t("validation.addressRequired");
+    }
+
+    // Field-specific fallbacks
+    switch (field) {
+      case "fullName":
+        return t("validation.fullNameRequired");
+      case "phone":
+        return t("validation.phoneRequired");
+      case "address":
+        return t("validation.addressRequired");
+      default:
+        return errors[0];
+    }
+  };
+
   return (
     <form ref={formRef} action={formAction} className="space-y-4">
+      {/* Hidden input to pass locale to server action */}
+      <input type="hidden" name="locale" value={locale} />
+
       <div className="bg-white p-6 rounded-3xl shadow-2xl border-[5px] border-green-700 space-y-4">
         <h2 className="text-xl font-bold text-center text-gray-800">
-          {lang === "ar" ? "معلومات الزبون" : "Informations client"}
+          {t("customerInfo")}
         </h2>
         <div className="flex flex-col md:flex-row gap-4">
           <div className="w-full">
             <input
               type="text"
-              name="fullName" // Name must match schema
-              placeholder={
-                lang === "ar" ? "الاسم الكامل 🧑🏻‍" : "Prénom et Nom 🧑🏻‍"
-              }
+              name="fullName"
+              placeholder={t("fullNamePlaceholder")}
               className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
             />
             {state.errors?.fullName && (
               <p className="text-red-500 text-sm mt-1 text-center">
-                {state.errors.fullName[0]}
+                {getErrorMessage("fullName", state.errors.fullName)}
               </p>
             )}
           </div>
           <div className="w-full">
             <input
               type="text"
-              name="phone" // Name must match schema
-              placeholder={lang === "ar" ? "الهاتف 📞" : "Téléphone 📞"}
+              name="phone"
+              placeholder={t("phonePlaceholder")}
               className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
             />
             {state.errors?.phone && (
               <p className="text-red-500 text-sm mt-1 text-center">
-                {state.errors.phone[0]}
+                {getErrorMessage("phone", state.errors.phone)}
               </p>
             )}
           </div>
@@ -96,13 +134,13 @@ export const CheckoutForm: React.FC<{ lang: Language }> = ({ lang }) => {
         <div className="form-group">
           <input
             type="text"
-            name="address" // Name must match schema
-            placeholder={lang === "ar" ? "العنوان 🏡" : "Adresse 🏡"}
+            name="address"
+            placeholder={t("addressPlaceholder")}
             className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
           />
           {state.errors?.address && (
             <p className="text-red-500 text-sm mt-1 text-center">
-              {state.errors.address[0]}
+              {getErrorMessage("address", state.errors.address)}
             </p>
           )}
         </div>
@@ -111,11 +149,10 @@ export const CheckoutForm: React.FC<{ lang: Language }> = ({ lang }) => {
       <SubmitButton lang={lang} />
 
       <div className="text-center font-semibold h-6">
-        {state.message && !state.errors && (
-          <p className="text-green-600">{state.message}</p>
-        )}
-        {state.message && state.errors && (
-          <p className="text-red-500">{state.message}</p>
+        {state.message && (
+          <p className={`${!state.errors ? "text-green-600" : "text-red-500"}`}>
+            {state.message}
+          </p>
         )}
       </div>
     </form>
