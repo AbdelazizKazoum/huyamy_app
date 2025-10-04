@@ -13,4 +13,6 @@ export type Product = {
   category: Category;
   subImages: string[];
   keywords: string[];
+  createdAt?: string | null; // ISO string or null
+  updatedAt?: string | null; // ISO string or null
 };

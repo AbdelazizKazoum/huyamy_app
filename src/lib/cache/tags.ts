@@ -6,6 +6,7 @@
  */
 export const CACHE_TAGS = {
   PRODUCTS: "products",
+  PRODUCT_DETAIL: "product-detail",
   CATEGORIES: "categories",
   SECTIONS: "sections",
 } as const;
@@ -56,6 +57,13 @@ export const getLandingPageTags = (): string[] => {
 };
 
 /**
+ * Get product detail specific tag for a slug
+ */
+export const getProductDetailTag = (slug: string): string => {
+  return `${CACHE_TAGS.PRODUCT_DETAIL}-${slug}`;
+};
+
+/**
  * Cache tag configurations for different data types
  */
 export const CACHE_CONFIG = {
@@ -68,6 +76,15 @@ export const CACHE_CONFIG = {
     ],
     revalidate: 604800, // 7 days
     key: ["products"],
+  },
+  PRODUCT_DETAIL: {
+    tags: [
+      CACHE_TAGS.PRODUCT_DETAIL,
+      MASTER_CACHE_TAGS.ALL_CONTENT,
+      MASTER_CACHE_TAGS.SEO_META,
+    ],
+    revalidate: 604800, // 7 days
+    key: ["product-detail"],
   },
   CATEGORIES: {
     tags: [
