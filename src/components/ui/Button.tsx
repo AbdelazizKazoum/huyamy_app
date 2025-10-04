@@ -1,7 +1,7 @@
 import React from "react";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline";
+  variant?: "primary" | "secondary" | "outline" | "ghost";
   size?: "sm" | "md" | "lg";
   children: React.ReactNode;
   className?: string;
@@ -15,19 +15,23 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    "font-bold rounded-full transition-all duration-300 shadow-md";
+    "font-semibold cursor-pointer rounded-xl transition-all duration-300 inline-flex items-center justify-center";
 
   const variantClasses = {
-    primary: "bg-primary-800 text-white hover:bg-primary-900",
-    secondary: "bg-secondary-500 text-white hover:bg-secondary-600",
+    primary:
+      "bg-green-600 text-white hover:bg-green-700 shadow-md hover:shadow-lg",
+    secondary:
+      "bg-blue-500 text-white hover:bg-blue-600 shadow-md hover:shadow-lg",
     outline:
-      "bg-transparent text-primary-800 border-2 border-primary-800 hover:bg-primary-800 hover:text-white",
+      "bg-transparent text-green-600 border-2 border-green-600 hover:bg-green-600 hover:text-white shadow-sm hover:shadow-md",
+    ghost:
+      "bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-800 shadow-sm hover:shadow-md",
   };
 
   const sizeClasses = {
-    sm: "py-2 px-6 text-sm",
-    md: "py-3 px-10 text-base",
-    lg: "py-4 px-12 text-lg",
+    sm: "py-2 px-4 text-sm",
+    md: "py-3 px-6 text-base",
+    lg: "py-4 px-8 text-lg",
   };
 
   const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
