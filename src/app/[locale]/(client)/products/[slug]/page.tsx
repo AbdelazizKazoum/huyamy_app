@@ -13,7 +13,7 @@ import CountdownTimer from "@/components/CountdownTimer";
 import CheckoutForm from "@/components/forms/CheckoutForm";
 
 type Props = {
-  params: Promise<{ locale: Language; slug: string }>;
+  params: { locale: Language; slug: string };
 };
 
 // Serialize product data to remove Firestore objects
@@ -71,7 +71,7 @@ export async function generateStaticParams() {
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale, slug } = await params;
+  const { locale, slug } = params;
 
   // Get cached product data for metadata
   const getCachedProduct = getCachedProductBySlug(slug);
@@ -170,43 +170,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: descriptions[locale],
       images: [product.image],
     },
-
-    // Additional meta tags
     other: {
-      // Product-specific meta tags
       "product:price:amount": product.price.toString(),
       "product:price:currency": currency,
       "product:availability": "in stock",
       "product:condition": "new",
       "product:brand": "Huyamy Store",
       "product:category": categoryName,
-
-      // E-commerce specific
       "og:price:amount": product.price.toString(),
       "og:price:currency": currency,
       "og:availability": "instock",
-
-      // Internationalization
       "og:locale": locale === "ar" ? "ar_MA" : "fr_FR",
       "og:locale:alternate": locale === "ar" ? "fr_FR" : "ar_MA",
-
-      // Additional SEO tags
       robots: "index, follow, max-image-preview:large",
       googlebot: "index, follow",
       author: "Huyamy Store",
       publisher: "Huyamy Store",
-      "theme-color": "#059669", // Green theme color
-
-      // Mobile optimization
+      "theme-color": "#059669",
       "format-detection": "telephone=yes",
       "mobile-web-app-capable": "yes",
-
-      // Language alternates
       "alternate-ar": alternateLanguages.ar,
       "alternate-fr": alternateLanguages.fr,
     },
-
-    // Canonical URL
     alternates: {
       canonical: productUrl,
       languages: {
@@ -390,7 +375,7 @@ function BreadcrumbStructuredData({
 
 // Main Page Component
 export default async function ProductDetailsPage({ params }: Props) {
-  const { locale, slug } = await params;
+  const { locale, slug } = params;
   const currency = currencies[locale];
 
   // Get cached product data
@@ -534,5 +519,3 @@ export default async function ProductDetailsPage({ params }: Props) {
     </>
   );
 }
-// Enable ISR for this page// Enable ISR for this page
-export const revalidate = CACHE_CONFIG.PRODUCT_DETAIL.revalidate; // 7 days
