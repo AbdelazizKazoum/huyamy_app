@@ -5,6 +5,7 @@ import { currencies } from "@/data";
 import ProductImageGallery from "@/components/ProductImageGallery";
 import CheckoutForm from "@/components/forms/CheckoutForm";
 import CountdownTimer from "@/components/CountdownTimer";
+import Breadcrumb from "@/components/Breadcrumb";
 import { getProductBySlug } from "@/lib/services/productService";
 import { unstable_cache } from "next/cache";
 import { CACHE_CONFIG, getProductDetailTag } from "@/lib/cache/tags";
@@ -318,6 +319,7 @@ function ProductStructuredData({
     structuredData.offers = {
       ...structuredData.offers,
       "@type": "AggregateOffer",
+      //@ts-expect-error AggregateOffer fields are not in Product type
       lowPrice: product.price.toString(),
       highPrice: product.originalPrice.toString(),
       offerCount: "1",
@@ -418,53 +420,11 @@ export default async function ProductDetailsPage({ params }: Props) {
         className="bg-white"
         style={{ fontFamily: "'Cairo', sans-serif" }}
       >
-        {/* Breadcrumb Navigation */}
-        <nav className="bg-gray-50 py-3" aria-label="Breadcrumb">
-          <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-            <ol
-              className="flex items-center space-x-2 text-sm text-gray-600"
-              dir={locale === "ar" ? "rtl" : "ltr"}
-            >
-              <li>
-                <a
-                  href={`/${locale}`}
-                  className="hover:text-green-600 transition-colors"
-                >
-                  {locale === "ar" ? "الرئيسية" : "Accueil"}
-                </a>
-              </li>
-              <li className="flex items-center">
-                <span className="mx-2">/</span>
-                <a
-                  href={`/${locale}/products`}
-                  className="hover:text-green-600 transition-colors"
-                >
-                  {locale === "ar" ? "المنتجات" : "Produits"}
-                </a>
-              </li>
-              {product.category && (
-                <li className="flex items-center">
-                  <span className="mx-2">/</span>
-                  <a
-                    href={`/${locale}/categories/${product.category.id}`}
-                    className="hover:text-green-600 transition-colors"
-                  >
-                    {product.category.name[locale]}
-                  </a>
-                </li>
-              )}
-              <li className="flex items-center">
-                <span className="mx-2">/</span>
-                <span className="text-gray-900 font-medium">
-                  {product.name[locale]}
-                </span>
-              </li>
-            </ol>
-          </div>
-        </nav>
-
         <main className="py-12">
           <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Dynamic Breadcrumb Navigation */}
+            {/* <Breadcrumb lang={locale} product={product} />
+ */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               {/* Product Gallery */}
               <div>
@@ -496,7 +456,7 @@ export default async function ProductDetailsPage({ params }: Props) {
                     </p>
                   )}
                   {product.originalPrice && (
-                    <span className="bg-amber-100 text-amber-600 text-sm font-medium px-2.5 py-0.5 rounded">
+                    <span className="bg-red-100 text-red-800 text-sm font-medium px-2.5 py-0.5 rounded">
                       -
                       {Math.round(
                         ((product.originalPrice - product.price) /
@@ -532,10 +492,7 @@ export default async function ProductDetailsPage({ params }: Props) {
                     />
                   )}
 
-                {/* Checkout Form */}
-                <CheckoutForm lang={locale} />
-
-                {/* Product Description - Moved below form */}
+                {/* Product Description */}
                 <div className="prose max-w-none">
                   <h2 className="text-xl font-semibold text-gray-900 mb-3">
                     {locale === "ar" ? "وصف المنتج" : "Description du produit"}
@@ -545,42 +502,33 @@ export default async function ProductDetailsPage({ params }: Props) {
                   </p>
                 </div>
 
-                {/* Features/Benefits - Moved below form */}
+                {/* Features/Benefits */}
                 <div className="space-y-3">
                   <h3 className="text-lg font-semibold text-gray-900">
                     {locale === "ar" ? "المميزات" : "Avantages"}
                   </h3>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-center">
-                      <span
-                        className={`w-2 h-2 bg-green-500 rounded-full ${
-                          locale === "ar" ? "ml-3" : "mr-3"
-                        }`}
-                      ></span>
+                      <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
                       {locale === "ar"
                         ? "منتج أصلي 100%"
                         : "Produit 100% authentique"}
                     </li>
                     <li className="flex items-center">
-                      <span
-                        className={`w-2 h-2 bg-green-500 rounded-full ${
-                          locale === "ar" ? "ml-3" : "mr-3"
-                        }`}
-                      ></span>
+                      <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
                       {locale === "ar" ? "توصيل مجاني" : "Livraison gratuite"}
                     </li>
                     <li className="flex items-center">
-                      <span
-                        className={`w-2 h-2 bg-green-500 rounded-full ${
-                          locale === "ar" ? "ml-3" : "mr-3"
-                        }`}
-                      ></span>
+                      <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
                       {locale === "ar"
                         ? "دفع عند الاستلام"
                         : "Paiement à la livraison"}
                     </li>
                   </ul>
                 </div>
+
+                {/* Checkout Form */}
+                <CheckoutForm lang={locale} />
               </div>
             </div>
           </div>
