@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import React from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { motion } from "framer-motion";
 import { heroFeatures, getFeatureIcon } from "@/data/heroFeatures";
 import { Locale } from "@/types";
 
@@ -8,16 +11,42 @@ const HeroSection: React.FC = () => {
   const t = useTranslations("hero");
   const currentLocale = useLocale() as Locale;
 
+  const cardContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const cardItemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: ["easeOut"],
+      },
+    },
+  };
+
   return (
     <section className="relative">
       {/* Promotional Banner */}
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeInOut" }}
         className="w-full"
         style={{ backgroundColor: "var(--color-background-secondary)" }}
       >
         <a href="#" className="block">
           <Image
-            src="https://placehold.co/1600x450/f7f6f2/166534?text=منتجات+طبيعية+بجودة+عالية"
+            src="/images/banner.png"
             alt={t("promoAlt")}
             width={1600}
             height={450}
@@ -25,48 +54,38 @@ const HeroSection: React.FC = () => {
             priority
           />
         </a>
-      </div>
+      </motion.div>
 
       {/* Feature Cards */}
       <div className="bg-white">
-        <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 md:-mt-16 relative z-10">
-          {/* Desktop View: Grid */}
-          <div className="hidden md:grid md:grid-cols-3 gap-8">
+        <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 md:-mt-20 relative z-10">
+          {/* Unified View for all screen sizes */}
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8"
+            variants={cardContainerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {heroFeatures.map((feature) => (
-              <div
+              <motion.div
                 key={feature.id}
-                className="bg-white p-8 rounded-lg shadow-lg text-center flex flex-col items-center border border-neutral-100"
+                variants={cardItemVariants}
+                className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-row md:flex-col items-center text-left md:text-center"
               >
-                {getFeatureIcon(feature.iconName, 40, "text-primary-800 mb-4")}
-                <h3 className="text-xl font-bold text-neutral-800 mb-2">
-                  {feature.title[currentLocale]}
-                </h3>
-                <p className="text-neutral-500">
-                  {feature.description[currentLocale]}
-                </p>
-              </div>
-            ))}
-          </div>
-          {/* Mobile View: Single compact card */}
-          <div className="md:hidden bg-white p-4 rounded-lg shadow-lg border border-neutral-100">
-            <div className="flex justify-around items-start text-center">
-              {heroFeatures.map((feature) => (
-                <div
-                  key={feature.id}
-                  className="flex flex-col items-center px-1 w-1/3"
-                >
-                  {getFeatureIcon(
-                    feature.iconName,
-                    32,
-                    "text-primary-800 mb-2"
-                  )}
-                  <h3 className="text-xs sm:text-sm font-bold text-neutral-800 leading-tight">
+                <div className="flex-shrink-0 mr-5 md:mr-0 md:mb-4">
+                  {getFeatureIcon(feature.iconName, 40, "text-primary-800")}
+                </div>
+                <div>
+                  <h3 className="text-base md:text-xl font-bold text-neutral-800 mb-1">
                     {feature.title[currentLocale]}
                   </h3>
+                  <p className="hidden md:block text-neutral-500">
+                    {feature.description[currentLocale]}
+                  </p>
                 </div>
-              ))}
-            </div>
-          </div>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </div>
     </section>
