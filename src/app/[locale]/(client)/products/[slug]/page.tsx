@@ -456,7 +456,7 @@ export default async function ProductDetailsPage({ params }: Props) {
                     </p>
                   )}
                   {product.originalPrice && (
-                    <span className="bg-red-100 text-red-800 text-sm font-medium px-2.5 py-0.5 rounded">
+                    <span className="bg-secondary-100 text-amber-500 text-sm font-medium px-2.5 py-0.5 rounded">
                       -
                       {Math.round(
                         ((product.originalPrice - product.price) /
@@ -478,9 +478,9 @@ export default async function ProductDetailsPage({ params }: Props) {
                       />
                     ))}
                   </div>
-                  <span className="text-gray-600 text-sm">
+                  {/* <span className="text-gray-600 text-sm">
                     (4.8/5 - 127 {locale === "ar" ? "تقييم" : "avis"})
-                  </span>
+                  </span> */}
                 </div>
 
                 {/* Countdown Timer */}
