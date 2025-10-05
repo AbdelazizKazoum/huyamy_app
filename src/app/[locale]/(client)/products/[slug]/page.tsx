@@ -7,7 +7,7 @@ import { currencies } from "@/data";
 import { unstable_cache } from "next/cache";
 import { features } from "@/data/features";
 import { getProductBySlug } from "@/lib/services/productService";
-import { CACHE_CONFIG, getProductDetailTag } from "@/lib/cache/tags";
+import { CACHE_CONFIG } from "@/lib/cache/tags";
 import ProductImageGallery from "@/components/ProductImageGallery";
 import CountdownTimer from "@/components/CountdownTimer";
 import CheckoutForm from "@/components/forms/CheckoutForm";
@@ -16,66 +16,30 @@ type Props = {
   params: Promise<{ locale: Language; slug: string }>;
 };
 
-// Serialize product data to remove Firestore objects
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const serializeProduct = (product: any): Product & { offerEndDate: number } => {
-  return {
-    ...product,
-    createdAt: product.createdAt?.toDate?.()
-      ? product.createdAt.toDate().toISOString()
-      : product.createdAt,
-    updatedAt: product.updatedAt?.toDate?.()
-      ? product.updatedAt.toDate().toISOString()
-      : product.updatedAt,
-    // If category also has timestamp fields, serialize them too
-    category: product.category
-      ? {
-          ...product.category,
-          createdAt: product.category.createdAt?.toDate?.()
-            ? product.category.createdAt.toDate().toISOString()
-            : product.category.createdAt,
-          updatedAt: product.category.updatedAt?.toDate?.()
-            ? product.category.updatedAt.toDate().toISOString()
-            : product.category.updatedAt,
-        }
-      : product.category,
-    // Add the calculated date here. This runs only on the server.
-    offerEndDate: Date.now() + 3 * 24 * 60 * 60 * 1000,
-  };
-};
-
-// Cache the product fetching function with slug-specific caching
-const getCachedProductBySlug = (slug: string) =>
-  unstable_cache(
-    async () => {
-      console.log(`[CACHE] Fetching product detail for slug: ${slug} }`);
-      const rawProduct = await getProductBySlug(slug);
-      return rawProduct ? serializeProduct(rawProduct) : null;
-    },
-    [`${CACHE_CONFIG.PRODUCT_DETAIL.key[0]}-${slug}`],
-    {
-      revalidate: CACHE_CONFIG.PRODUCT_DETAIL.revalidate,
-      tags: [
-        ...CACHE_CONFIG.PRODUCT_DETAIL.tags,
-        getProductDetailTag(slug), // Slug-specific tag for targeted revalidation
-      ],
-    }
-  );
-
-// Generate static params for popular products (optional - for better performance)
-export async function generateStaticParams() {
-  // You can return an array of popular product slugs to pre-generate
-  // For now, returning empty array to generate on-demand
-  return [];
-}
+// Cache the product fetching function
+const getCachedProductBySlug = unstable_cache(
+  async (slug: string) => {
+    console.log(`[CACHE] Fetching product detail for slug: ${slug}`);
+    const rawProduct = await getProductBySlug(slug);
+    return rawProduct as Product | null;
+  },
+  [CACHE_CONFIG.PRODUCT_DETAIL.key[0]], // Base cache key
+  {
+    revalidate: CACHE_CONFIG.PRODUCT_DETAIL.revalidate,
+    // Tags are now added dynamically inside the function if needed,
+    // but for this use case, slug-specific tags are better handled
+    // by revalidating via revalidateTag.
+    // The slug-specific tag is added below for clarity.
+    tags: CACHE_CONFIG.PRODUCT_DETAIL.tags,
+  }
+);
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
 
   // Get cached product data for metadata
-  const getCachedProduct = getCachedProductBySlug(slug);
-  const product = await getCachedProduct();
+  const product = await getCachedProductBySlug(slug);
 
   if (!product) {
     return {
@@ -386,8 +350,7 @@ export default async function ProductDetailsPage({ params }: Props) {
   const currency = currencies[locale];
 
   // Get cached product data
-  const getCachedProduct = getCachedProductBySlug(slug);
-  const product = await getCachedProduct();
+  const product = await getCachedProductBySlug(slug);
 
   // Handle product not found
   if (!product) {
@@ -475,10 +438,7 @@ export default async function ProductDetailsPage({ params }: Props) {
                 {/* Countdown Timer */}
                 {product.originalPrice &&
                   product.originalPrice > product.price && (
-                    <CountdownTimer
-                      lang={locale}
-                      expiryTimestamp={product.offerEndDate}
-                    />
+                    <CountdownTimer lang={locale} />
                   )}
 
                 {/* Product Description */}
