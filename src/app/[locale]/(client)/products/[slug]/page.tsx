@@ -18,7 +18,7 @@ type Props = {
 
 // Serialize product data to remove Firestore objects
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const serializeProduct = (product: any): Product => {
+const serializeProduct = (product: any): Product & { offerEndDate: number } => {
   return {
     ...product,
     createdAt: product.createdAt?.toDate?.()
@@ -39,6 +39,8 @@ const serializeProduct = (product: any): Product => {
             : product.category.updatedAt,
         }
       : product.category,
+    // Add the calculated date here. This runs only on the server.
+    offerEndDate: Date.now() + 3 * 24 * 60 * 60 * 1000,
   };
 };
 
@@ -473,7 +475,10 @@ export default async function ProductDetailsPage({ params }: Props) {
                 {/* Countdown Timer */}
                 {product.originalPrice &&
                   product.originalPrice > product.price && (
-                    <CountdownTimer lang={locale} />
+                    <CountdownTimer
+                      lang={locale}
+                      expiryTimestamp={product.offerEndDate}
+                    />
                   )}
 
                 {/* Product Description */}
