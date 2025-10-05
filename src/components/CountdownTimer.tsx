@@ -13,10 +13,10 @@ type LabelsConfig = {
   [K in Language]: TimeLabels;
 };
 
-const CountdownTimer: React.FC<{ expiryTimestamp: number; lang: Language }> = ({
-  expiryTimestamp,
-  lang,
-}) => {
+const CountdownTimer: React.FC<{ lang: Language }> = ({ lang }) => {
+  // Set offer to end 3 days from now for demonstration
+  const expiryTimestamp = new Date().getTime() + 3 * 24 * 60 * 60 * 1000;
+
   const calculateTimeLeft = () => {
     const difference = +new Date(expiryTimestamp) - +new Date();
     let timeLeft = {

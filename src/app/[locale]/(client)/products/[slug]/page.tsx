@@ -46,9 +46,7 @@ const serializeProduct = (product: any): Product => {
 const getCachedProductBySlug = (slug: string) =>
   unstable_cache(
     async () => {
-      console.log(
-        `[CACHE] Fetching product detail for slug: ${slug} at ${new Date().toISOString()}`
-      );
+      console.log(`[CACHE] Fetching product detail for slug: ${slug} }`);
       const rawProduct = await getProductBySlug(slug);
       return rawProduct ? serializeProduct(rawProduct) : null;
     },
@@ -253,6 +251,23 @@ function ProductStructuredData({
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL || "https://huyamy-store.com";
 
+  const baseOffer = {
+    "@type": "Offer",
+    priceCurrency: currency === "د.م." ? "MAD" : "MAD",
+    price: product.price.toString(),
+    // priceValidUntil: new Date(
+    //   Date.now() + 30 * 24 * 60 * 60 * 1000
+    // ).toISOString(), // 30 days
+    availability: "https://schema.org/InStock",
+    url: `${baseUrl}/${locale}/products/${product.slug}`,
+    seller: {
+      "@type": "Organization",
+      name: "Huyamy Store",
+      url: baseUrl,
+    },
+    itemCondition: "https://schema.org/NewCondition",
+  };
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -265,22 +280,15 @@ function ProductStructuredData({
       name: "Huyamy Store",
     },
     category: product.category?.name?.[locale],
-    offers: {
-      "@type": "Offer",
-      priceCurrency: currency === "د.م." ? "MAD" : "MAD",
-      price: product.price.toString(),
-      priceValidUntil: new Date(
-        Date.now() + 30 * 24 * 60 * 60 * 1000
-      ).toISOString(), // 30 days
-      availability: "https://schema.org/InStock",
-      url: `${baseUrl}/${locale}/products/${product.slug}`,
-      seller: {
-        "@type": "Organization",
-        name: "Huyamy Store",
-        url: baseUrl,
-      },
-      itemCondition: "https://schema.org/NewCondition",
-    },
+    offers: product.originalPrice
+      ? {
+          ...baseOffer,
+          "@type": "AggregateOffer",
+          lowPrice: product.price.toString(),
+          highPrice: product.originalPrice.toString(),
+          offerCount: "1",
+        }
+      : baseOffer,
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: "4.8",
@@ -306,25 +314,7 @@ function ProductStructuredData({
             : "Produit excellent et de haute qualité, je le recommande vivement",
       },
     ],
-    isRelatedTo: [
-      {
-        "@type": "Product",
-        name: locale === "ar" ? "منتجات العناية" : "Produits de Soins",
-      },
-    ],
   };
-
-  // Add original price if exists (for discounted products)
-  if (product.originalPrice) {
-    structuredData.offers = {
-      ...structuredData.offers,
-      "@type": "AggregateOffer",
-      //@ts-expect-error AggregateOffer fields are not in Product type
-      lowPrice: product.price.toString(),
-      highPrice: product.originalPrice.toString(),
-      offerCount: "1",
-    };
-  }
 
   return (
     <script
@@ -401,9 +391,6 @@ export default async function ProductDetailsPage({ params }: Props) {
   if (!product) {
     notFound();
   }
-
-  // Set offer to end 3 days from now for demonstration
-  const offerEndDate = new Date().getTime() + 3 * 24 * 60 * 60 * 1000;
 
   return (
     <>
@@ -486,10 +473,7 @@ export default async function ProductDetailsPage({ params }: Props) {
                 {/* Countdown Timer */}
                 {product.originalPrice &&
                   product.originalPrice > product.price && (
-                    <CountdownTimer
-                      expiryTimestamp={offerEndDate}
-                      lang={locale}
-                    />
+                    <CountdownTimer lang={locale} />
                   )}
 
                 {/* Product Description */}
