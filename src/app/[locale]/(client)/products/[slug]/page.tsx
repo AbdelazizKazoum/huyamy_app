@@ -1,16 +1,16 @@
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
 import React from "react";
 import { Star } from "lucide-react";
 import { Language, Product } from "@/types";
 import { currencies } from "@/data";
-import ProductImageGallery from "@/components/ProductImageGallery";
-import CheckoutForm from "@/components/forms/CheckoutForm";
-import CountdownTimer from "@/components/CountdownTimer";
-import Breadcrumb from "@/components/Breadcrumb";
-import { getProductBySlug } from "@/lib/services/productService";
 import { unstable_cache } from "next/cache";
+import { features } from "@/data/features";
+import { getProductBySlug } from "@/lib/services/productService";
 import { CACHE_CONFIG, getProductDetailTag } from "@/lib/cache/tags";
-import { notFound } from "next/navigation";
-import { Metadata } from "next";
+import ProductImageGallery from "@/components/ProductImageGallery";
+import CountdownTimer from "@/components/CountdownTimer";
+import CheckoutForm from "@/components/forms/CheckoutForm";
 
 type Props = {
   params: Promise<{ locale: Language; slug: string }>;
@@ -424,7 +424,7 @@ export default async function ProductDetailsPage({ params }: Props) {
           <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Dynamic Breadcrumb Navigation */}
             {/* <Breadcrumb lang={locale} product={product} />
- */}
+             */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               {/* Product Gallery */}
               <div>
@@ -435,7 +435,7 @@ export default async function ProductDetailsPage({ params }: Props) {
               <div className="space-y-6">
                 {/* Product Badge */}
                 {product.isNew && (
-                  <span className="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                  <span className="inline-block bg-primary-100 text-primary-800 text-xs font-semibold px-2.5 py-0.5 rounded">
                     {locale === "ar" ? "جديد" : "Nouveau"}
                   </span>
                 )}
@@ -447,7 +447,7 @@ export default async function ProductDetailsPage({ params }: Props) {
 
                 {/* Price */}
                 <div className="flex items-center space-x-4">
-                  <p className="text-3xl font-bold text-green-800">
+                  <p className="text-3xl font-bold text-primary-800">
                     {product.price.toFixed(2)} {currency}
                   </p>
                   {product.originalPrice && (
@@ -502,33 +502,30 @@ export default async function ProductDetailsPage({ params }: Props) {
                   </p>
                 </div>
 
-                {/* Features/Benefits */}
-                <div className="space-y-3">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {locale === "ar" ? "المميزات" : "Avantages"}
-                  </h3>
-                  <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-center">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                      {locale === "ar"
-                        ? "منتج أصلي 100%"
-                        : "Produit 100% authentique"}
-                    </li>
-                    <li className="flex items-center">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                      {locale === "ar" ? "توصيل مجاني" : "Livraison gratuite"}
-                    </li>
-                    <li className="flex items-center">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mr-3"></span>
-                      {locale === "ar"
-                        ? "دفع عند الاستلام"
-                        : "Paiement à la livraison"}
-                    </li>
-                  </ul>
-                </div>
-
                 {/* Checkout Form */}
                 <CheckoutForm lang={locale} />
+
+                {/* Features/Benefits Section */}
+                <div className="mt-10 pt-8 border-t border-border-light">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-10">
+                    {features.map((feature, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start text-center sm:text-inherit"
+                      >
+                        <div className="flex-shrink-0">{feature.icon}</div>
+                        <div className="mx-4">
+                          <h3 className="font-semibold text-text-primary">
+                            {feature.title[locale]}
+                          </h3>
+                          <p className="text-sm text-text-secondary mt-1">
+                            {feature.description[locale]}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -537,6 +534,5 @@ export default async function ProductDetailsPage({ params }: Props) {
     </>
   );
 }
-
-// Enable ISR for this page
+// Enable ISR for this page// Enable ISR for this page
 export const revalidate = CACHE_CONFIG.PRODUCT_DETAIL.revalidate; // 7 days
