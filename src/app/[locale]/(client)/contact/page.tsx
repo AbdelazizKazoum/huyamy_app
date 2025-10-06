@@ -42,17 +42,15 @@ const ContactItem: React.FC<{
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="group block p-6 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl border border-neutral-200 dark:border-neutral-700 transition-all duration-300 hover:border-primary-700 dark:hover:border-primary-500 hover:shadow-lg hover:-translate-y-1"
+      className="group block p-6 bg-neutral-50 rounded-xl border border-neutral-200 transition-all duration-300 hover:border-primary-700 hover:shadow-lg hover:-translate-y-1"
     >
       <div className="flex items-center gap-5">
-        <div className="text-primary-800 dark:text-primary-400 bg-primary-100 dark:bg-primary-900/30 p-4 rounded-full transition-colors duration-300 group-hover:bg-primary-200 dark:group-hover:bg-primary-800/50">
+        <div className="text-primary-800 bg-primary-100 p-4 rounded-full transition-colors duration-300 group-hover:bg-primary-200">
           {icon}
         </div>
         <div>
-          <h3 className="font-bold text-lg text-neutral-800 dark:text-neutral-200">
-            {title}
-          </h3>
-          <p className="text-neutral-600 dark:text-neutral-400 transition-colors duration-300 group-hover:text-primary-800 dark:group-hover:text-primary-300">
+          <h3 className="font-bold text-lg text-neutral-800">{title}</h3>
+          <p className="text-neutral-600 transition-colors duration-300 group-hover:text-primary-800">
             {value}
           </p>
         </div>
@@ -68,16 +66,16 @@ export default function ContactPage({ params }: ContactPageProps) {
   return (
     <div
       dir={lang === "ar" ? "rtl" : "ltr"}
-      className="bg-background-primary dark:bg-neutral-900"
+      className="bg-background-primary"
       style={{ fontFamily: "'Cairo', sans-serif" }}
     >
       <main className="py-12 sm:py-16">
         <div className="container max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-text-primary dark:text-neutral-100">
+            <h1 className="text-2xl md:text-3xl font-bold text-text-primary">
               {lang === "ar" ? "تواصل معنا" : "Contactez-nous"}
             </h1>
-            <p className="mt-2 text-sm leading-6 text-text-secondary dark:text-neutral-400 max-w-xl mx-auto">
+            <p className="mt-2 text-sm leading-6 text-text-secondary max-w-xl mx-auto">
               {lang === "ar"
                 ? "يسعدنا التواصل معك! سواء كان لديك سؤال حول منتجاتنا أو خدماتنا أو الأسعار أو أي شيء آخر، فريقنا جاهز للإجابة على جميع استفساراتك."
                 : "Nous sommes ravis de vous entendre ! Que vous ayez une question sur nos produits, nos services, nos prix ou toute autre chose, notre équipe est prête à répondre à toutes vos demandes."}
@@ -106,7 +104,7 @@ export default function ContactPage({ params }: ContactPageProps) {
                 href="https://wa.me/212600000000"
               />
               <div className="text-center pt-8">
-                <h3 className="font-bold text-xl text-neutral-800 dark:text-neutral-200 mb-6">
+                <h3 className="font-bold text-xl text-neutral-800 mb-6">
                   {lang === "ar" ? "تابعنا على" : "Suivez-nous sur"}
                 </h3>
                 <div className="flex justify-center gap-8">
