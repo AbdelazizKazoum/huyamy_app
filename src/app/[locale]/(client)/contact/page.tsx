@@ -1,10 +1,10 @@
 import React from "react";
 import { Phone, Mail, Instagram, Facebook } from "lucide-react";
-import MapWrapper from "./components/MapWrapper";
+import MapWrapper from "@/components/MapWrapper";
+import { getTranslations } from "next-intl/server";
+import { Language } from "@/types";
 
 // --- Type Definitions ---
-
-type Language = "ar" | "fr";
 
 interface ContactPageProps {
   params: {
@@ -60,12 +60,15 @@ const ContactItem: React.FC<{
 };
 
 // --- Main Page Component ---
-export default function ContactPage({ params }: ContactPageProps) {
-  const lang = params.locale;
+export default async function ContactPage({ params }: ContactPageProps) {
+  const t = await getTranslations({
+    locale: params.locale,
+    namespace: "contact",
+  });
 
   return (
     <div
-      dir={lang === "ar" ? "rtl" : "ltr"}
+      dir={params.locale === "ar" ? "rtl" : "ltr"}
       className="bg-background-primary"
       style={{ fontFamily: "'Cairo', sans-serif" }}
     >
@@ -73,12 +76,10 @@ export default function ContactPage({ params }: ContactPageProps) {
         <div className="container max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h1 className="text-2xl md:text-3xl font-bold text-text-primary">
-              {lang === "ar" ? "تواصل معنا" : "Contactez-nous"}
+              {t("title")}
             </h1>
             <p className="mt-2 text-sm leading-6 text-text-secondary max-w-xl mx-auto">
-              {lang === "ar"
-                ? "يسعدنا التواصل معك! سواء كان لديك سؤال حول منتجاتنا أو خدماتنا أو الأسعار أو أي شيء آخر، فريقنا جاهز للإجابة على جميع استفساراتك."
-                : "Nous sommes ravis de vous entendre ! Que vous ayez une question sur nos produits, nos services, nos prix ou toute autre chose, notre équipe est prête à répondre à toutes vos demandes."}
+              {t("description")}
             </p>
           </div>
 
@@ -87,13 +88,13 @@ export default function ContactPage({ params }: ContactPageProps) {
             <div className="space-y-6">
               <ContactItem
                 icon={<Phone size={28} />}
-                title={lang === "ar" ? "الهاتف" : "Téléphone"}
+                title={t("phone")}
                 value="+212 5 00 00 00 00"
                 href="tel:+212500000000"
               />
               <ContactItem
                 icon={<Mail size={28} />}
-                title={lang === "ar" ? "البريد الإلكتروني" : "Email"}
+                title={t("email")}
                 value="contact@huyamy.ma"
                 href="mailto:contact@huyamy.ma"
               />
@@ -105,7 +106,7 @@ export default function ContactPage({ params }: ContactPageProps) {
               />
               <div className="text-center pt-8">
                 <h3 className="font-bold text-xl text-neutral-800 mb-6">
-                  {lang === "ar" ? "تابعنا على" : "Suivez-nous sur"}
+                  {t("followUs")}
                 </h3>
                 <div className="flex justify-center gap-8">
                   <a

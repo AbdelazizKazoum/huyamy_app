@@ -71,6 +71,13 @@
     "contactLabel": "Contactez-nous sur WhatsApp",
     "tooltip": "Contactez-nous sur WhatsApp"
   },
+  "contact": {
+    "title": "Contactez-nous",
+    "description": "Nous sommes ravis de vous entendre ! Que vous ayez une question sur nos produits, nos services, nos prix ou toute autre chose, notre équipe est prête à répondre à toutes vos demandes.",
+    "phone": "Téléphone",
+    "email": "Email",
+    "followUs": "Suivez-nous sur"
+  },
   "footer": {
     "description": "Votre premier magasin pour les produits de beauté naturels et les soins de la peau. Nous croyons au pouvoir de la nature pour sublimer votre beauté.",
     "customerService": {
