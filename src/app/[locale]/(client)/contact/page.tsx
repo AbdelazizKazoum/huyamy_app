@@ -60,15 +60,14 @@ const ContactItem: React.FC<{
 };
 
 // --- Main Page Component ---
-export default async function ContactPage({ params }: ContactPageProps) {
-  const t = await getTranslations({
-    locale: params.locale,
-    namespace: "contact",
-  });
+export default async function ContactPage({
+  params: { locale },
+}: ContactPageProps) {
+  const t = await getTranslations("contact");
 
   return (
     <div
-      dir={params.locale === "ar" ? "rtl" : "ltr"}
+      dir={locale === "ar" ? "rtl" : "ltr"}
       className="bg-background-primary"
       style={{ fontFamily: "'Cairo', sans-serif" }}
     >
