@@ -7,9 +7,7 @@ import { Language } from "@/types";
 // --- Type Definitions ---
 
 interface ContactPageProps {
-  params: {
-    locale: Language;
-  };
+  params: Promise<{ locale: Language }>;
 }
 
 // --- SVG Icon Components ---
@@ -60,10 +58,9 @@ const ContactItem: React.FC<{
 };
 
 // --- Main Page Component ---
-export default async function ContactPage({
-  params: { locale },
-}: ContactPageProps) {
+export default async function ContactPage({ params }: ContactPageProps) {
   const t = await getTranslations("contact");
+  const { locale } = await params;
 
   return (
     <div
