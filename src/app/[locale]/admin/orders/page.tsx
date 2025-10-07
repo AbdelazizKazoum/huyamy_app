@@ -2,18 +2,11 @@
 
 import DataTable from "@/components/admin/DataTable";
 import Pagination from "@/components/admin/Pagination";
+import DateInput from "@/components/admin/ui/DateInput";
 import SearchInput from "@/components/admin/ui/SearchInput";
 import useSortableData from "@/hooks/useSortableData";
 import { Language } from "@/types";
-import {
-  ArrowDown,
-  ArrowUp,
-  ChevronsUpDown,
-  Edit,
-  Eye,
-  MoreHorizontal,
-  Trash2,
-} from "lucide-react";
+import { Edit, Eye } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useMemo, useState, useEffect } from "react";
 
@@ -217,15 +210,13 @@ const OrdersPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <input
+          <DateInput
             id="date-filter"
-            type="date"
             value={dateFilter}
             onChange={(e) => {
               setDateFilter(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-40 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 text-sm"
           />
           <button
             onClick={() => {
@@ -236,7 +227,7 @@ const OrdersPage: React.FC = () => {
             className={`px-4 py-2 font-semibold rounded-lg transition-colors text-sm ${
               dateFilter === new Date().toISOString().split("T")[0]
                 ? "bg-green-700 text-white"
-                : "bg-white text-gray-700 border hover:bg-gray-100"
+                : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
             }`}
           >
             اليوم
