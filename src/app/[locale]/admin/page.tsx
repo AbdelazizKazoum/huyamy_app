@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, Fragment, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   LayoutDashboard,
   Package,
@@ -24,11 +24,15 @@ import {
   Filter,
   ChevronDown,
 } from "lucide-react";
-import { Transition } from "@headlessui/react";
-import { X } from "lucide-react";
 import { Category, Language, LocalizedString, Product } from "@/types";
 import useSortableData from "@/hooks/useSortableData";
 import Pagination from "@/components/admin/Pagination";
+import SearchInput from "@/components/admin/ui/SearchInput";
+import SelectInput from "@/components/admin/ui/SelectInput";
+import DateInput from "@/components/admin/ui/DateInput";
+import DataTable from "@/components/admin/DataTable";
+import { MobileSidebar, Sidebar } from "@/components/admin/Sidebar";
+import Header from "@/components/admin/Header";
 
 // --- Type Definitions ---
 
@@ -50,564 +54,26 @@ type Order = {
   itemCount: number;
 };
 
-// --- Mock Data ---
-const categoriesData: Category[] = [
-  {
-    id: "cat-1",
-    name: { ar: "العناية بالبشرة", fr: "Soins de la peau" },
-    description: {
-      ar: "كل ما تحتاجينه لبشرة نضرة وصحية.",
-      fr: "Tout ce dont vous avez besoin pour une peau fraîche et saine.",
-    },
-    image: "https://placehold.co/200x200/f3e0e6/ffffff?text=بشرة",
-  },
-  {
-    id: "cat-2",
-    name: { ar: "العناية بالشعر", fr: "Soins des cheveux" },
-    description: {
-      ar: "منتجات طبيعية لتقوية وتغذية شعرك.",
-      fr: "Produits naturels pour renforcer et nourrir vos cheveux.",
-    },
-    image: "https://placehold.co/200x200/f0e6d3/ffffff?text=شعر",
-  },
-];
-const productsData: Product[] = [
-  {
-    id: "prod-1",
-    name: { ar: "كريم مرطب بالصبار", fr: "Crème hydratante à l'aloe vera" },
-    slug: "كريم-مرطب-بالصبار",
-    price: 85.0,
-    originalPrice: 120.0,
-    image: "https://placehold.co/400x400/d1e4d1/ffffff?text=منتج+1",
-    isNew: true,
-    description: {
-      ar: "كريم غني بخلاصة الصبار الطبيعي لترطيب عميق وتهدئة البشرة الحساسة.",
-      fr: "Crème riche en extrait naturel d'aloe vera pour une hydratation profonde.",
-    },
-    category: categoriesData[0],
-    subImages: [],
-    keywords: ["كريم", "صبار", "ترطيب"],
-  },
-  {
-    id: "prod-2",
-    name: { ar: "زيت الأرغان الأصلي", fr: "Huile d'argan authentique" },
-    slug: "زيت-الأرغان-الأصلي",
-    price: 150.0,
-    image: "https://placehold.co/400x400/e4d8c8/ffffff?text=منتج+2",
-    isNew: false,
-    description: {
-      ar: "زيت الأرغان المغربي النقي 100% لتغذية الشعر والبشرة والأظافر.",
-      fr: "Huile d'argan marocaine 100% pure pour nourrir les cheveux, la peau et les ongles.",
-    },
-    category: categoriesData[1],
-    subImages: [],
-    keywords: ["زيت", "أرغان", "شعر", "بشرة"],
-  },
-  {
-    id: "prod-3",
-    name: { ar: "شامبو ضد القشرة", fr: "Shampooing anti-pelliculaire" },
-    slug: "شامبو-ضد-القشرة",
-    price: 95.0,
-    image: "https://placehold.co/400x400/cce0ff/ffffff?text=منتج+3",
-    isNew: false,
-    description: {
-      ar: "شامبو فعال للقضاء على القشرة وتهدئة فروة الرأس.",
-      fr: "Shampooing efficace pour éliminer les pellicules et apaiser le cuir chevelu.",
-    },
-    category: categoriesData[1],
-    subImages: [],
-    keywords: ["شامبو", "قشرة", "شعر"],
-  },
-  {
-    id: "prod-4",
-    name: { ar: "واقي شمسي SPF 50", fr: "Écran solaire SPF 50" },
-    slug: "واقي-شمسي-spf-50",
-    price: 130.0,
-    image: "https://placehold.co/400x400/fff0b3/ffffff?text=منتج+4",
-    isNew: true,
-    description: {
-      ar: "حماية عالية من أشعة الشمس الضارة مع تركيبة خفيفة وغير دهنية.",
-      fr: "Haute protection contre les rayons UV nocifs avec une formule légère et non grasse.",
-    },
-    category: categoriesData[0],
-    subImages: [],
-    keywords: ["واقي شمسي", "حماية", "بشرة"],
-  },
-  {
-    id: "prod-5",
-    name: { ar: "مقشر الجسم بالقهوة", fr: "Gommage corps au café" },
-    slug: "مقشر-الجسم-بالقهوة",
-    price: 110.0,
-    image: "https://placehold.co/400x400/d4bca2/ffffff?text=منتج+5",
-    isNew: false,
-    description: {
-      ar: "مقشر طبيعي لتنشيط الدورة الدموية وإزالة الجلد الميت.",
-      fr: "Gommage naturel pour stimuler la circulation et éliminer les peaux mortes.",
-    },
-    category: categoriesData[0],
-    subImages: [],
-    keywords: ["مقشر", "قهوة", "جسم"],
-  },
-  {
-    id: "prod-6",
-    name: { ar: "بلسم مرطب للشعر", fr: "Après-shampooing hydratant" },
-    slug: "بلسم-مرطب-للشعر",
-    price: 90.0,
-    image: "https://placehold.co/400x400/e0d1e4/ffffff?text=منتج+6",
-    isNew: false,
-    description: {
-      ar: "بلسم لفك تشابك الشعر وتغذيته بعمق.",
-      fr: "Après-shampooing pour démêler et nourrir les cheveux en profondeur.",
-    },
-    category: categoriesData[1],
-    subImages: [],
-    keywords: ["بلسم", "شعر", "ترطيب"],
-  },
-  {
-    id: "prod-7",
-    name: { ar: "سيروم فيتامين سي", fr: "Sérum à la vitamine C" },
-    slug: "سيروم-فيتامين-سي",
-    price: 180.0,
-    image: "https://placehold.co/400x400/ffe5b4/ffffff?text=منتج+7",
-    isNew: true,
-    description: {
-      ar: "سيروم لتفتيح البشرة ومحاربة علامات التقدم في السن.",
-      fr: "Sérum pour éclaircir le teint et combattre les signes de l'âge.",
-    },
-    category: categoriesData[0],
-    subImages: [],
-    keywords: ["سيروم", "فيتامين سي", "بشرة"],
-  },
-];
-const sectionsData: Section[] = [
-  {
-    id: "landing-popular",
-    type: "landing-page",
-    title: { ar: "الأكثر مبيعاً", fr: "Les plus vendus" },
-    subtitle: {
-      ar: "المنتجات التي يحبها عملاؤنا أكثر",
-      fr: "Les produits que nos clients préfèrent",
-    },
-    ctaProductIds: ["prod-3", "prod-6", "prod-7", "prod-5"],
-    createdAt: new Date("2025-10-02T20:50:11Z"),
-    updatedAt: new Date("2025-10-02T20:50:11Z"),
-  },
-  {
-    id: "landing-new",
-    type: "landing-page",
-    title: { ar: "وصل حديثاً", fr: "Nouveautés" },
-    subtitle: {
-      ar: "اكتشف أحدث إضافاتنا إلى المجموعة",
-      fr: "Découvrez nos dernières additions à la collection",
-    },
-    ctaProductIds: ["prod-1", "prod-4", "prod-9"],
-    createdAt: new Date("2025-10-01T10:00:00Z"),
-    updatedAt: new Date("2025-10-01T10:00:00Z"),
-  },
-];
+const OrdersPage: React.FC<{ lang: Language }> = ({ lang }) => {
+  const orders: Order[] = Array.from({ length: 25 }, (_, i) => ({
+    id: `ORD-00${i + 1}`,
+    customerName: [
+      "أحمد العلوي",
+      "فاطمة الزهراء",
+      "Youssef Alaoui",
+      "Nadia Benjelloun",
+      "خالد السعيدي",
+      "Amine Tazi",
+      "ليلى العامري",
+    ][i % 7],
+    date: new Date(new Date().setDate(new Date().getDate() - i)),
+    status: ["pending", "shipped", "delivered", "cancelled"][
+      i % 4
+    ] as Order["status"],
+    total: 50 + Math.random() * 500,
+    itemCount: 1 + Math.floor(Math.random() * 5),
+  }));
 
-const ordersData: Order[] = Array.from({ length: 25 }, (_, i) => ({
-  id: `ORD-00${i + 1}`,
-  customerName: [
-    "أحمد العلوي",
-    "فاطمة الزهراء",
-    "Youssef Alaoui",
-    "Nadia Benjelloun",
-    "خالد السعيدي",
-    "Amine Tazi",
-    "ليلى العامري",
-  ][i % 7],
-  date: new Date(new Date().setDate(new Date().getDate() - i)),
-  status: ["pending", "shipped", "delivered", "cancelled"][
-    i % 4
-  ] as Order["status"],
-  total: 50 + Math.random() * 500,
-  itemCount: 1 + Math.floor(Math.random() * 5),
-}));
-
-// --- Reusable UI Components ---
-
-interface SearchInputProps {
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder: string;
-}
-const SearchInput: React.FC<SearchInputProps> = ({
-  value,
-  onChange,
-  placeholder,
-}) => (
-  <div className="relative w-full md:w-auto">
-    <input
-      type="text"
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      className="w-full p-2.5 pr-10 rounded-lg bg-white border-neutral-200 border focus:outline-none"
-    />
-    <Search
-      size={20}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-    />
-  </div>
-);
-interface SelectInputProps {
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: { value: string; label: string }[];
-}
-const SelectInput: React.FC<SelectInputProps> = ({
-  value,
-  onChange,
-  options,
-}) => (
-  <div className="relative flex-1">
-    <select
-      value={value}
-      onChange={onChange}
-      className="appearance-none w-full p-2.5 pr-10 rounded-lg bg-white border-neutral-200 border focus:outline-none min-w-[150px]"
-    >
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
-    <ChevronDown
-      size={16}
-      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-    />
-  </div>
-);
-interface DateInputProps {
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}
-const DateInput: React.FC<DateInputProps> = ({ onChange }) => (
-  <input
-    type="date"
-    onChange={onChange}
-    className="flex-1 p-2.5 rounded-lg bg-white border-neutral-200 border focus:outline-none"
-  />
-);
-interface DataTableProps<T extends object> {
-  columns: {
-    key: keyof T;
-    label: string;
-    sortable: boolean;
-    render?: (item: T) => React.ReactNode;
-  }[];
-  data: T[];
-  renderActions?: (item: T) => React.ReactNode;
-}
-const DataTable = <T extends { id: string }>({
-  columns,
-  data,
-  renderActions,
-}: DataTableProps<T>) => {
-  const { items: sortedItems, requestSort, sortConfig } = useSortableData(data);
-  const getSortIcon = (key: keyof T) => {
-    if (!sortConfig || sortConfig.key !== key)
-      return <ChevronsUpDown size={14} className="text-gray-400" />;
-    return sortConfig.direction === "ascending" ? (
-      <ArrowUp size={14} />
-    ) : (
-      <ArrowDown size={14} />
-    );
-  };
-  return (
-    <div className="bg-white/50 rounded-lg shadow-md">
-      {/* Mobile Card View */}
-      <div className="md:hidden">
-        <div className="space-y-4 p-4">
-          {sortedItems.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-lg border border-neutral-200 p-4 space-y-3"
-            >
-              {columns.map((col) => (
-                <div
-                  key={`${item.id}-${col.key as string}`}
-                  className="flex justify-between items-start"
-                >
-                  <span className="font-semibold text-sm text-gray-600">
-                    {col.label}
-                  </span>
-                  <div className="text-left">
-                    {col.render ? col.render(item) : String(item[col.key])}
-                  </div>
-                </div>
-              ))}
-              {renderActions && (
-                <div className="flex justify-between items-center pt-3 border-t border-neutral-200">
-                  <span className="font-semibold text-sm text-gray-600">
-                    إجراءات
-                  </span>
-                  {renderActions(item)}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-right min-w-[600px]">
-          <thead className="bg-gray-50">
-            <tr>
-              {columns.map((col) => (
-                <th key={col.key as string} className="p-4">
-                  {col.sortable ? (
-                    <button
-                      onClick={() => requestSort(col.key)}
-                      className="flex items-center gap-2 font-semibold text-sm text-gray-600"
-                    >
-                      {col.label} {getSortIcon(col.key)}
-                    </button>
-                  ) : (
-                    <span className="font-semibold text-sm text-gray-600">
-                      {col.label}
-                    </span>
-                  )}
-                </th>
-              ))}
-              {renderActions && (
-                <th className="p-4 font-semibold text-sm text-gray-600">
-                  إجراءات
-                </th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {sortedItems.map((item) => (
-              <tr key={item.id} className="border-t border-neutral-200">
-                {columns.map((col) => (
-                  <td
-                    key={`${item.id}-${col.key as string}`}
-                    className="p-4 text-gray-600"
-                  >
-                    {col.render ? col.render(item) : String(item[col.key])}
-                  </td>
-                ))}
-                {renderActions && (
-                  <td className="p-4">{renderActions(item)}</td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
-// --- Page Components ---
-const Sidebar: React.FC<{
-  activePage: string;
-  setActivePage: (page: string) => void;
-  isCollapsed: boolean;
-}> = ({ activePage, setActivePage, isCollapsed }) => {
-  const navItems = [
-    { id: "dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
-    { id: "orders", label: "الطلبات", icon: ShoppingCart },
-    { id: "products", label: "المنتجات", icon: Package },
-    { id: "categories", label: "الفئات", icon: Tag },
-    { id: "sections", label: "الأقسام", icon: Layers },
-  ];
-  return (
-    <aside
-      className={`bg-white border-l border-neutral-200 rtl:border-l-0 rtl:border-r rtl:border-neutral-200 flex-col fixed inset-y-0 hidden md:flex transition-all duration-300 ${
-        isCollapsed ? "w-20" : "w-64"
-      }`}
-    >
-      <div className="flex items-center justify-center h-16 border-b border-neutral-200 px-4">
-        <a href="#" className="flex flex-col items-center leading-none">
-          <span
-            className={`font-bold text-amber-500 transition-all duration-300 ${
-              isCollapsed ? "text-2xl" : "text-3xl"
-            }`}
-            style={{ fontFamily: "'Cairo', sans-serif" }}
-          >
-            {isCollapsed ? "H" : "Huyamy"}
-          </span>
-          {!isCollapsed && (
-            <span className="text-xs text-green-800 font-semibold tracking-wider">
-              لوحة التحكم
-            </span>
-          )}
-        </a>
-      </div>
-      <nav className="flex-1 px-4 py-4">
-        <ul className="space-y-2">
-          {navItems.map((item) => (
-            <li key={item.id}>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActivePage(item.id);
-                }}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  isCollapsed ? "justify-center" : ""
-                } ${
-                  activePage === item.id
-                    ? "bg-green-100 text-green-800 font-bold"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-                title={isCollapsed ? item.label : ""}
-              >
-                <item.icon size={20} />
-                {!isCollapsed && <span>{item.label}</span>}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </aside>
-  );
-};
-const MobileSidebar: React.FC<{
-  isOpen: boolean;
-  onClose: () => void;
-  activePage: string;
-  setActivePage: (page: string) => void;
-}> = ({ isOpen, onClose, activePage, setActivePage }) => {
-  const navItems = [
-    { id: "dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
-    { id: "orders", label: "الطلبات", icon: ShoppingCart },
-    { id: "products", label: "المنتجات", icon: Package },
-    { id: "categories", label: "الفئات", icon: Tag },
-    { id: "sections", label: "الأقسام", icon: Layers },
-  ];
-  const handleLinkClick = (page: string) => {
-    setActivePage(page);
-    onClose();
-  };
-  return (
-    <Transition show={isOpen} as={Fragment}>
-      <div className="fixed inset-0 z-50 md:hidden" dir="rtl">
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
-        </Transition.Child>
-        <Transition.Child
-          as={Fragment}
-          enter="transform transition ease-in-out duration-300"
-          enterFrom="translate-x-full"
-          enterTo="translate-x-0"
-          leave="transform transition ease-in-out duration-300"
-          leaveFrom="translate-x-0"
-          leaveTo="translate-x-full"
-        >
-          <div className="relative w-64 bg-white h-full flex flex-col">
-            <div className="flex items-center justify-between h-16 border-b border-neutral-200 px-4">
-              <a href="#" className="flex flex-col items-start leading-none">
-                <span
-                  className="text-3xl font-bold text-amber-500"
-                  style={{ fontFamily: "'Cairo', sans-serif" }}
-                >
-                  Huyamy
-                </span>
-                <span className="text-xs text-green-800 font-semibold tracking-wider">
-                  لوحة التحكم
-                </span>
-              </a>
-              <button
-                onClick={onClose}
-                className="p-2 text-gray-500 rounded-full hover:bg-gray-100"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            <nav className="flex-1 px-4 py-4">
-              <ul className="space-y-2">
-                {navItems.map((item) => (
-                  <li key={item.id}>
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleLinkClick(item.id);
-                      }}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                        activePage === item.id
-                          ? "bg-green-100 text-green-800 font-bold"
-                          : "text-gray-600 hover:bg-gray-100"
-                      }`}
-                    >
-                      <item.icon size={20} />
-                      <span>{item.label}</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
-        </Transition.Child>
-      </div>
-    </Transition>
-  );
-};
-const Header: React.FC<{
-  onDesktopSidebarToggle: () => void;
-  onMobileSidebarOpen: () => void;
-}> = ({ onDesktopSidebarToggle, onMobileSidebarOpen }) => {
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  return (
-    <header className="bg-white shadow-sm border-b border-neutral-200 h-16 p-4 flex justify-between items-center sticky top-0 z-30">
-      <div className="flex items-center gap-4">
-        <button
-          onClick={onDesktopSidebarToggle}
-          className="p-2 text-gray-600 hover:bg-gray-100 rounded-full hidden md:block"
-        >
-          <MenuIcon size={24} />
-        </button>
-        <button
-          onClick={onMobileSidebarOpen}
-          className="p-2 text-gray-600 hover:bg-gray-100 rounded-full md:hidden"
-        >
-          <MenuIcon size={24} />
-        </button>
-      </div>
-      <div className="flex items-center gap-4">
-        <div className="relative">
-          <button
-            onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className="flex items-center gap-2"
-          >
-            <img
-              src="https://placehold.co/40x40/d1e4d1/166534?text=A"
-              alt="Admin"
-              className="w-10 h-10 rounded-full"
-            />
-          </button>
-          {isUserMenuOpen && (
-            <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-neutral-200 z-50">
-              <a
-                href="#"
-                className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50"
-              >
-                <LogOut size={18} />
-                <span>تسجيل الخروج</span>
-              </a>
-            </div>
-          )}
-        </div>
-      </div>
-    </header>
-  );
-};
-const OrdersPage: React.FC<{ orders: Order[]; lang: Language }> = ({
-  orders,
-  lang,
-}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
@@ -772,10 +238,136 @@ const OrdersPage: React.FC<{ orders: Order[]; lang: Language }> = ({
     </div>
   );
 };
-const ProductsPage: React.FC<{ products: Product[]; lang: Language }> = ({
-  products,
-  lang,
-}) => {
+const ProductsPage: React.FC<{ lang: Language }> = ({ lang }) => {
+  const categoriesData: Category[] = [
+    {
+      id: "cat-1",
+      name: { ar: "العناية بالبشرة", fr: "Soins de la peau" },
+      description: {
+        ar: "كل ما تحتاجينه لبشرة نضرة وصحية.",
+        fr: "Tout ce dont vous avez besoin pour une peau fraîche et saine.",
+      },
+      image: "https://placehold.co/200x200/f3e0e6/ffffff?text=بشرة",
+    },
+    {
+      id: "cat-2",
+      name: { ar: "العناية بالشعر", fr: "Soins des cheveux" },
+      description: {
+        ar: "منتجات طبيعية لتقوية وتغذية شعرك.",
+        fr: "Produits naturels pour renforcer et nourrir vos cheveux.",
+      },
+      image: "https://placehold.co/200x200/f0e6d3/ffffff?text=شعر",
+    },
+  ];
+  const products: Product[] = [
+    {
+      id: "prod-1",
+      name: { ar: "كريم مرطب بالصبار", fr: "Crème hydratante à l'aloe vera" },
+      slug: "كريم-مرطب-بالصبار",
+      price: 85.0,
+      originalPrice: 120.0,
+      image: "https://placehold.co/400x400/d1e4d1/ffffff?text=منتج+1",
+      isNew: true,
+      description: {
+        ar: "كريم غني بخلاصة الصبار الطبيعي لترطيب عميق وتهدئة البشرة الحساسة.",
+        fr: "Crème riche en extrait naturel d'aloe vera pour une hydratation profonde.",
+      },
+      category: categoriesData[0],
+      subImages: [],
+      keywords: ["كريم", "صبار", "ترطيب"],
+    },
+    {
+      id: "prod-2",
+      name: { ar: "زيت الأرغان الأصلي", fr: "Huile d'argan authentique" },
+      slug: "زيت-الأرغان-الأصلي",
+      price: 150.0,
+      image: "https://placehold.co/400x400/e4d8c8/ffffff?text=منتج+2",
+      isNew: false,
+      description: {
+        ar: "زيت الأرغان المغربي النقي 100% لتغذية الشعر والبشرة والأظافر.",
+        fr: "Huile d'argan marocaine 100% pure pour nourrir les cheveux, la peau et les ongles.",
+      },
+      category: categoriesData[1],
+      subImages: [],
+      keywords: ["زيت", "أرغان", "شعر", "بشرة"],
+    },
+    {
+      id: "prod-3",
+      name: { ar: "شامبو ضد القشرة", fr: "Shampooing anti-pelliculaire" },
+      slug: "شامبو-ضد-القشرة",
+      price: 95.0,
+      image: "https://placehold.co/400x400/cce0ff/ffffff?text=منتج+3",
+      isNew: false,
+      description: {
+        ar: "شامبو فعال للقضاء على القشرة وتهدئة فروة الرأس.",
+        fr: "Shampooing efficace pour éliminer les pellicules et apaiser le cuir chevelu.",
+      },
+      category: categoriesData[1],
+      subImages: [],
+      keywords: ["شامبو", "قشرة", "شعر"],
+    },
+    {
+      id: "prod-4",
+      name: { ar: "واقي شمسي SPF 50", fr: "Écran solaire SPF 50" },
+      slug: "واقي-شمسي-spf-50",
+      price: 130.0,
+      image: "https://placehold.co/400x400/fff0b3/ffffff?text=منتج+4",
+      isNew: true,
+      description: {
+        ar: "حماية عالية من أشعة الشمس الضارة مع تركيبة خفيفة وغير دهنية.",
+        fr: "Haute protection contre les rayons UV nocifs avec une formule légère et non grasse.",
+      },
+      category: categoriesData[0],
+      subImages: [],
+      keywords: ["واقي شمسي", "حماية", "بشرة"],
+    },
+    {
+      id: "prod-5",
+      name: { ar: "مقشر الجسم بالقهوة", fr: "Gommage corps au café" },
+      slug: "مقشر-الجسم-بالقهوة",
+      price: 110.0,
+      image: "https://placehold.co/400x400/d4bca2/ffffff?text=منتج+5",
+      isNew: false,
+      description: {
+        ar: "مقشر طبيعي لتنشيط الدورة الدموية وإزالة الجلد الميت.",
+        fr: "Gommage naturel pour stimuler la circulation et éliminer les peaux mortes.",
+      },
+      category: categoriesData[0],
+      subImages: [],
+      keywords: ["مقشر", "قهوة", "جسم"],
+    },
+    {
+      id: "prod-6",
+      name: { ar: "بلسم مرطب للشعر", fr: "Après-shampooing hydratant" },
+      slug: "بلسم-مرطب-للشعر",
+      price: 90.0,
+      image: "https://placehold.co/400x400/e0d1e4/ffffff?text=منتج+6",
+      isNew: false,
+      description: {
+        ar: "بلسم لفك تشابك الشعر وتغذيته بعمق.",
+        fr: "Après-shampooing pour démêler et nourrir les cheveux en profondeur.",
+      },
+      category: categoriesData[1],
+      subImages: [],
+      keywords: ["بلسم", "شعر", "ترطيب"],
+    },
+    {
+      id: "prod-7",
+      name: { ar: "سيروم فيتامين سي", fr: "Sérum à la vitamine C" },
+      slug: "سيروم-فيتامين-سي",
+      price: 180.0,
+      image: "https://placehold.co/400x400/ffe5b4/ffffff?text=منتج+7",
+      isNew: true,
+      description: {
+        ar: "سيروم لتفتيح البشرة ومحاربة علامات التقدم في السن.",
+        fr: "Sérum pour éclaircir le teint et combattre les signes de l'âge.",
+      },
+      category: categoriesData[0],
+      subImages: [],
+      keywords: ["سيروم", "فيتامين سي", "بشرة"],
+    },
+  ];
+
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 5;
@@ -881,10 +473,28 @@ const ProductsPage: React.FC<{ products: Product[]; lang: Language }> = ({
     </div>
   );
 };
-const CategoriesPage: React.FC<{ categories: Category[]; lang: Language }> = ({
-  categories,
-  lang,
-}) => {
+const CategoriesPage: React.FC<{ lang: Language }> = ({ lang }) => {
+  const categories: Category[] = [
+    {
+      id: "cat-1",
+      name: { ar: "العناية بالبشرة", fr: "Soins de la peau" },
+      description: {
+        ar: "كل ما تحتاجينه لبشرة نضرة وصحية.",
+        fr: "Tout ce dont vous avez besoin pour une peau fraîche et saine.",
+      },
+      image: "https://placehold.co/200x200/f3e0e6/ffffff?text=بشرة",
+    },
+    {
+      id: "cat-2",
+      name: { ar: "العناية بالشعر", fr: "Soins des cheveux" },
+      description: {
+        ar: "منتجات طبيعية لتقوية وتغذية شعرك.",
+        fr: "Produits naturels pour renforcer et nourrir vos cheveux.",
+      },
+      image: "https://placehold.co/200x200/f0e6d3/ffffff?text=شعر",
+    },
+  ];
+
   const columns: {
     key: keyof Category;
     label: string;
@@ -929,7 +539,7 @@ const CategoriesPage: React.FC<{ categories: Category[]; lang: Language }> = ({
       </div>
       <DataTable
         columns={columns}
-        data={categoriesData}
+        data={categories}
         renderActions={() => (
           <div className="flex gap-2">
             <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-md">
@@ -944,10 +554,34 @@ const CategoriesPage: React.FC<{ categories: Category[]; lang: Language }> = ({
     </div>
   );
 };
-const SectionsPage: React.FC<{ sections: Section[]; lang: Language }> = ({
-  sections,
-  lang,
-}) => {
+const SectionsPage: React.FC<{ lang: Language }> = ({ lang }) => {
+  const sections: Section[] = [
+    {
+      id: "landing-popular",
+      type: "landing-page",
+      title: { ar: "الأكثر مبيعاً", fr: "Les plus vendus" },
+      subtitle: {
+        ar: "المنتجات التي يحبها عملاؤنا أكثر",
+        fr: "Les produits que nos clients préfèrent",
+      },
+      ctaProductIds: ["prod-3", "prod-6", "prod-7", "prod-5"],
+      createdAt: new Date("2025-10-02T20:50:11Z"),
+      updatedAt: new Date("2025-10-02T20:50:11Z"),
+    },
+    {
+      id: "landing-new",
+      type: "landing-page",
+      title: { ar: "وصل حديثاً", fr: "Nouveautés" },
+      subtitle: {
+        ar: "اكتشف أحدث إضافاتنا إلى المجموعة",
+        fr: "Découvrez nos dernières additions à la collection",
+      },
+      ctaProductIds: ["prod-1", "prod-4", "prod-9"],
+      createdAt: new Date("2025-10-01T10:00:00Z"),
+      updatedAt: new Date("2025-10-01T10:00:00Z"),
+    },
+  ];
+
   const columns: {
     key: keyof Section;
     label: string;
@@ -991,7 +625,7 @@ const SectionsPage: React.FC<{ sections: Section[]; lang: Language }> = ({
       </div>
       <DataTable
         columns={columns}
-        data={sectionsData}
+        data={sections}
         renderActions={() => (
           <div className="flex gap-2">
             <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-md">
@@ -1015,20 +649,20 @@ const DashboardPage: React.FC = () => (
 // --- Main Admin Panel Component ---
 export default function AdminPanel() {
   const [activePage, setActivePage] = useState("orders");
-  const [lang, setLang] = useState<Language>("ar");
+  const [lang] = useState<Language>("ar");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const renderPage = () => {
     switch (activePage) {
       case "products":
-        return <ProductsPage products={productsData} lang={lang} />;
+        return <ProductsPage lang={lang} />;
       case "categories":
-        return <CategoriesPage categories={categoriesData} lang={lang} />;
+        return <CategoriesPage lang={lang} />;
       case "sections":
-        return <SectionsPage sections={sectionsData} lang={lang} />;
+        return <SectionsPage lang={lang} />;
       case "orders":
-        return <OrdersPage orders={ordersData} lang={lang} />;
+        return <OrdersPage lang={lang} />;
       default:
         return <DashboardPage />;
     }
