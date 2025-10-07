@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, Fragment, useEffect, useMemo } from "react";
+import React, { useState, Fragment, useMemo } from "react";
 import {
   LayoutDashboard,
   Package,
@@ -26,30 +26,12 @@ import {
 } from "lucide-react";
 import { Transition } from "@headlessui/react";
 import { X } from "lucide-react";
+import { Category, Language, LocalizedString, Product } from "@/types";
+import useSortableData from "@/hooks/useSortableData";
+import Pagination from "@/components/admin/Pagination";
 
 // --- Type Definitions ---
-type LocalizedString = { ar: string; fr: string };
-type Language = "ar" | "fr";
-type Theme = "light" | "dark";
-type Category = {
-  id: string;
-  name: LocalizedString;
-  description: LocalizedString;
-  image: string;
-};
-type Product = {
-  id: string;
-  name: LocalizedString;
-  slug: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  isNew: boolean;
-  description: LocalizedString;
-  category: Category;
-  subImages: string[];
-  keywords: string[];
-};
+
 type Section = {
   id: string;
   type: string;
@@ -121,6 +103,81 @@ const productsData: Product[] = [
     subImages: [],
     keywords: ["زيت", "أرغان", "شعر", "بشرة"],
   },
+  {
+    id: "prod-3",
+    name: { ar: "شامبو ضد القشرة", fr: "Shampooing anti-pelliculaire" },
+    slug: "شامبو-ضد-القشرة",
+    price: 95.0,
+    image: "https://placehold.co/400x400/cce0ff/ffffff?text=منتج+3",
+    isNew: false,
+    description: {
+      ar: "شامبو فعال للقضاء على القشرة وتهدئة فروة الرأس.",
+      fr: "Shampooing efficace pour éliminer les pellicules et apaiser le cuir chevelu.",
+    },
+    category: categoriesData[1],
+    subImages: [],
+    keywords: ["شامبو", "قشرة", "شعر"],
+  },
+  {
+    id: "prod-4",
+    name: { ar: "واقي شمسي SPF 50", fr: "Écran solaire SPF 50" },
+    slug: "واقي-شمسي-spf-50",
+    price: 130.0,
+    image: "https://placehold.co/400x400/fff0b3/ffffff?text=منتج+4",
+    isNew: true,
+    description: {
+      ar: "حماية عالية من أشعة الشمس الضارة مع تركيبة خفيفة وغير دهنية.",
+      fr: "Haute protection contre les rayons UV nocifs avec une formule légère et non grasse.",
+    },
+    category: categoriesData[0],
+    subImages: [],
+    keywords: ["واقي شمسي", "حماية", "بشرة"],
+  },
+  {
+    id: "prod-5",
+    name: { ar: "مقشر الجسم بالقهوة", fr: "Gommage corps au café" },
+    slug: "مقشر-الجسم-بالقهوة",
+    price: 110.0,
+    image: "https://placehold.co/400x400/d4bca2/ffffff?text=منتج+5",
+    isNew: false,
+    description: {
+      ar: "مقشر طبيعي لتنشيط الدورة الدموية وإزالة الجلد الميت.",
+      fr: "Gommage naturel pour stimuler la circulation et éliminer les peaux mortes.",
+    },
+    category: categoriesData[0],
+    subImages: [],
+    keywords: ["مقشر", "قهوة", "جسم"],
+  },
+  {
+    id: "prod-6",
+    name: { ar: "بلسم مرطب للشعر", fr: "Après-shampooing hydratant" },
+    slug: "بلسم-مرطب-للشعر",
+    price: 90.0,
+    image: "https://placehold.co/400x400/e0d1e4/ffffff?text=منتج+6",
+    isNew: false,
+    description: {
+      ar: "بلسم لفك تشابك الشعر وتغذيته بعمق.",
+      fr: "Après-shampooing pour démêler et nourrir les cheveux en profondeur.",
+    },
+    category: categoriesData[1],
+    subImages: [],
+    keywords: ["بلسم", "شعر", "ترطيب"],
+  },
+  {
+    id: "prod-7",
+    name: { ar: "سيروم فيتامين سي", fr: "Sérum à la vitamine C" },
+    slug: "سيروم-فيتامين-سي",
+    price: 180.0,
+    image: "https://placehold.co/400x400/ffe5b4/ffffff?text=منتج+7",
+    isNew: true,
+    description: {
+      ar: "سيروم لتفتيح البشرة ومحاربة علامات التقدم في السن.",
+      fr: "Sérum pour éclaircir le teint et combattre les signes de l'âge.",
+    },
+    category: categoriesData[0],
+    subImages: [],
+    keywords: ["سيروم", "فيتامين سي", "بشرة"],
+  },
 ];
 const sectionsData: Section[] = [
   {
@@ -148,6 +205,7 @@ const sectionsData: Section[] = [
     updatedAt: new Date("2025-10-01T10:00:00Z"),
   },
 ];
+
 const ordersData: Order[] = Array.from({ length: 25 }, (_, i) => ({
   id: `ORD-00${i + 1}`,
   customerName: [
@@ -167,109 +225,8 @@ const ordersData: Order[] = Array.from({ length: 25 }, (_, i) => ({
   itemCount: 1 + Math.floor(Math.random() * 5),
 }));
 
-// --- Helper Hooks ---
-const useSortableData = <T extends object>(
-  items: T[],
-  config: { key: keyof T; direction: "ascending" | "descending" } | null = null
-) => {
-  const [sortConfig, setSortConfig] = useState(config);
-  const sortedItems = useMemo(() => {
-    let sortableItems = [...items];
-    if (sortConfig !== null) {
-      sortableItems.sort((a, b) => {
-        const aVal = a[sortConfig.key];
-        const bVal = b[sortConfig.key];
-        if (aVal < bVal) {
-          return sortConfig.direction === "ascending" ? -1 : 1;
-        }
-        if (aVal > bVal) {
-          return sortConfig.direction === "ascending" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableItems;
-  }, [items, sortConfig]);
-  const requestSort = (key: keyof T) => {
-    let direction: "ascending" | "descending" = "ascending";
-    if (
-      sortConfig &&
-      sortConfig.key === key &&
-      sortConfig.direction === "ascending"
-    ) {
-      direction = "descending";
-    }
-    setSortConfig({ key, direction });
-  };
-  return { items: sortedItems, requestSort, sortConfig };
-};
-
 // --- Reusable UI Components ---
-const Pagination: React.FC<{
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-}> = ({ currentPage, totalPages, onPageChange }) => {
-  if (totalPages <= 1) return null;
-  const paginationRange = useMemo(() => {
-    const delta = 1;
-    const range: (number | string)[] = [];
-    for (
-      let i = Math.max(2, currentPage - delta);
-      i <= Math.min(totalPages - 1, currentPage + delta);
-      i++
-    ) {
-      range.push(i);
-    }
-    if (currentPage - delta > 2) {
-      range.unshift("...");
-    }
-    if (currentPage + delta < totalPages - 1) {
-      range.push("...");
-    }
-    range.unshift(1);
-    if (totalPages > 1) range.push(totalPages);
-    return range;
-  }, [currentPage, totalPages]);
-  return (
-    <div className="flex justify-center items-center gap-1 mt-6">
-      <button
-        onClick={() => onPageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="p-2 disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-200 rounded-full"
-      >
-        <ChevronRight size={20} />
-      </button>
-      {paginationRange.map((page, index) => {
-        if (typeof page === "string") {
-          return (
-            <span key={`${page}-${index}`} className="px-2 py-2 text-sm">
-              ...
-            </span>
-          );
-        }
-        return (
-          <button
-            key={page}
-            onClick={() => onPageChange(page)}
-            className={`w-10 h-10 rounded-full text-sm font-medium ${
-              currentPage === page ? "bg-green-700 text-white" : "bg-gray-200"
-            }`}
-          >
-            {page}
-          </button>
-        );
-      })}
-      <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="p-2 disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:bg-gray-200 rounded-full"
-      >
-        <ChevronLeft size={20} />
-      </button>
-    </div>
-  );
-};
+
 interface SearchInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -338,7 +295,7 @@ interface DataTableProps<T extends object> {
     label: string;
     sortable: boolean;
     render?: (item: T) => React.ReactNode;
-  };
+  }[];
   data: T[];
   renderActions?: (item: T) => React.ReactNode;
 }
@@ -358,49 +315,88 @@ const DataTable = <T extends { id: string }>({
     );
   };
   return (
-    <div className="bg-white/50 rounded-lg shadow-md overflow-x-auto">
-      <table className="w-full text-right min-w-[600px]">
-        <thead className="bg-gray-50">
-          <tr>
-            {columns.map((col) => (
-              <th key={col.key as string} className="p-4">
-                {col.sortable ? (
-                  <button
-                    onClick={() => requestSort(col.key)}
-                    className="flex items-center gap-2 font-semibold text-sm text-gray-600"
-                  >
-                    {col.label} {getSortIcon(col.key)}
-                  </button>
-                ) : (
+    <div className="bg-white/50 rounded-lg shadow-md">
+      {/* Mobile Card View */}
+      <div className="md:hidden">
+        <div className="space-y-4 p-4">
+          {sortedItems.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white rounded-lg border border-neutral-200 p-4 space-y-3"
+            >
+              {columns.map((col) => (
+                <div
+                  key={`${item.id}-${col.key as string}`}
+                  className="flex justify-between items-start"
+                >
                   <span className="font-semibold text-sm text-gray-600">
                     {col.label}
                   </span>
-                )}
-              </th>
-            ))}
-            {renderActions && (
-              <th className="p-4 font-semibold text-sm text-gray-600">
-                إجراءات
-              </th>
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {sortedItems.map((item) => (
-            <tr key={item.id} className="border-t border-neutral-200">
-              {columns.map((col) => (
-                <td
-                  key={`${item.id}-${col.key as string}`}
-                  className="p-4 text-gray-600"
-                >
-                  {col.render ? col.render(item) : String(item[col.key])}
-                </td>
+                  <div className="text-left">
+                    {col.render ? col.render(item) : String(item[col.key])}
+                  </div>
+                </div>
               ))}
-              {renderActions && <td className="p-4">{renderActions(item)}</td>}
-            </tr>
+              {renderActions && (
+                <div className="flex justify-between items-center pt-3 border-t border-neutral-200">
+                  <span className="font-semibold text-sm text-gray-600">
+                    إجراءات
+                  </span>
+                  {renderActions(item)}
+                </div>
+              )}
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full text-right min-w-[600px]">
+          <thead className="bg-gray-50">
+            <tr>
+              {columns.map((col) => (
+                <th key={col.key as string} className="p-4">
+                  {col.sortable ? (
+                    <button
+                      onClick={() => requestSort(col.key)}
+                      className="flex items-center gap-2 font-semibold text-sm text-gray-600"
+                    >
+                      {col.label} {getSortIcon(col.key)}
+                    </button>
+                  ) : (
+                    <span className="font-semibold text-sm text-gray-600">
+                      {col.label}
+                    </span>
+                  )}
+                </th>
+              ))}
+              {renderActions && (
+                <th className="p-4 font-semibold text-sm text-gray-600">
+                  إجراءات
+                </th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {sortedItems.map((item) => (
+              <tr key={item.id} className="border-t border-neutral-200">
+                {columns.map((col) => (
+                  <td
+                    key={`${item.id}-${col.key as string}`}
+                    className="p-4 text-gray-600"
+                  >
+                    {col.render ? col.render(item) : String(item[col.key])}
+                  </td>
+                ))}
+                {renderActions && (
+                  <td className="p-4">{renderActions(item)}</td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
@@ -780,6 +776,28 @@ const ProductsPage: React.FC<{ products: Product[]; lang: Language }> = ({
   products,
   lang,
 }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const itemsPerPage = 5;
+
+  const filteredProducts = useMemo(() => {
+    if (!searchTerm) return products;
+    const lowercasedFilter = searchTerm.toLowerCase();
+    return products.filter(
+      (product) =>
+        product.name.ar.toLowerCase().includes(lowercasedFilter) ||
+        product.name.fr.toLowerCase().includes(lowercasedFilter)
+    );
+  }, [products, searchTerm]);
+
+  const { items: sortedProducts } = useSortableData(filteredProducts);
+
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+  const paginatedProducts = sortedProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const columns: {
     key: keyof Product;
     label: string;
@@ -819,22 +837,28 @@ const ProductsPage: React.FC<{ products: Product[]; lang: Language }> = ({
   return (
     <div>
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">إدارة المنتجات</h1>
-        <div className="flex items-center gap-4 w-full md:w-auto">
+        <h1 className="text-3xl font-bold text-gray-800 self-start md:self-center">
+          إدارة المنتجات
+        </h1>
+        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <SearchInput
-            value=""
-            onChange={() => {}}
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="...ابحث عن منتج"
           />
-          <button className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors">
+          <button className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors w-full md:w-auto justify-center">
             <PlusCircle size={20} />
             <span className="hidden sm:inline">منتج جديد</span>
+            <span className="sm:hidden">إضافة</span>
           </button>
         </div>
       </div>
       <DataTable
         columns={columns}
-        data={productsData}
+        data={paginatedProducts}
         renderActions={() => (
           <div className="flex gap-2">
             <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-md">
@@ -848,6 +872,11 @@ const ProductsPage: React.FC<{ products: Product[]; lang: Language }> = ({
             </button>
           </div>
         )}
+      />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
       />
     </div>
   );
@@ -892,9 +921,10 @@ const CategoriesPage: React.FC<{ categories: Category[]; lang: Language }> = ({
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">إدارة الفئات</h1>
-        <button className="bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors">
+        <button className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors">
           <PlusCircle size={20} />
-          <span>فئة جديدة</span>
+          <span className="hidden sm:inline">فئة جديدة</span>
+          <span className="sm:hidden">إضافة</span>
         </button>
       </div>
       <DataTable
@@ -953,9 +983,10 @@ const SectionsPage: React.FC<{ sections: Section[]; lang: Language }> = ({
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">إدارة الأقسام</h1>
-        <button className="bg-green-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors">
+        <button className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors">
           <PlusCircle size={20} />
-          <span>قسم جديد</span>
+          <span className="hidden sm:inline">قسم جديد</span>
+          <span className="sm:hidden">إضافة</span>
         </button>
       </div>
       <DataTable
@@ -1031,7 +1062,7 @@ export default function AdminPanel() {
             }
             onMobileSidebarOpen={() => setIsMobileMenuOpen(true)}
           />
-          <main className="flex-1 p-6 overflow-y-auto pt-20">
+          <main className="flex-1 p-4 md:p-6 overflow-y-auto pt-20">
             {renderPage()}
           </main>
         </div>
