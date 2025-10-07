@@ -7,20 +7,57 @@ import {
   Tag,
   X,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Fragment } from "react";
 
 const Sidebar: React.FC<{
-  activePage: string;
-  setActivePage: (page: string) => void;
   isCollapsed: boolean;
-}> = ({ activePage, setActivePage, isCollapsed }) => {
+}> = ({ isCollapsed }) => {
+  const pathname = usePathname();
+  const baseAdminPath = pathname.split("/").slice(0, 3).join("/");
+
   const navItems = [
-    { id: "dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
-    { id: "orders", label: "الطلبات", icon: ShoppingCart },
-    { id: "products", label: "المنتجات", icon: Package },
-    { id: "categories", label: "الفئات", icon: Tag },
-    { id: "sections", label: "الأقسام", icon: Layers },
+    {
+      id: "dashboard",
+      label: "لوحة التحكم",
+      icon: LayoutDashboard,
+      href: `${baseAdminPath}/dashboard`,
+    },
+    {
+      id: "orders",
+      label: "الطلبات",
+      icon: ShoppingCart,
+      href: `${baseAdminPath}/orders`,
+    },
+    {
+      id: "products",
+      label: "المنتجات",
+      icon: Package,
+      href: `${baseAdminPath}/products`,
+    },
+    {
+      id: "categories",
+      label: "الفئات",
+      icon: Tag,
+      href: `${baseAdminPath}/categories`,
+    },
+    {
+      id: "sections",
+      label: "الأقسام",
+      icon: Layers,
+      href: `${baseAdminPath}/sections`,
+    },
   ];
+
+  const isActive = (href: string) => {
+    // Handle the base case for /admin which we can treat as /admin/orders
+    if (href.endsWith("/orders") && pathname === baseAdminPath) {
+      return true;
+    }
+    return pathname.startsWith(href);
+  };
+
   return (
     <aside
       className={`bg-white border-l border-neutral-200 rtl:border-l-0 rtl:border-r rtl:border-neutral-200 flex-col fixed inset-y-0 hidden md:flex transition-all duration-300 ${
@@ -28,7 +65,10 @@ const Sidebar: React.FC<{
       }`}
     >
       <div className="flex items-center justify-center h-16 border-b border-neutral-200 px-4">
-        <a href="#" className="flex flex-col items-center leading-none">
+        <Link
+          href={baseAdminPath}
+          className="flex flex-col items-center leading-none"
+        >
           <span
             className={`font-bold text-amber-500 transition-all duration-300 ${
               isCollapsed ? "text-2xl" : "text-3xl"
@@ -42,22 +82,18 @@ const Sidebar: React.FC<{
               لوحة التحكم
             </span>
           )}
-        </a>
+        </Link>
       </div>
       <nav className="flex-1 px-4 py-4">
         <ul className="space-y-2">
           {navItems.map((item) => (
             <li key={item.id}>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setActivePage(item.id);
-                }}
+              <Link
+                href={item.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   isCollapsed ? "justify-center" : ""
                 } ${
-                  activePage === item.id
+                  isActive(item.href)
                     ? "bg-green-100 text-green-800 font-bold"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
@@ -65,7 +101,7 @@ const Sidebar: React.FC<{
               >
                 <item.icon size={20} />
                 {!isCollapsed && <span>{item.label}</span>}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
@@ -73,23 +109,54 @@ const Sidebar: React.FC<{
     </aside>
   );
 };
+
 const MobileSidebar: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  activePage: string;
-  setActivePage: (page: string) => void;
-}> = ({ isOpen, onClose, activePage, setActivePage }) => {
+}> = ({ isOpen, onClose }) => {
+  const pathname = usePathname();
+  const baseAdminPath = pathname.split("/").slice(0, 3).join("/");
+
   const navItems = [
-    { id: "dashboard", label: "لوحة التحكم", icon: LayoutDashboard },
-    { id: "orders", label: "الطلبات", icon: ShoppingCart },
-    { id: "products", label: "المنتجات", icon: Package },
-    { id: "categories", label: "الفئات", icon: Tag },
-    { id: "sections", label: "الأقسام", icon: Layers },
+    {
+      id: "dashboard",
+      label: "لوحة التحكم",
+      icon: LayoutDashboard,
+      href: `${baseAdminPath}/dashboard`,
+    },
+    {
+      id: "orders",
+      label: "الطلبات",
+      icon: ShoppingCart,
+      href: `${baseAdminPath}/orders`,
+    },
+    {
+      id: "products",
+      label: "المنتجات",
+      icon: Package,
+      href: `${baseAdminPath}/products`,
+    },
+    {
+      id: "categories",
+      label: "الفئات",
+      icon: Tag,
+      href: `${baseAdminPath}/categories`,
+    },
+    {
+      id: "sections",
+      label: "الأقسام",
+      icon: Layers,
+      href: `${baseAdminPath}/sections`,
+    },
   ];
-  const handleLinkClick = (page: string) => {
-    setActivePage(page);
-    onClose();
+
+  const isActive = (href: string) => {
+    if (href.endsWith("/orders") && pathname === baseAdminPath) {
+      return true;
+    }
+    return pathname.startsWith(href);
   };
+
   return (
     <Transition show={isOpen} as={Fragment}>
       <div className="fixed inset-0 z-50 md:hidden" dir="rtl">
@@ -115,7 +182,10 @@ const MobileSidebar: React.FC<{
         >
           <div className="relative w-64 bg-white h-full flex flex-col">
             <div className="flex items-center justify-between h-16 border-b border-neutral-200 px-4">
-              <a href="#" className="flex flex-col items-start leading-none">
+              <Link
+                href={baseAdminPath}
+                className="flex flex-col items-start leading-none"
+              >
                 <span
                   className="text-3xl font-bold text-amber-500"
                   style={{ fontFamily: "'Cairo', sans-serif" }}
@@ -125,7 +195,7 @@ const MobileSidebar: React.FC<{
                 <span className="text-xs text-green-800 font-semibold tracking-wider">
                   لوحة التحكم
                 </span>
-              </a>
+              </Link>
               <button
                 onClick={onClose}
                 className="p-2 text-gray-500 rounded-full hover:bg-gray-100"
@@ -137,21 +207,18 @@ const MobileSidebar: React.FC<{
               <ul className="space-y-2">
                 {navItems.map((item) => (
                   <li key={item.id}>
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleLinkClick(item.id);
-                      }}
+                    <Link
+                      href={item.href}
+                      onClick={onClose}
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                        activePage === item.id
+                        isActive(item.href)
                           ? "bg-green-100 text-green-800 font-bold"
                           : "text-gray-600 hover:bg-gray-100"
                       }`}
                     >
                       <item.icon size={20} />
                       <span>{item.label}</span>
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
