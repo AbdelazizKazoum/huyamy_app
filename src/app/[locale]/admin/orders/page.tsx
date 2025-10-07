@@ -4,8 +4,18 @@ import DataTable from "@/components/admin/DataTable";
 import Pagination from "@/components/admin/Pagination";
 import SearchInput from "@/components/admin/ui/SearchInput";
 import useSortableData from "@/hooks/useSortableData";
-import { Edit, Eye } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Language } from "@/types";
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronsUpDown,
+  Edit,
+  Eye,
+  MoreHorizontal,
+  Trash2,
+} from "lucide-react";
+import { useParams } from "next/navigation";
+import { useMemo, useState, useEffect } from "react";
 
 type Order = {
   id: string;
@@ -17,62 +27,60 @@ type Order = {
 };
 
 const OrdersPage: React.FC = () => {
-  const orders: Order[] = Array.from({ length: 25 }, (_, i) => ({
-    id: `ORD-00${i + 1}`,
-    customerName: [
-      "أحمد العلوي",
-      "فاطمة الزهراء",
-      "Youssef Alaoui",
-      "Nadia Benjelloun",
-      "خالد السعيدي",
-      "Amine Tazi",
-      "ليلى العامري",
-    ][i % 7],
-    date: new Date(new Date().setDate(new Date().getDate() - i)),
-    status: ["pending", "shipped", "delivered", "cancelled"][
-      i % 4
-    ] as Order["status"],
-    total: 50 + Math.random() * 500,
-    itemCount: 1 + Math.floor(Math.random() * 5),
-  }));
+  const params = useParams();
+  const lang = params.locale as Language;
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    const generatedOrders: Order[] = Array.from({ length: 25 }, (_, i) => ({
+      id: `ORD-00${i + 1}`,
+      customerName: [
+        "أحمد العلوي",
+        "فاطمة الزهراء",
+        "Youssef Alaoui",
+        "Nadia Benjelloun",
+        "خالد السعيدي",
+        "Amine Tazi",
+        "ليلى العامري",
+      ][i % 7],
+      date: new Date(new Date().setDate(new Date().getDate() - i)),
+      status: ["pending", "shipped", "delivered", "cancelled"][
+        i % 4
+      ] as Order["status"],
+      total: 50 + Math.random() * 500,
+      itemCount: 1 + Math.floor(Math.random() * 5),
+    }));
+    setOrders(generatedOrders);
+  }, []);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<Order["status"] | "all">(
+    "all"
+  );
   const itemsPerPage = 5;
+
   const filteredOrders = useMemo(
     () =>
       orders.filter((order) => {
-        const matchesSearch = order.customerName
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-        if (!dateFilter) return matchesSearch;
-        const orderDate = new Date(order.date);
-        orderDate.setHours(0, 0, 0, 0);
-        if (dateFilter === "today") {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          return matchesSearch && orderDate.getTime() === today.getTime();
-        }
-        if (dateFilter === "this_week") {
-          const today = new Date();
-          const firstDayOfWeek = new Date(
-            today.setDate(
-              today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)
-            )
-          );
-          firstDayOfWeek.setHours(0, 0, 0, 0);
-          return matchesSearch && orderDate >= firstDayOfWeek;
-        }
-        if (dateFilter.includes("-")) {
-          const filterDate = new Date(dateFilter);
-          filterDate.setHours(0, 0, 0, 0);
-          return matchesSearch && orderDate.getTime() === filterDate.getTime();
-        }
-        return matchesSearch;
+        const matchesSearch =
+          !searchTerm ||
+          order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.id.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const matchesDate =
+          !dateFilter ||
+          order.date.toISOString().split("T")[0].includes(dateFilter);
+
+        const matchesStatus =
+          statusFilter === "all" || order.status === statusFilter;
+
+        return matchesSearch && matchesDate && matchesStatus;
       }),
-    [orders, searchTerm, dateFilter]
+    [orders, searchTerm, dateFilter, statusFilter]
   );
+
   const {
     items: sortedOrders,
     requestSort,
@@ -81,11 +89,13 @@ const OrdersPage: React.FC = () => {
     key: "date",
     direction: "descending",
   });
+
   const totalPages = Math.ceil(sortedOrders.length / itemsPerPage);
   const paginatedOrders = sortedOrders.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
   const getStatusChip = (status: Order["status"]) => {
     switch (status) {
       case "pending":
@@ -114,6 +124,7 @@ const OrdersPage: React.FC = () => {
         );
     }
   };
+
   const columns: {
     key: keyof Order;
     label: string;
@@ -155,32 +166,84 @@ const OrdersPage: React.FC = () => {
       ),
     },
   ];
+  const statusOptions: { id: Order["status"] | "all"; label: string }[] = [
+    { id: "all", label: "الكل" },
+    { id: "pending", label: "قيد الانتظار" },
+    { id: "shipped", label: "تم الشحن" },
+    { id: "delivered", label: "تم التوصيل" },
+    { id: "cancelled", label: "ملغي" },
+  ];
   return (
     <div>
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold text-gray-800 self-start md:self-center">
           إدارة الطلبات
         </h1>
-        <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
+        <div className="flex items-center gap-4 w-full md:w-auto">
           <SearchInput
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="...ابحث بالاسم"
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="...ابحث بالاسم أو رقم الطلب"
           />
-          <div className="flex gap-2 w-full md:w-auto">
-            {/* <SelectInput
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              options={[
-                { value: "", label: "كل الأوقات" },
-                { value: "today", label: "اليوم" },
-                { value: "this_week", label: "هذا الأسبوع" },
-              ]}
-            />
-            <DateInput onChange={(e) => setDateFilter(e.target.value)} /> */}
-          </div>
         </div>
       </div>
+
+      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="font-semibold text-gray-700 whitespace-nowrap">
+            تصفية حسب:
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {statusOptions.map((status) => (
+              <button
+                key={status.id}
+                onClick={() => {
+                  setStatusFilter(status.id);
+                  setCurrentPage(1);
+                }}
+                className={`px-3 py-1.5 text-sm font-semibold rounded-full transition-all duration-200 ${
+                  statusFilter === status.id
+                    ? "bg-green-700 text-white shadow-md"
+                    : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                }`}
+              >
+                {status.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            id="date-filter"
+            type="date"
+            value={dateFilter}
+            onChange={(e) => {
+              setDateFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-40 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 text-sm"
+          />
+          <button
+            onClick={() => {
+              const today = new Date().toISOString().split("T")[0];
+              setDateFilter(dateFilter === today ? "" : today);
+              setCurrentPage(1);
+            }}
+            className={`px-4 py-2 font-semibold rounded-lg transition-colors text-sm ${
+              dateFilter === new Date().toISOString().split("T")[0]
+                ? "bg-green-700 text-white"
+                : "bg-white text-gray-700 border hover:bg-gray-100"
+            }`}
+          >
+            اليوم
+          </button>
+        </div>
+      </div>
+
       <DataTable
         columns={columns}
         data={paginatedOrders}

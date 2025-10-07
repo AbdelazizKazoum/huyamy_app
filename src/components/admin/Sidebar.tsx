@@ -22,7 +22,7 @@ const Sidebar: React.FC<{
       id: "dashboard",
       label: "لوحة التحكم",
       icon: LayoutDashboard,
-      href: `${baseAdminPath}/dashboard`,
+      href: baseAdminPath,
     },
     {
       id: "orders",
@@ -51,10 +51,11 @@ const Sidebar: React.FC<{
   ];
 
   const isActive = (href: string) => {
-    // Handle the base case for /admin which we can treat as /admin/orders
-    if (href.endsWith("/orders") && pathname === baseAdminPath) {
-      return true;
+    // Exact match for the dashboard/base route.
+    if (href === baseAdminPath) {
+      return pathname === baseAdminPath;
     }
+    // For all other routes, use startsWith.
     return pathname.startsWith(href);
   };
 
@@ -122,7 +123,7 @@ const MobileSidebar: React.FC<{
       id: "dashboard",
       label: "لوحة التحكم",
       icon: LayoutDashboard,
-      href: `${baseAdminPath}/dashboard`,
+      href: baseAdminPath,
     },
     {
       id: "orders",
@@ -151,9 +152,11 @@ const MobileSidebar: React.FC<{
   ];
 
   const isActive = (href: string) => {
-    if (href.endsWith("/orders") && pathname === baseAdminPath) {
-      return true;
+    // Exact match for the dashboard/base route.
+    if (href === baseAdminPath) {
+      return pathname === baseAdminPath;
     }
+    // For all other routes, use startsWith.
     return pathname.startsWith(href);
   };
 
