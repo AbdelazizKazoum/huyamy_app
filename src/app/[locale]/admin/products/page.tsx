@@ -8,6 +8,7 @@ import { Category, Language, Product } from "@/types";
 import { Edit, Eye, PlusCircle, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import ProductFormModal from "@/components/admin/ProductFormModal"; // Import the modal
 
 const ProductsPage: React.FC = () => {
   const lang = "ar" as Language;
@@ -51,6 +52,7 @@ const ProductsPage: React.FC = () => {
           fr: "Crème riche en extrait naturel d'aloe vera pour une hydratation profonde.",
         },
         category: categoriesData[0],
+        categoryId: categoriesData[0].id,
         subImages: [],
         keywords: ["كريم", "صبار", "ترطيب"],
       },
@@ -66,6 +68,7 @@ const ProductsPage: React.FC = () => {
           fr: "Huile d'argan marocaine 100% pure pour nourrir les cheveux, la peau et les ongles.",
         },
         category: categoriesData[1],
+        categoryId: categoriesData[1].id,
         subImages: [],
         keywords: ["زيت", "أرغان", "شعر", "بشرة"],
       },
@@ -81,6 +84,7 @@ const ProductsPage: React.FC = () => {
           fr: "Shampooing efficace pour éliminer les pellicules et apaiser le cuir chevelu.",
         },
         category: categoriesData[1],
+        categoryId: categoriesData[1].id,
         subImages: [],
         keywords: ["شامبو", "قشرة", "شعر"],
       },
@@ -96,6 +100,7 @@ const ProductsPage: React.FC = () => {
           fr: "Haute protection contre les rayons UV nocifs avec une formule légère et non grasse.",
         },
         category: categoriesData[0],
+        categoryId: categoriesData[0].id,
         subImages: [],
         keywords: ["واقي شمسي", "حماية", "بشرة"],
       },
@@ -111,6 +116,7 @@ const ProductsPage: React.FC = () => {
           fr: "Gommage naturel pour stimuler la circulation et éliminer les peaux mortes.",
         },
         category: categoriesData[0],
+        categoryId: categoriesData[0].id,
         subImages: [],
         keywords: ["مقشر", "قهوة", "جسم"],
       },
@@ -126,6 +132,7 @@ const ProductsPage: React.FC = () => {
           fr: "Après-shampooing pour démêler et nourrir les cheveux en profondeur.",
         },
         category: categoriesData[1],
+        categoryId: categoriesData[1].id,
         subImages: [],
         keywords: ["بلسم", "شعر", "ترطيب"],
       },
@@ -141,6 +148,8 @@ const ProductsPage: React.FC = () => {
           fr: "Sérum pour éclaircir le teint et combattre les signes de l'âge.",
         },
         category: categoriesData[0],
+        categoryId: categoriesData[0].id,
+
         subImages: [],
         keywords: ["سيروم", "فيتامين سي", "بشرة"],
       },
@@ -150,7 +159,9 @@ const ProductsPage: React.FC = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const itemsPerPage = 5;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const itemsPerPage = 8;
 
   const filteredProducts = useMemo(() => {
     if (!searchTerm) return products;
@@ -169,6 +180,32 @@ const ProductsPage: React.FC = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const handleOpenAddModal = () => {
+    setEditingProduct(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (product: Product) => {
+    setEditingProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingProduct(null);
+  };
+
+  const handleFormSubmit = (formData: FormData) => {
+    if (editingProduct) {
+      // Handle update logic
+      console.log("Updating product:", Object.fromEntries(formData.entries()));
+    } else {
+      // Handle create logic
+      console.log("Creating product:", Object.fromEntries(formData.entries()));
+    }
+    handleCloseModal();
+  };
 
   const columns: {
     key: keyof Product;
@@ -226,7 +263,10 @@ const ProductsPage: React.FC = () => {
             }}
             placeholder="...ابحث عن منتج"
           />
-          <button className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors w-full md:w-auto justify-center">
+          <button
+            onClick={handleOpenAddModal}
+            className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors w-full md:w-auto justify-center"
+          >
             <PlusCircle size={20} />
             <span className="hidden sm:inline">منتج جديد</span>
             <span className="sm:hidden">إضافة</span>
@@ -236,12 +276,15 @@ const ProductsPage: React.FC = () => {
       <DataTable
         columns={columns}
         data={paginatedProducts}
-        renderActions={() => (
+        renderActions={(item: Product) => (
           <div className="flex gap-2">
             <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-md">
               <Eye size={18} />
             </button>
-            <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-md">
+            <button
+              onClick={() => handleOpenEditModal(item)}
+              className="p-2 text-blue-600 hover:bg-blue-50 rounded-md"
+            >
               <Edit size={18} />
             </button>
             <button className="p-2 text-red-600 hover:bg-red-50 rounded-md">
@@ -254,6 +297,14 @@ const ProductsPage: React.FC = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}
+      />
+      <ProductFormModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleFormSubmit}
+        product={editingProduct}
+        categories={categoriesData}
+        lang={lang}
       />
     </div>
   );

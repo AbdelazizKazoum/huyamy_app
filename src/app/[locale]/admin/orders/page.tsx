@@ -52,7 +52,7 @@ const OrdersPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<Order["status"] | "all">(
     "all"
   );
-  const itemsPerPage = 5;
+  const itemsPerPage = 8;
 
   const filteredOrders = useMemo(
     () =>

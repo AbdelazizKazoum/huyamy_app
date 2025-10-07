@@ -11,6 +11,7 @@ export type Product = {
   isNew: boolean;
   description: LocalizedString;
   category: Category;
+  categoryId: string;
   subImages: string[];
   keywords: string[];
   createdAt?: string | null; // ISO string or null
