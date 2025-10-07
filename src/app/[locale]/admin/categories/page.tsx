@@ -2,8 +2,10 @@
 import DataTable from "@/components/admin/DataTable";
 import { Category, Language } from "@/types";
 import { Edit, PlusCircle, Trash2 } from "lucide-react";
+import Image from "next/image";
 
-const CategoriesPage: React.FC<{ lang: Language }> = ({ lang }) => {
+const CategoriesPage: React.FC = () => {
+  const lang = "ar" as Language;
   const categories: Category[] = [
     {
       id: "cat-1",
@@ -37,9 +39,11 @@ const CategoriesPage: React.FC<{ lang: Language }> = ({ lang }) => {
       sortable: true,
       render: (item) => (
         <div className="flex items-center gap-4">
-          <img
+          <Image
             src={item.image}
             alt={item.name[lang]}
+            width={48}
+            height={48}
             className="w-12 h-12 rounded-full object-cover"
           />
           <span className="font-medium text-gray-800">{item.name[lang]}</span>

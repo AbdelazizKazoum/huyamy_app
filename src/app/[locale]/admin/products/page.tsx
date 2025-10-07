@@ -1,18 +1,17 @@
 "use client";
+
 import DataTable from "@/components/admin/DataTable";
 import Pagination from "@/components/admin/Pagination";
 import SearchInput from "@/components/admin/ui/SearchInput";
 import useSortableData from "@/hooks/useSortableData";
-import { Category, Product } from "@/types";
-import { Language } from "firebase/ai";
+import { Category, Language, Product } from "@/types";
 import { Edit, Eye, PlusCircle, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 
-const ProductsPage: React.FC<{ params: { locale: Language } }> = ({
-  params,
-}) => {
-  const lang = params.locale;
+const ProductsPage: React.FC = () => {
+  const lang = "ar" as Language;
+
   const categoriesData: Category[] = useMemo(
     () => [
       {

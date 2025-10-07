@@ -14,7 +14,8 @@ type Section = {
   updatedAt: Date;
 };
 
-const SectionsPage: React.FC<{ lang: Language }> = ({ lang }) => {
+const SectionsPage: React.FC = () => {
+  const lang = "ar" as Language;
   const sections: Section[] = [
     {
       id: "landing-popular",
@@ -53,6 +54,7 @@ const SectionsPage: React.FC<{ lang: Language }> = ({ lang }) => {
       label: "العنوان",
       sortable: true,
       render: (item) => (
+        // @ts-expect-error: LocalizedString index type mismatch
         <span className="font-medium text-gray-800">{item.title[lang]}</span>
       ),
     },

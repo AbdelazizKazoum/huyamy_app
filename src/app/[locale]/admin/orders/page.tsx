@@ -1,13 +1,12 @@
 "use client";
+
 import DataTable from "@/components/admin/DataTable";
 import Pagination from "@/components/admin/Pagination";
-import DateInput from "@/components/admin/ui/DateInput";
 import SearchInput from "@/components/admin/ui/SearchInput";
-import SelectInput from "@/components/admin/ui/SelectInput";
 import useSortableData from "@/hooks/useSortableData";
-import { Language } from "firebase/ai";
 import { Edit, Eye } from "lucide-react";
 import { useMemo, useState } from "react";
+
 type Order = {
   id: string;
   customerName: string;
@@ -17,7 +16,7 @@ type Order = {
   itemCount: number;
 };
 
-const OrdersPage: React.FC<{ lang: Language }> = ({ lang }) => {
+const OrdersPage: React.FC = () => {
   const orders: Order[] = Array.from({ length: 25 }, (_, i) => ({
     id: `ORD-00${i + 1}`,
     customerName: [
@@ -169,7 +168,7 @@ const OrdersPage: React.FC<{ lang: Language }> = ({ lang }) => {
             placeholder="...ابحث بالاسم"
           />
           <div className="flex gap-2 w-full md:w-auto">
-            <SelectInput
+            {/* <SelectInput
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
               options={[
@@ -178,7 +177,7 @@ const OrdersPage: React.FC<{ lang: Language }> = ({ lang }) => {
                 { value: "this_week", label: "هذا الأسبوع" },
               ]}
             />
-            <DateInput onChange={(e) => setDateFilter(e.target.value)} />
+            <DateInput onChange={(e) => setDateFilter(e.target.value)} /> */}
           </div>
         </div>
       </div>
