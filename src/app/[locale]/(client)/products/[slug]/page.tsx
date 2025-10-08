@@ -47,6 +47,8 @@ const getCachedProductBySlug = unstable_cache(
   async (slug: string) => {
     console.log(`[CACHE] Fetching product detail for slug: ${slug}`);
     const rawProduct = await getProductBySlug(slug);
+    console.log("🚀 ~ rawProduct:", rawProduct);
+
     return rawProduct ? serializeProduct(rawProduct) : null;
   },
   [CACHE_CONFIG.PRODUCT_DETAIL.key[0]], // Base cache key
