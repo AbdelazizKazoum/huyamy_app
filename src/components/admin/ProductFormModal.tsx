@@ -142,41 +142,58 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       return; // Stop submission if validation fails
     }
 
+    // Find the full category object based on the selected categoryId
+    const selectedCategory =
+      categories.find((cat) => cat.id === categoryId) || null;
+
+    // 1. Consolidate all non-file data into a single object.
+    const productData = {
+      name: { ar: nameAr, fr: nameFr },
+      description: { ar: descriptionAr, fr: descriptionFr },
+      price: Number(price),
+      originalPrice: originalPrice ? Number(originalPrice) : null,
+      categoryId,
+      category: selectedCategory, // Include the full category object
+      isNew,
+      keywords,
+    };
+
     const formData = new FormData();
 
-    // Append product ID if it's an update
+    // 2. Append the product data as a single JSON string.
+    formData.append("productData", JSON.stringify(productData));
+
+    // Append product ID separately for updates, as it's crucial for backend routing/logic.
     if (product) {
       formData.append("id", product.id);
     }
 
-    // Append text and other data
-    formData.append("nameAr", nameAr);
-    formData.append("nameFr", nameFr);
-    formData.append("descriptionAr", descriptionAr);
-    formData.append("descriptionFr", descriptionFr);
-    formData.append("price", String(price));
-    formData.append("originalPrice", String(originalPrice));
-    formData.append("categoryId", categoryId);
-    formData.append("isNew", String(isNew));
-
-    // Keywords are sent as a JSON string array
-    formData.append("keywords", JSON.stringify(keywords));
-
-    // Append the main image file if a new one was selected
+    // 3. Append image files separately.
     if (mainImage) {
       formData.append("mainImage", mainImage);
     }
 
-    // Append all new sub-image files
     subImages.forEach((file) => {
-      // We only append files, not existing URL strings
-      if (file instanceof File) {
-        formData.append("subImages", file);
-      }
+      formData.append("subImages", file);
     });
 
-    // In a real update scenario, you might also need to send
-    // a list of sub-images to keep or delete. For now, we just send new ones.
+    // --- For Debugging ---
+    // Log the JSON data and file data separately for clarity.
+    console.log("--- Submitting Product Data (JSON) ---");
+    console.log(JSON.parse(formData.get("productData") as string));
+
+    console.log("--- Submitting Files ---");
+    if (mainImage) {
+      console.log(
+        `mainImage: File { name: "${mainImage.name}", size: ${mainImage.size} }`
+      );
+    }
+    subImages.forEach((file, index) => {
+      console.log(
+        `subImages[${index}]: File { name: "${file.name}", size: ${file.size} }`
+      );
+    });
+    console.log("--------------------------");
 
     onSubmit(formData);
   };
