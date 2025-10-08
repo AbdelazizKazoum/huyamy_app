@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // lib/services/productService.ts
 import { adminDb } from "@/lib/firebaseAdmin";
 import { Product, Category } from "@/types";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function getAllProducts(): Promise<Product[]> {
   const snap = await adminDb
@@ -120,4 +122,37 @@ export async function getCategoriesByIds(
   return docs
     .filter((doc) => doc.exists)
     .map((doc) => ({ id: doc.id, ...doc.data() } as Category));
+}
+
+// --- CRUD Operations ---
+
+export async function createProduct(
+  productData: Omit<Product, "id">
+): Promise<Product> {
+  const productRef = adminDb.collection("products").doc();
+  const newProduct = {
+    ...productData,
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+  await productRef.set(newProduct);
+  //@ts-ignore
+  return { id: productRef.id, ...newProduct } as Product;
+}
+
+export async function updateProduct(
+  productId: string,
+  productData: Partial<Product>
+): Promise<void> {
+  const productRef = adminDb.collection("products").doc(productId);
+  await productRef.update({
+    ...productData,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+}
+
+export async function deleteProduct(productId: string): Promise<void> {
+  const productRef = adminDb.collection("products").doc(productId);
+  await productRef.delete();
+  // Note: You might also want to delete associated images from your storage (e.g., R2) here.
 }
