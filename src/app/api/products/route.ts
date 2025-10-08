@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       ...productData,
       slug: generateSlug(productData.name.ar), // Generate slug from Arabic name
       image: mainImageUrl,
-      subImages: subImageUrls.map((url) => ({ url })), // Store as object array
+      subImages: subImageUrls, // Store as array
       createdAt: new Date(), // Placeholder, will be replaced by server timestamp
       updatedAt: new Date(), // Placeholder, will be replaced by server timestamp
     };
