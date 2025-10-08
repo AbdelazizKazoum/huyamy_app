@@ -10,11 +10,15 @@ interface DataTableProps<T extends object> {
   }[];
   data: T[];
   renderActions?: (item: T) => React.ReactNode;
+  isLoading?: boolean;
+  itemsPerPage?: number;
 }
 const DataTable = <T extends { id: string }>({
   columns,
   data,
   renderActions,
+  isLoading = false,
+  itemsPerPage = 8,
 }: DataTableProps<T>) => {
   const { items: sortedItems, requestSort, sortConfig } = useSortableData(data);
   const getSortIcon = (key: keyof T) => {
@@ -26,39 +30,79 @@ const DataTable = <T extends { id: string }>({
       <ArrowDown size={14} />
     );
   };
+
+  const SkeletonRow = () => (
+    <tr className="border-t border-neutral-200">
+      {columns.map((col) => (
+        <td key={col.key as string} className="p-4">
+          <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+        </td>
+      ))}
+      {renderActions && (
+        <td className="p-4">
+          <div className="h-8 w-24 bg-gray-200 rounded animate-pulse"></div>
+        </td>
+      )}
+    </tr>
+  );
+
+  const MobileSkeletonCard = () => (
+    <div className="bg-white rounded-lg border border-neutral-200 p-4 space-y-3 animate-pulse">
+      {columns.map((col) => (
+        <div
+          key={col.key as string}
+          className="flex justify-between items-start"
+        >
+          <div className="h-5 w-20 bg-gray-200 rounded"></div>
+          <div className="h-5 w-32 bg-gray-200 rounded"></div>
+        </div>
+      ))}
+      {renderActions && (
+        <div className="flex justify-between items-center pt-3 border-t border-neutral-200">
+          <div className="h-5 w-20 bg-gray-200 rounded"></div>
+          <div className="h-8 w-24 bg-gray-200 rounded"></div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="bg-white/50 rounded-lg shadow-md">
       {/* Mobile Card View */}
       <div className="md:hidden">
         <div className="space-y-4 p-4">
-          {sortedItems.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-lg border border-neutral-200 p-4 space-y-3"
-            >
-              {columns.map((col) => (
+          {isLoading
+            ? Array.from({ length: itemsPerPage }).map((_, i) => (
+                <MobileSkeletonCard key={i} />
+              ))
+            : sortedItems.map((item) => (
                 <div
-                  key={`${item.id}-${col.key as string}`}
-                  className="flex justify-between items-start"
+                  key={item.id}
+                  className="bg-white rounded-lg border border-neutral-200 p-4 space-y-3"
                 >
-                  <span className="font-semibold text-sm text-gray-600">
-                    {col.label}
-                  </span>
-                  <div className="text-left">
-                    {col.render ? col.render(item) : String(item[col.key])}
-                  </div>
+                  {columns.map((col) => (
+                    <div
+                      key={`${item.id}-${col.key as string}`}
+                      className="flex justify-between items-start"
+                    >
+                      <span className="font-semibold text-sm text-gray-600">
+                        {col.label}
+                      </span>
+                      <div className="text-left">
+                        {col.render ? col.render(item) : String(item[col.key])}
+                      </div>
+                    </div>
+                  ))}
+                  {renderActions && (
+                    <div className="flex justify-between items-center pt-3 border-t border-neutral-200">
+                      <span className="font-semibold text-sm text-gray-600">
+                        إجراءات
+                      </span>
+                      {renderActions(item)}
+                    </div>
+                  )}
                 </div>
               ))}
-              {renderActions && (
-                <div className="flex justify-between items-center pt-3 border-t border-neutral-200">
-                  <span className="font-semibold text-sm text-gray-600">
-                    إجراءات
-                  </span>
-                  {renderActions(item)}
-                </div>
-              )}
-            </div>
-          ))}
         </div>
       </div>
 
@@ -91,21 +135,25 @@ const DataTable = <T extends { id: string }>({
             </tr>
           </thead>
           <tbody>
-            {sortedItems.map((item) => (
-              <tr key={item.id} className="border-t border-neutral-200">
-                {columns.map((col) => (
-                  <td
-                    key={`${item.id}-${col.key as string}`}
-                    className="p-4 text-gray-600"
-                  >
-                    {col.render ? col.render(item) : String(item[col.key])}
-                  </td>
+            {isLoading
+              ? Array.from({ length: itemsPerPage }).map((_, i) => (
+                  <SkeletonRow key={i} />
+                ))
+              : sortedItems.map((item) => (
+                  <tr key={item.id} className="border-t border-neutral-200">
+                    {columns.map((col) => (
+                      <td
+                        key={`${item.id}-${col.key as string}`}
+                        className="p-4 text-gray-600"
+                      >
+                        {col.render ? col.render(item) : String(item[col.key])}
+                      </td>
+                    ))}
+                    {renderActions && (
+                      <td className="p-4">{renderActions(item)}</td>
+                    )}
+                  </tr>
                 ))}
-                {renderActions && (
-                  <td className="p-4">{renderActions(item)}</td>
-                )}
-              </tr>
-            ))}
           </tbody>
         </table>
       </div>

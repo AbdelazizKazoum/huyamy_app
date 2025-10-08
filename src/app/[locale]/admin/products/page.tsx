@@ -3,183 +3,65 @@
 import DataTable from "@/components/admin/DataTable";
 import Pagination from "@/components/admin/Pagination";
 import SearchInput from "@/components/admin/ui/SearchInput";
-import useSortableData from "@/hooks/useSortableData";
 import { Category, Language, Product } from "@/types";
 import { Edit, Eye, PlusCircle, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useMemo, useState } from "react";
-import ProductFormModal from "@/components/admin/ProductFormModal"; // Import the modal
+import { useMemo, useState, useEffect } from "react";
+import ProductFormModal from "@/components/admin/ProductFormModal";
+import { useProductStore } from "@/store/useProductStore";
+import { fetchAllCategoriesAPI } from "@/lib/api/categories";
 
 const ProductsPage: React.FC = () => {
   const lang = "ar" as Language;
 
-  const categoriesData: Category[] = useMemo(
-    () => [
-      {
-        id: "cat-1",
-        name: { ar: "العناية بالبشرة", fr: "Soins de la peau" },
-        description: {
-          ar: "كل ما تحتاجينه لبشرة نضرة وصحية.",
-          fr: "Tout ce dont vous avez besoin pour une peau fraîche et saine.",
-        },
-        image: "https://placehold.co/200x200/f3e0e6/ffffff?text=بشرة",
-      },
-      {
-        id: "cat-2",
-        name: { ar: "العناية بالشعر", fr: "Soins des cheveux" },
-        description: {
-          ar: "منتجات طبيعية لتقوية وتغذية شعرك.",
-          fr: "Produits naturels pour renforcer et nourrir vos cheveux.",
-        },
-        image: "https://placehold.co/200x200/f0e6d3/ffffff?text=شعر",
-      },
-    ],
-    []
-  );
+  // Zustand store integration
+  const {
+    products,
+    isLoading,
+    error,
+    fetchProducts,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+  } = useProductStore();
 
-  const products: Product[] = useMemo(
-    () => [
-      {
-        id: "prod-1",
-        name: { ar: "كريم مرطب بالصبار", fr: "Crème hydratante à l'aloe vera" },
-        slug: "كريم-مرطب-بالصبار",
-        price: 85.0,
-        originalPrice: 120.0,
-        image: "https://placehold.co/400x400/d1e4d1/ffffff?text=منتج+1",
-        isNew: true,
-        description: {
-          ar: "كريم غني بخلاصة الصبار الطبيعي لترطيب عميق وتهدئة البشرة الحساسة.",
-          fr: "Crème riche en extrait naturel d'aloe vera pour une hydratation profonde.",
-        },
-        category: categoriesData[0],
-        categoryId: categoriesData[0].id,
-        subImages: [],
-        keywords: ["كريم", "صبار", "ترطيب"],
-      },
-      {
-        id: "prod-2",
-        name: { ar: "زيت الأرغان الأصلي", fr: "Huile d'argan authentique" },
-        slug: "زيت-الأرغان-الأصلي",
-        price: 150.0,
-        image: "https://placehold.co/400x400/e4d8c8/ffffff?text=منتج+2",
-        isNew: false,
-        description: {
-          ar: "زيت الأرغان المغربي النقي 100% لتغذية الشعر والبشرة والأظافر.",
-          fr: "Huile d'argan marocaine 100% pure pour nourrir les cheveux, la peau et les ongles.",
-        },
-        category: categoriesData[1],
-        categoryId: categoriesData[1].id,
-        subImages: [],
-        keywords: ["زيت", "أرغان", "شعر", "بشرة"],
-      },
-      {
-        id: "prod-3",
-        name: { ar: "شامبو ضد القشرة", fr: "Shampooing anti-pelliculaire" },
-        slug: "شامبو-ضد-القشرة",
-        price: 95.0,
-        image: "https://placehold.co/400x400/cce0ff/ffffff?text=منتج+3",
-        isNew: false,
-        description: {
-          ar: "شامبو فعال للقضاء على القشرة وتهدئة فروة الرأس.",
-          fr: "Shampooing efficace pour éliminer les pellicules et apaiser le cuir chevelu.",
-        },
-        category: categoriesData[1],
-        categoryId: categoriesData[1].id,
-        subImages: [],
-        keywords: ["شامبو", "قشرة", "شعر"],
-      },
-      {
-        id: "prod-4",
-        name: { ar: "واقي شمسي SPF 50", fr: "Écran solaire SPF 50" },
-        slug: "واقي-شمسي-spf-50",
-        price: 130.0,
-        image: "https://placehold.co/400x400/fff0b3/ffffff?text=منتج+4",
-        isNew: true,
-        description: {
-          ar: "حماية عالية من أشعة الشمس الضارة مع تركيبة خفيفة وغير دهنية.",
-          fr: "Haute protection contre les rayons UV nocifs avec une formule légère et non grasse.",
-        },
-        category: categoriesData[0],
-        categoryId: categoriesData[0].id,
-        subImages: [],
-        keywords: ["واقي شمسي", "حماية", "بشرة"],
-      },
-      {
-        id: "prod-5",
-        name: { ar: "مقشر الجسم بالقهوة", fr: "Gommage corps au café" },
-        slug: "مقشر-الجسم-بالقهوة",
-        price: 110.0,
-        image: "https://placehold.co/400x400/d4bca2/ffffff?text=منتج+5",
-        isNew: false,
-        description: {
-          ar: "مقشر طبيعي لتنشيط الدورة الدموية وإزالة الجلد الميت.",
-          fr: "Gommage naturel pour stimuler la circulation et éliminer les peaux mortes.",
-        },
-        category: categoriesData[0],
-        categoryId: categoriesData[0].id,
-        subImages: [],
-        keywords: ["مقشر", "قهوة", "جسم"],
-      },
-      {
-        id: "prod-6",
-        name: { ar: "بلسم مرطب للشعر", fr: "Après-shampooing hydratant" },
-        slug: "بلسم-مرطب-للشعر",
-        price: 90.0,
-        image: "https://placehold.co/400x400/e0d1e4/ffffff?text=منتج+6",
-        isNew: false,
-        description: {
-          ar: "بلسم لفك تشابك الشعر وتغذيته بعمق.",
-          fr: "Après-shampooing pour démêler et nourrir les cheveux en profondeur.",
-        },
-        category: categoriesData[1],
-        categoryId: categoriesData[1].id,
-        subImages: [],
-        keywords: ["بلسم", "شعر", "ترطيب"],
-      },
-      {
-        id: "prod-7",
-        name: { ar: "سيروم فيتامين سي", fr: "Sérum à la vitamine C" },
-        slug: "سيروم-فيتامين-سي",
-        price: 180.0,
-        image: "https://placehold.co/400x400/ffe5b4/ffffff?text=منتج+7",
-        isNew: true,
-        description: {
-          ar: "سيروم لتفتيح البشرة ومحاربة علامات التقدم في السن.",
-          fr: "Sérum pour éclaircir le teint et combattre les signes de l'âge.",
-        },
-        category: categoriesData[0],
-        categoryId: categoriesData[0].id,
-
-        subImages: [],
-        keywords: ["سيروم", "فيتامين سي", "بشرة"],
-      },
-    ],
-    [categoriesData]
-  );
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Pagination and search state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 8;
 
+  // Fetch initial data from Firebase via the store
+  useEffect(() => {
+    fetchProducts();
+    fetchAllCategoriesAPI().then(setCategories);
+  }, [fetchProducts]);
+
+  // Local filtering based on search term
   const filteredProducts = useMemo(() => {
     if (!searchTerm) return products;
     const lowercasedFilter = searchTerm.toLowerCase();
     return products.filter(
       (product) =>
         product.name.ar.toLowerCase().includes(lowercasedFilter) ||
-        product.name.fr.toLowerCase().includes(lowercasedFilter)
+        product.name.fr.toLowerCase().includes(lowercasedFilter) ||
+        product.category.name.ar.toLowerCase().includes(lowercasedFilter) ||
+        product.category.name.fr.toLowerCase().includes(lowercasedFilter)
     );
   }, [products, searchTerm]);
 
-  const { items: sortedProducts } = useSortableData<Product>(filteredProducts);
-
-  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
-  const paginatedProducts = sortedProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Local pagination
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = useMemo(() => {
+    return filteredProducts.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }, [filteredProducts, currentPage, itemsPerPage]);
 
   const handleOpenAddModal = () => {
     setEditingProduct(null);
@@ -192,25 +74,46 @@ const ProductsPage: React.FC = () => {
   };
 
   const handleCloseModal = () => {
+    if (isSubmitting) return;
     setIsModalOpen(false);
     setEditingProduct(null);
   };
 
-  const handleFormSubmit = (formData: FormData) => {
-    if (editingProduct) {
-      // Handle update logic
-      console.log("Updating product:", Object.fromEntries(formData.entries()));
-    } else {
-      // Handle create logic
-      console.log("Creating product:", Object.fromEntries(formData.entries()));
+  const handleFormSubmit = async (formData: FormData) => {
+    setIsSubmitting(true);
+    try {
+      if (editingProduct) {
+        await updateProduct(editingProduct.id, formData);
+        // Optionally show a success toast/notification
+      } else {
+        await addProduct(formData);
+        // Optionally show a success toast/notification
+      }
+      handleCloseModal();
+    } catch (err) {
+      console.error("Failed to submit form:", err);
+      // Optionally show an error toast/notification
+    } finally {
+      setIsSubmitting(false);
     }
-    handleCloseModal();
+  };
+
+  const handleDelete = async (productId: string) => {
+    if (window.confirm("Are you sure you want to delete this product?")) {
+      try {
+        await deleteProduct(productId);
+        // Optionally show a success toast/notification
+      } catch (err) {
+        console.error("Failed to delete product:", err);
+        // Optionally show an error toast/notification
+      }
+    }
   };
 
   const columns: {
     key: keyof Product;
     label: string;
-    sortable: boolean;
+    sortable: boolean; // Note: Sorting is now handled by the DataTable's internal hook
     render?: (item: Product) => React.ReactNode;
   }[] = [
     {
@@ -221,14 +124,12 @@ const ProductsPage: React.FC = () => {
         <div className="flex items-center gap-4">
           <Image
             src={item.image}
-            alt={item.name[lang as keyof typeof item.name]}
+            alt={item.name[lang]}
             width={48}
             height={48}
-            className="w-12 h-12 rounded-md object-cover"
+            className="w-12 h-12 rounded-md object-cover bg-gray-100"
           />
-          <span className="font-medium text-gray-800">
-            {item.name[lang as keyof typeof item.name]}
-          </span>
+          <span className="font-medium text-gray-800">{item.name[lang]}</span>
         </div>
       ),
     },
@@ -236,8 +137,7 @@ const ProductsPage: React.FC = () => {
       key: "category",
       label: "الفئة",
       sortable: true,
-      render: (item) =>
-        item.category.name[lang as keyof typeof item.category.name],
+      render: (item) => item.category.name[lang],
     },
     {
       key: "price",
@@ -248,11 +148,20 @@ const ProductsPage: React.FC = () => {
       ),
     },
   ];
+
+  if (error) {
+    return (
+      <div className="text-center py-10 text-red-500">
+        Failed to load products: {error}
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1 className="text-3xl font-bold text-gray-800 self-start md:self-center">
-          إدارة المنتجات
+          إدارة المنتجات ({products.length})
         </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <SearchInput
@@ -276,36 +185,51 @@ const ProductsPage: React.FC = () => {
       <DataTable
         columns={columns}
         data={paginatedProducts}
+        isLoading={isLoading && products.length === 0}
+        itemsPerPage={itemsPerPage}
         renderActions={(item: Product) => (
           <div className="flex gap-2">
-            <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-md">
+            <button
+              title="View (not implemented)"
+              className="p-2 text-gray-500 hover:bg-gray-100 rounded-md"
+            >
               <Eye size={18} />
             </button>
             <button
+              title="Edit Product"
               onClick={() => handleOpenEditModal(item)}
               className="p-2 text-blue-600 hover:bg-blue-50 rounded-md"
             >
               <Edit size={18} />
             </button>
-            <button className="p-2 text-red-600 hover:bg-red-50 rounded-md">
+            <button
+              title="Delete Product"
+              onClick={() => handleDelete(item.id)}
+              className="p-2 text-red-600 hover:bg-red-50 rounded-md"
+            >
               <Trash2 size={18} />
             </button>
           </div>
         )}
       />
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
-      <ProductFormModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSubmit={handleFormSubmit}
-        product={editingProduct}
-        categories={categoriesData}
-        lang={lang}
-      />
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
+      {isModalOpen && (
+        <ProductFormModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSubmit={handleFormSubmit}
+          product={editingProduct}
+          categories={categories}
+          lang={lang}
+          // Pass isSubmitting to disable form controls during submission
+        />
+      )}
     </div>
   );
 };

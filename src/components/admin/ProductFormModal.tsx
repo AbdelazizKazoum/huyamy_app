@@ -1,9 +1,17 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 
+import {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useState,
+  useRef,
+  KeyboardEvent,
+} from "react";
 import { Category, Language, Product } from "@/types";
-import { PlusCircle, UploadCloud, X } from "lucide-react";
+import { Loader2, PlusCircle, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState, FormEvent, ChangeEvent } from "react";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -12,6 +20,7 @@ interface ProductFormModalProps {
   product: Product | null;
   categories: Category[];
   lang: Language;
+  isSubmitting?: boolean; // Add this prop
 }
 
 const ProductFormModal: React.FC<ProductFormModalProps> = ({
@@ -21,6 +30,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   product,
   categories,
   lang,
+  isSubmitting = false, // Use the prop
 }) => {
   const [nameAr, setNameAr] = useState("");
   const [nameFr, setNameFr] = useState("");
@@ -28,7 +38,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [descriptionFr, setDescriptionFr] = useState("");
   const [price, setPrice] = useState<number | string>("");
   const [originalPrice, setOriginalPrice] = useState<number | string>("");
-  const [categoryId, setCategoryId] = useState("");
+  // This state will now hold the stringified category object
+  const [selectedCategoryJSON, setSelectedCategoryJSON] = useState("");
   const [isNew, setIsNew] = useState(true);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [keywordsInput, setKeywordsInput] = useState("");
@@ -46,13 +57,18 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setDescriptionFr(product.description.fr);
       setPrice(product.price);
       setOriginalPrice(product.originalPrice || "");
-      setCategoryId(product.categoryId);
+      // When editing, stringify the existing category object to set the select's value
+      setSelectedCategoryJSON(
+        product.category ? JSON.stringify(product.category) : ""
+      );
       setIsNew(product.isNew);
       setKeywords(product.keywords || []);
-      setMainImagePreview(product.image);
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-expect-error
-      setSubImagePreviews(product.subImages.map((img) => img.url)); // Assuming subImages have a url property
+      setMainImage(null);
+      setMainImagePreview(product.image); // Show existing image
+      setSubImages([]);
+      // Assuming product.subImages is an array of { url: string }
+      //@ts-ignore
+      setSubImagePreviews(product.subImages?.map((img) => img.url) || []);
     } else {
       // Reset form for new product
       setNameAr("");
@@ -61,9 +77,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setDescriptionFr("");
       setPrice("");
       setOriginalPrice("");
-      setCategoryId("");
+      setSelectedCategoryJSON(""); // Reset category selection
       setIsNew(true);
       setKeywords([]);
+      setKeywordsInput("");
       setMainImage(null);
       setMainImagePreview(null);
       setSubImages([]);
@@ -125,11 +142,12 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       newErrors.descriptionFr = "وصف المنتج بالفرنسية مطلوب.";
     if (!price || Number(price) <= 0)
       newErrors.price = "السعر يجب أن يكون رقمًا موجبًا.";
-    if (!categoryId) newErrors.categoryId = "يجب اختيار فئة.";
+    // Validate that a category has been selected
+    if (!selectedCategoryJSON) newErrors.categoryId = "يجب اختيار فئة.";
 
     // Main image is required only for new products.
     if (!product && !mainImage) {
-      newErrors.mainImage = "الصورة الرئيسية مطلوبة.";
+      newErrors.mainImage = "الصورة الرئيسية مطلوبة لمنتج جديد.";
     }
 
     setErrors(newErrors);
@@ -138,13 +156,14 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!validate()) {
-      return; // Stop submission if validation fails
+    if (!validate() || isSubmitting) {
+      return;
     }
 
-    // Find the full category object based on the selected categoryId
-    const selectedCategory =
-      categories.find((cat) => cat.id === categoryId) || null;
+    // Parse the selected category JSON string back into an object
+    const selectedCategory = selectedCategoryJSON
+      ? (JSON.parse(selectedCategoryJSON) as Category)
+      : null;
 
     // 1. Consolidate all non-file data into a single object.
     const productData = {
@@ -152,8 +171,9 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       description: { ar: descriptionAr, fr: descriptionFr },
       price: Number(price),
       originalPrice: originalPrice ? Number(originalPrice) : null,
-      categoryId,
-      category: selectedCategory, // Include the full category object
+      // Include both the ID and the full object
+      categoryId: selectedCategory?.id || "",
+      category: selectedCategory,
       isNew,
       keywords,
     };
@@ -204,23 +224,20 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 z-50 flex justify-center items-center p-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[95vh]"
-      >
-        <div className="flex-shrink-0 flex justify-between items-center p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+        <div className="flex justify-between items-center p-4 border-b">
+          <h2 className="text-xl font-bold text-gray-800">{title}</h2>
           <button
-            type="button"
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100"
+            disabled={isSubmitting}
+            className="p-2 rounded-full text-gray-500 hover:bg-gray-100 disabled:opacity-50"
           >
-            <X size={24} className="text-gray-600" />
+            <X size={24} />
           </button>
         </div>
-
-        <div className="flex-grow overflow-y-auto p-6">
-          <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="overflow-y-auto p-6 space-y-6">
+          {/* All form fields should be disabled when submitting */}
+          <fieldset disabled={isSubmitting} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-6">
@@ -294,29 +311,35 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     />
                   </div>
                 </div>
+                {/* Category */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="category"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     الفئة
                   </label>
                   <select
-                    value={categoryId}
-                    onChange={(e) => setCategoryId(e.target.value)}
-                    className={`w-full px-3 py-2 border bg-white rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700 ${
-                      errors.categoryId ? "border-red-500" : "border-gray-300"
+                    id="category"
+                    value={selectedCategoryJSON}
+                    onChange={(e) => setSelectedCategoryJSON(e.target.value)}
+                    className={`w-full p-2.5 border rounded-lg focus:ring-2 ${
+                      errors.categoryId
+                        ? "border-red-500 focus:ring-red-300"
+                        : "border-gray-300 focus:ring-green-300"
                     }`}
-                    required
                   >
                     <option value="" disabled>
-                      اختر فئة
+                      -- اختر فئة --
                     </option>
                     {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
+                      <option key={cat.id} value={JSON.stringify(cat)}>
                         {cat.name[lang]}
                       </option>
                     ))}
                   </select>
                   {errors.categoryId && (
-                    <p className="text-red-500 text-xs mt-1">
+                    <p className="text-red-500 text-sm mt-1">
                       {errors.categoryId}
                     </p>
                   )}
@@ -504,25 +527,34 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div className="flex-shrink-0 flex justify-end items-center gap-4 p-6 border-t border-gray-200">
+          </fieldset>
+        </form>
+        <div className="flex justify-end items-center gap-4 p-4 border-t bg-gray-50 rounded-b-lg">
           <button
             type="button"
             onClick={onClose}
-            className="py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            disabled={isSubmitting}
+            className="px-6 py-2.5 rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
           >
             إلغاء
           </button>
           <button
             type="submit"
-            className="bg-green-700 text-white font-bold py-2 px-6 rounded-md hover:bg-green-800 transition-colors"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="px-6 py-2.5 rounded-lg text-white bg-green-700 hover:bg-green-800 disabled:bg-green-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {product ? "حفظ التغييرات" : "إنشاء المنتج"}
+            {isSubmitting ? (
+              <>
+                <Loader2 size={20} className="animate-spin" />
+                <span>جاري الحفظ...</span>
+              </>
+            ) : (
+              <span>{product ? "حفظ التغييرات" : "إنشاء المنتج"}</span>
+            )}
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 };
