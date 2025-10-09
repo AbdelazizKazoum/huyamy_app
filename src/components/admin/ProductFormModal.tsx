@@ -6,12 +6,15 @@ import {
   FormEvent,
   useEffect,
   useState,
-  useRef,
-  KeyboardEvent,
+  // ... other imports
 } from "react";
 import { Category, Language, Product } from "@/types";
 import { Loader2, PlusCircle, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
+import FormInput from "./ui/FormInput";
+import FormTextarea from "./ui/FormTextarea";
+import FormSelect from "./ui/FormSelect";
+import FormToggle from "./ui/FormToggle";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -267,175 +270,93 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
           </button>
         </div>
         <div className="overflow-y-auto p-6 space-y-6">
-          {/* All form fields should be disabled when submitting */}
           <fieldset disabled={isSubmitting} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    اسم المنتج (بالعربية)
-                  </label>
-                  <input
-                    type="text"
-                    value={nameAr}
-                    onChange={(e) => setNameAr(e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700 ${
-                      errors.nameAr ? "border-red-500" : "border-gray-300"
-                    }`}
+                <FormInput
+                  label="اسم المنتج (بالعربية)"
+                  id="nameAr"
+                  value={nameAr}
+                  onChange={(e) => setNameAr(e.target.value)}
+                  error={errors.nameAr}
+                  required
+                />
+                <FormTextarea
+                  label="وصف المنتج (بالعربية)"
+                  id="descriptionAr"
+                  value={descriptionAr}
+                  onChange={(e) => setDescriptionAr(e.target.value)}
+                  rows={4}
+                  error={errors.descriptionAr}
+                  required
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormInput
+                    label="السعر (د.م.)"
+                    id="price"
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    error={errors.price}
                     required
                   />
-                  {errors.nameAr && (
-                    <p className="text-red-500 text-xs mt-1">{errors.nameAr}</p>
-                  )}
+                  <FormInput
+                    label="السعر الأصلي (اختياري)"
+                    id="originalPrice"
+                    type="number"
+                    value={originalPrice}
+                    onChange={(e) => setOriginalPrice(e.target.value)}
+                  />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    وصف المنتج (بالعربية)
-                  </label>
-                  <textarea
-                    value={descriptionAr}
-                    onChange={(e) => setDescriptionAr(e.target.value)}
-                    rows={4}
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700 ${
-                      errors.descriptionAr
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    }`}
-                    required
-                  ></textarea>
-                  {errors.descriptionAr && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.descriptionAr}
-                    </p>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      السعر (د.م.)
-                    </label>
-                    <input
-                      type="number"
-                      value={price}
-                      onChange={(e) => setPrice(e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700 ${
-                        errors.price ? "border-red-500" : "border-gray-300"
-                      }`}
-                      required
-                    />
-                    {errors.price && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {errors.price}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      السعر الأصلي (اختياري)
-                    </label>
-                    <input
-                      type="number"
-                      value={originalPrice}
-                      onChange={(e) => setOriginalPrice(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700"
-                    />
-                  </div>
-                </div>
-                {/* Category */}
-                <div>
-                  <label
-                    htmlFor="category"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    الفئة
-                  </label>
-                  <select
-                    id="category"
-                    value={selectedCategoryJSON}
-                    onChange={(e) => setSelectedCategoryJSON(e.target.value)}
-                    className={`w-full p-2.5 border rounded-lg focus:ring-2 ${
-                      errors.categoryId
-                        ? "border-red-500 focus:ring-red-300"
-                        : "border-gray-300 focus:ring-green-300"
-                    }`}
-                  >
-                    <option value="" disabled>
-                      -- اختر فئة --
+                <FormSelect
+                  label="الفئة"
+                  id="category"
+                  value={selectedCategoryJSON}
+                  onChange={(e) => setSelectedCategoryJSON(e.target.value)}
+                  error={errors.categoryId}
+                >
+                  <option value="" disabled>
+                    -- اختر فئة --
+                  </option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={JSON.stringify(cat)}>
+                      {cat.name[lang]}
                     </option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={JSON.stringify(cat)}>
-                        {cat.name[lang]}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.categoryId && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.categoryId}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center gap-4">
-                  <label className="block text-sm font-medium text-gray-700">
-                    منتج جديد؟
-                  </label>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={isNew}
-                      onChange={(e) => setIsNew(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-green-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-                  </label>
-                </div>
+                  ))}
+                </FormSelect>
+                <FormToggle
+                  label="منتج جديد؟"
+                  checked={isNew}
+                  onChange={(e) => setIsNew(e.target.checked)}
+                />
               </div>
 
               {/* Right Column */}
               <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nom du produit (Français)
-                  </label>
-                  <input
-                    type="text"
-                    value={nameFr}
-                    onChange={(e) => setNameFr(e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700 ${
-                      errors.nameFr ? "border-red-500" : "border-gray-300"
-                    }`}
-                    required
-                  />
-                  {errors.nameFr && (
-                    <p className="text-red-500 text-xs mt-1">{errors.nameFr}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description du produit (Français)
-                  </label>
-                  <textarea
-                    value={descriptionFr}
-                    onChange={(e) => setDescriptionFr(e.target.value)}
-                    rows={4}
-                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700 ${
-                      errors.descriptionFr
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    }`}
-                    required
-                  ></textarea>
-                  {errors.descriptionFr && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors.descriptionFr}
-                    </p>
-                  )}
-                </div>
+                <FormInput
+                  label="Nom du produit (Français)"
+                  id="nameFr"
+                  value={nameFr}
+                  onChange={(e) => setNameFr(e.target.value)}
+                  error={errors.nameFr}
+                  required
+                />
+                <FormTextarea
+                  label="Description du produit (Français)"
+                  id="descriptionFr"
+                  value={descriptionFr}
+                  onChange={(e) => setDescriptionFr(e.target.value)}
+                  rows={4}
+                  error={errors.descriptionFr}
+                  required
+                />
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     الكلمات المفتاحية (افصل بينها بفاصلة ,)
                   </label>
-                  <div className="flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md focus-within:outline-none focus-within:ring-1 focus-within:ring-green-700 focus-within:border-green-700">
+                  {/* Keywords input can also be refactored, but is left here for simplicity */}
+                  <div className="flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md focus-within:ring-1 focus-within:ring-green-700">
                     {keywords.map((kw, index) => (
                       <div
                         key={index}
@@ -464,8 +385,9 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
               </div>
             </div>
 
-            {/* Image Uploads */}
+            {/* Image Uploads (Can also be refactored into their own components) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
+              {/* Main Image Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   الصورة الرئيسية
@@ -517,6 +439,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   </p>
                 )}
               </div>
+              {/* Sub Images Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   الصور الفرعية
