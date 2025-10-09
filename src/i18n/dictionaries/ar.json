@@ -53,7 +53,36 @@
     "addToCart": "أضف للسلة",
     "discount": "خصم",
     "originalPrice": "السعر الأصلي",
-    "productsList": "قائمة المنتجات"
+    "productsList": "قائمة المنتجات",
+    "errorTitle": "خطأ في تحميل المنتجات",
+    "ourProducts": "منتجاتنا",
+    "discoverCollection": "اكتشف مجموعتنا من المنتجات الطبيعية المصممة لتعزيز جمالك.",
+    "filters": "تصفية",
+    "search": "بحث",
+    "searchPlaceholder": "ابحث عن منتج...",
+    "categories": "الفئات",
+    "priceRange": "نطاق السعر",
+    "currency": "د.م.",
+    "showingResults": "عرض {count} من النتائج",
+    "sortBy": {
+      "default": "الترتيب الافتراضي",
+      "newest": "الأحدث",
+      "priceAsc": "السعر: من الأقل إلى الأعلى",
+      "priceDesc": "السعر: من الأعلى إلى الأقل",
+      "nameAsc": "الاسم: أ-ي",
+      "nameDesc": "الاسم: ي-أ"
+    },
+    "noResults": {
+      "title": "لم يتم العثور على منتجات",
+      "description": "حاول تعديل الفلاتر للحصول على نتائج أفضل."
+    },
+    "pagination": {
+      "previous": "السابق",
+      "next": "التالي",
+      "page": "صفحة {current} من {total}"
+    },
+    "noProductsFound": "لم يتم العثور على منتجات",
+    "tryAdjustingFilters": "حاول تعديل الفلاتر للحصول على نتائج أفضل."
   },
   "newsletter": {
     "title": "انضمي إلى قائمتنا البريدية",
@@ -70,6 +99,10 @@
     "defaultMessage": "مرحبًا، أريد الاستفسار عن منتجاتكم",
     "contactLabel": "تواصل معنا عبر واتساب",
     "tooltip": "تواصل معنا عبر واتساب"
+  },
+  "pagination": {
+    "previous": "السابق",
+    "next": "التالي"
   },
   "contact": {
     "title": "تواصل معنا",

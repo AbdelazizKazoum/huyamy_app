@@ -53,7 +53,34 @@
     "addToCart": "Ajouter au panier",
     "discount": "Réduction",
     "originalPrice": "Prix original",
-    "productsList": "Liste des produits"
+    "productsList": "Liste des produits",
+    "errorTitle": "Erreur de chargement des produits",
+    "ourProducts": "Nos Produits",
+    "discoverCollection": "Découvrez notre collection de produits naturels conçus pour sublimer votre beauté.",
+    "filters": "Filtres",
+    "search": "Rechercher",
+    "searchPlaceholder": "Rechercher un produit...",
+    "categories": "Catégories",
+    "priceRange": "Fourchette de prix",
+    "currency": "MAD",
+    "showingResults": "Affichage de {count} résultats",
+    "sortBy": {
+      "default": "Tri par défaut",
+      "newest": "Les plus récents",
+      "priceAsc": "Prix : Croissant",
+      "priceDesc": "Prix : Décroissant",
+      "nameAsc": "Nom : A-Z",
+      "nameDesc": "Nom : Z-A"
+    },
+    "noResults": {
+      "title": "Aucun produit trouvé",
+      "description": "Essayez d'ajuster vos filtres pour de meilleurs résultats."
+    },
+    "pagination": {
+      "previous": "Précédent",
+      "next": "Suivant",
+      "page": "Page {current} sur {total}"
+    }
   },
   "newsletter": {
     "title": "Rejoignez notre newsletter",
@@ -70,6 +97,10 @@
     "defaultMessage": "Bonjour, je souhaiterais me renseigner sur vos produits",
     "contactLabel": "Contactez-nous sur WhatsApp",
     "tooltip": "Contactez-nous sur WhatsApp"
+  },
+  "pagination": {
+    "previous": "Précédent",
+    "next": "Suivant"
   },
   "contact": {
     "title": "Contactez-nous",
