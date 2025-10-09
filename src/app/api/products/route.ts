@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { createProduct, getAllProducts } from "@/lib/services/productService";
-import { uploadImage, uploadImages } from "@/lib/fileUploader";
 import { generateSlug } from "@/lib/utils";
 import { Product } from "@/types";
+import { uploadImagesToR2, uploadImageToR2 } from "@/lib/services/R2Service";
 
 export async function GET() {
   try {
@@ -33,17 +33,19 @@ export async function POST(request: Request) {
 
     const productData = JSON.parse(productDataString);
 
-    // 1. Upload images and get their URLs
-    const mainImageUrl = await uploadImage(mainImageFile);
+    // 1. Upload images to R2 and get their URLs
+    const mainImageUrl = await uploadImageToR2(mainImageFile);
     const subImageUrls =
-      subImageFiles.length > 0 ? await uploadImages(subImageFiles) : [];
+      subImageFiles.length > 0 ? await uploadImagesToR2(subImageFiles) : [];
 
     // 2. Prepare the final product object for the database
     const finalProduct: Omit<Product, "id"> = {
       ...productData,
-      slug: generateSlug(productData.name.ar), // Generate slug from Arabic name
+      slug: generateSlug(productData.name.ar),
       image: mainImageUrl,
-      subImages: subImageUrls, // Store as array
+      // Ensure subImages are stored in the correct format { url: string }
+
+      subImages: subImageUrls,
       createdAt: new Date(), // Placeholder, will be replaced by server timestamp
       updatedAt: new Date(), // Placeholder, will be replaced by server timestamp
     };
@@ -54,6 +56,8 @@ export async function POST(request: Request) {
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {
     console.error("Failed to create product:", error);
+    // In case of an error, you might want to delete any uploaded images to avoid orphans.
+    // This part is optional but good practice.
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

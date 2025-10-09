@@ -1,8 +1,19 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { NextResponse } from "next/server";
-import { updateProduct, deleteProduct } from "@/lib/services/productService";
-import { uploadImage, uploadImages } from "@/lib/fileUploader";
+import {
+  updateProduct,
+  deleteProduct,
+  getProductById,
+} from "@/lib/services/productService";
+
 import { generateSlug } from "@/lib/utils";
 import { Product } from "@/types";
+import {
+  deleteImageFromR2,
+  deleteImagesFromR2,
+  uploadImagesToR2,
+  uploadImageToR2,
+} from "@/lib/services/R2Service";
 
 interface RouteParams {
   params: { id: string };
@@ -29,24 +40,27 @@ export async function PUT(request: Request, { params }: RouteParams) {
       slug: generateSlug(productData.name.ar),
     };
 
-    // 1. Handle main image update
+    // Handle main image update: if a new one is uploaded, replace the old one.
     if (mainImageFile) {
-      updateData.image = await uploadImage(mainImageFile);
+      const oldProduct = await getProductById(id);
+      if (oldProduct?.image) {
+        await deleteImageFromR2(oldProduct.image); // Delete old image
+      }
+      updateData.image = await uploadImageToR2(mainImageFile); // Upload new one
     }
 
-    // 2. Handle sub-images update
-    // Note: This logic appends new images. A real-world scenario might need
-    // to handle removal of existing images as well.
+    // Handle sub-images: This example replaces all old sub-images with the new ones.
+    // A more complex implementation could allow appending/removing individual images.
     if (subImageFiles.length > 0) {
-      const newSubImageUrls = await uploadImages(subImageFiles);
-      // You need to decide how to merge: replace all or add to existing.
-      // Here we assume adding to the existing ones (which are not passed from the client).
-      // A better approach is to pass existing image URLs and new files separately.
-      // For now, we'll just set the new ones.
+      const oldProduct = await getProductById(id);
+      if (oldProduct?.subImages && oldProduct.subImages.length > 0) {
+        await deleteImagesFromR2(oldProduct.subImages);
+      }
+      const newSubImageUrls = await uploadImagesToR2(subImageFiles);
+
       updateData.subImages = newSubImageUrls;
     }
 
-    // 3. Update product in Firestore
     await updateProduct(id, updateData);
 
     return NextResponse.json({
@@ -72,9 +86,23 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       );
     }
 
-    // You should add logic here to delete images from your storage (Cloudflare R2)
-    // before deleting the database record.
+    // 1. Get the product record to find image URLs
+    const productToDelete = await getProductById(id);
 
+    if (productToDelete) {
+      // 2. Delete all associated images from R2
+      const imagesToDelete: string[] = [];
+      if (productToDelete.image) {
+        imagesToDelete.push(productToDelete.image);
+      }
+      if (productToDelete.subImages && productToDelete.subImages.length > 0) {
+        // @ts-ignore
+        imagesToDelete.push(...productToDelete.subImages.map((img) => img.url));
+      }
+      await deleteImagesFromR2(imagesToDelete);
+    }
+
+    // 3. Delete the product record from Firestore
     await deleteProduct(id);
 
     return NextResponse.json(
