@@ -1,8 +1,10 @@
 "use client";
 import DataTable from "@/components/admin/DataTable";
+import CategoryFormModal from "@/components/admin/modals/CategoryFormModal";
 import { Category, Language } from "@/types";
 import { Edit, PlusCircle, Trash2 } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 
 const CategoriesPage: React.FC = () => {
   const lang = "ar" as Language;
@@ -28,6 +30,36 @@ const CategoriesPage: React.FC = () => {
       image: "https://placehold.co/200x200/f0e6d3/ffffff?text=شعر",
     },
   ];
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleOpenAddModal = () => {
+    setEditingCategory(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (category: Category) => {
+    setEditingCategory(category);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    if (isSubmitting) return;
+    setIsModalOpen(false);
+  };
+
+  const handleFormSubmit = async (formData: FormData) => {
+    setIsSubmitting(true);
+    console.log("Form submitted!");
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsSubmitting(false);
+    handleCloseModal();
+  };
 
   const columns: {
     key: keyof Category;
@@ -67,7 +99,10 @@ const CategoriesPage: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">إدارة الفئات</h1>
-        <button className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors">
+        <button
+          onClick={handleOpenAddModal}
+          className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors"
+        >
           <PlusCircle size={20} />
           <span className="hidden sm:inline">فئة جديدة</span>
           <span className="sm:hidden">إضافة</span>
@@ -76,9 +111,12 @@ const CategoriesPage: React.FC = () => {
       <DataTable
         columns={columns}
         data={categories}
-        renderActions={() => (
+        renderActions={(item: Category) => (
           <div className="flex gap-2">
-            <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-md">
+            <button
+              onClick={() => handleOpenEditModal(item)}
+              className="p-2 text-blue-600 hover:bg-blue-50 rounded-md"
+            >
               <Edit size={18} />
             </button>
             <button className="p-2 text-red-600 hover:bg-red-50 rounded-md">
@@ -87,6 +125,16 @@ const CategoriesPage: React.FC = () => {
           </div>
         )}
       />
+      {isModalOpen && (
+        <CategoryFormModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSubmit={handleFormSubmit}
+          category={editingCategory}
+          lang={lang}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </div>
   );
 };
