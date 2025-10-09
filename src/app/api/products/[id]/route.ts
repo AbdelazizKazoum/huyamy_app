@@ -25,7 +25,14 @@ export async function PUT(request: Request, { params }: RouteParams) {
     const formData = await request.formData();
     const productDataString = formData.get("productData") as string;
     const mainImageFile = formData.get("mainImage") as File | null;
-    const subImageFiles = formData.getAll("subImages") as File[];
+    const newSubImageFiles = formData.getAll("subImages") as File[];
+    const deletedUrlsString = formData.get("deletedSubImageUrls") as
+      | string
+      | null;
+
+    const deletedSubImageUrls: string[] = deletedUrlsString
+      ? JSON.parse(deletedUrlsString)
+      : [];
 
     if (!productDataString) {
       return NextResponse.json(
@@ -40,27 +47,36 @@ export async function PUT(request: Request, { params }: RouteParams) {
       slug: generateSlug(productData.name.ar),
     };
 
-    // Handle main image update: if a new one is uploaded, replace the old one.
+    const oldProduct = await getProductById(id);
+    if (!oldProduct) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
     if (mainImageFile) {
-      const oldProduct = await getProductById(id);
-      if (oldProduct?.image) {
-        await deleteImageFromR2(oldProduct.image); // Delete old image
+      if (oldProduct.image) {
+        await deleteImageFromR2(oldProduct.image).catch(console.error);
       }
-      updateData.image = await uploadImageToR2(mainImageFile); // Upload new one
+      updateData.image = await uploadImageToR2(mainImageFile);
     }
 
-    // Handle sub-images: This example replaces all old sub-images with the new ones.
-    // A more complex implementation could allow appending/removing individual images.
-    if (subImageFiles.length > 0) {
-      const oldProduct = await getProductById(id);
-      if (oldProduct?.subImages && oldProduct.subImages.length > 0) {
-        await deleteImagesFromR2(oldProduct.subImages);
-      }
-      const newSubImageUrls = await uploadImagesToR2(subImageFiles);
-
-      updateData.subImages = newSubImageUrls;
+    if (deletedSubImageUrls.length > 0) {
+      await deleteImagesFromR2(deletedSubImageUrls).catch(console.error);
     }
 
+    const newSubImageUrls =
+      newSubImageFiles.length > 0
+        ? await uploadImagesToR2(newSubImageFiles)
+        : [];
+
+    // 4. Construct the final subImages array of strings
+    const remainingSubImages =
+      oldProduct.subImages?.filter(
+        (url) => !deletedSubImageUrls.includes(url)
+      ) || [];
+
+    updateData.subImages = [...remainingSubImages, ...newSubImageUrls];
+
+    // 5. Update product in Firestore
     await updateProduct(id, updateData);
 
     return NextResponse.json({
@@ -86,23 +102,20 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       );
     }
 
-    // 1. Get the product record to find image URLs
     const productToDelete = await getProductById(id);
 
     if (productToDelete) {
-      // 2. Delete all associated images from R2
       const imagesToDelete: string[] = [];
       if (productToDelete.image) {
         imagesToDelete.push(productToDelete.image);
       }
+      // Handle subImages as a direct array of strings
       if (productToDelete.subImages && productToDelete.subImages.length > 0) {
-        // @ts-ignore
-        imagesToDelete.push(...productToDelete.subImages.map((img) => img.url));
+        imagesToDelete.push(...productToDelete.subImages);
       }
       await deleteImagesFromR2(imagesToDelete);
     }
 
-    // 3. Delete the product record from Firestore
     await deleteProduct(id);
 
     return NextResponse.json(

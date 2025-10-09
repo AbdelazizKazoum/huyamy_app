@@ -43,8 +43,7 @@ export async function POST(request: Request) {
       ...productData,
       slug: generateSlug(productData.name.ar),
       image: mainImageUrl,
-      // Ensure subImages are stored in the correct format { url: string }
-
+      // Save subImages as a direct array of strings
       subImages: subImageUrls,
       createdAt: new Date(), // Placeholder, will be replaced by server timestamp
       updatedAt: new Date(), // Placeholder, will be replaced by server timestamp
@@ -56,8 +55,6 @@ export async function POST(request: Request) {
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {
     console.error("Failed to create product:", error);
-    // In case of an error, you might want to delete any uploaded images to avoid orphans.
-    // This part is optional but good practice.
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

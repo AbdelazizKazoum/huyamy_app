@@ -10,6 +10,7 @@ const CategoriesPage: React.FC = () => {
     {
       id: "cat-1",
       name: { ar: "العناية بالبشرة", fr: "Soins de la peau" },
+      slug: "soins-de-la-peau",
       description: {
         ar: "كل ما تحتاجينه لبشرة نضرة وصحية.",
         fr: "Tout ce dont vous avez besoin pour une peau fraîche et saine.",
@@ -19,6 +20,7 @@ const CategoriesPage: React.FC = () => {
     {
       id: "cat-2",
       name: { ar: "العناية بالشعر", fr: "Soins des cheveux" },
+      slug: "soins-des-cheveux",
       description: {
         ar: "منتجات طبيعية لتقوية وتغذية شعرك.",
         fr: "Produits naturels pour renforcer et nourrir vos cheveux.",

@@ -47,6 +47,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
   const [subImages, setSubImages] = useState<File[]>([]);
   const [subImagePreviews, setSubImagePreviews] = useState<string[]>([]);
+  // New state to track URLs of existing images to be deleted
+  const [deletedSubImageUrls, setDeletedSubImageUrls] = useState<string[]>([]);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
 
   useEffect(() => {
@@ -64,11 +66,12 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setIsNew(product.isNew);
       setKeywords(product.keywords || []);
       setMainImage(null);
-      setMainImagePreview(product.image); // Show existing image
+      setMainImagePreview(product.image);
       setSubImages([]);
-      // Assuming product.subImages is an array of { url: string }
-      //@ts-ignore
-      setSubImagePreviews(product.subImages?.map((img) => img.url) || []);
+      // Set previews directly from the string array of URLs
+      setSubImagePreviews(product.subImages || []);
+      // Reset the deleted images list
+      setDeletedSubImageUrls([]);
     } else {
       // Reset form for new product
       setNameAr("");
@@ -85,6 +88,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setMainImagePreview(null);
       setSubImages([]);
       setSubImagePreviews([]);
+      setDeletedSubImageUrls([]);
     }
     // Clear errors when modal opens or product changes
     setErrors({});
@@ -100,15 +104,33 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   const handleSubImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const files = Array.from(e.target.files);
-      setSubImages((prev) => [...prev, ...files]);
-      const newPreviews = files.map((file) => URL.createObjectURL(file));
+      const newFiles = Array.from(e.target.files);
+      setSubImages((prev) => [...prev, ...newFiles]);
+
+      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
       setSubImagePreviews((prev) => [...prev, ...newPreviews]);
     }
   };
 
-  const removeSubImage = (index: number) => {
-    setSubImages((prev) => prev.filter((_, i) => i !== index));
+  const removeSubImage = (index: number, previewUrl: string) => {
+    // Check if the preview URL is a blob URL (a new file) or an existing http URL
+    if (previewUrl.startsWith("blob:")) {
+      // This is a new file that hasn't been uploaded yet.
+      // We need to find which file corresponds to this blob URL.
+      const fileIndexToRemove = subImagePreviews
+        .slice(subImagePreviews.length - subImages.length)
+        .findIndex((p) => p === previewUrl);
+
+      if (fileIndexToRemove !== -1) {
+        setSubImages((prev) => prev.filter((_, i) => i !== fileIndexToRemove));
+      }
+    } else {
+      // This is an existing image URL from the database.
+      // Add it to the list of images to be deleted on the backend.
+      setDeletedSubImageUrls((prev) => [...prev, previewUrl]);
+    }
+
+    // In both cases, remove the preview from the UI.
     setSubImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -179,9 +201,15 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     };
 
     const formData = new FormData();
-
-    // 2. Append the product data as a single JSON string.
     formData.append("productData", JSON.stringify(productData));
+
+    // Append deleted image URLs for the backend to process
+    if (deletedSubImageUrls.length > 0) {
+      formData.append(
+        "deletedSubImageUrls",
+        JSON.stringify(deletedSubImageUrls)
+      );
+    }
 
     // Append product ID separately for updates, as it's crucial for backend routing/logic.
     if (product) {
@@ -192,7 +220,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     if (mainImage) {
       formData.append("mainImage", mainImage);
     }
-
     subImages.forEach((file) => {
       formData.append("subImages", file);
     });
@@ -224,10 +251,14 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 z-50 flex justify-center items-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"
+      >
         <div className="flex justify-between items-center p-4 border-b">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
           <button
+            type="button" // Change to type="button" to prevent form submission
             onClick={onClose}
             disabled={isSubmitting}
             className="p-2 rounded-full text-gray-500 hover:bg-gray-100 disabled:opacity-50"
@@ -235,7 +266,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             <X size={24} />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="overflow-y-auto p-6 space-y-6">
+        <div className="overflow-y-auto p-6 space-y-6">
           {/* All form fields should be disabled when submitting */}
           <fieldset disabled={isSubmitting} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -502,7 +533,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       />
                       <button
                         type="button"
-                        onClick={() => removeSubImage(index)}
+                        onClick={() => removeSubImage(index, src)}
                         className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5"
                       >
                         <X size={12} />
@@ -528,7 +559,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
               </div>
             </div>
           </fieldset>
-        </form>
+        </div>
         <div className="flex justify-end items-center gap-4 p-4 border-t bg-gray-50 rounded-b-lg">
           <button
             type="button"
@@ -539,8 +570,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             إلغاء
           </button>
           <button
-            type="submit"
-            onClick={handleSubmit}
+            type="submit" // This will now correctly trigger the form's onSubmit
             disabled={isSubmitting}
             className="px-6 py-2.5 rounded-lg text-white bg-green-700 hover:bg-green-800 disabled:bg-green-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
@@ -554,7 +584,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             )}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

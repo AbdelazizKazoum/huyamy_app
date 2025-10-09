@@ -80,21 +80,18 @@ const ProductsPage: React.FC = () => {
   };
 
   const handleFormSubmit = async (formData: FormData) => {
-    setIsSubmitting(true);
+    setIsSubmitting(true); // <-- Loading starts here
     try {
       if (editingProduct) {
         await updateProduct(editingProduct.id, formData);
-        // Optionally show a success toast/notification
       } else {
         await addProduct(formData);
-        // Optionally show a success toast/notification
       }
       handleCloseModal();
     } catch (err) {
       console.error("Failed to submit form:", err);
-      // Optionally show an error toast/notification
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // <-- Loading stops here
     }
   };
 
@@ -227,7 +224,7 @@ const ProductsPage: React.FC = () => {
           product={editingProduct}
           categories={categories}
           lang={lang}
-          // Pass isSubmitting to disable form controls during submission
+          isSubmitting={isSubmitting} // <-- State is passed to the modal
         />
       )}
     </div>
