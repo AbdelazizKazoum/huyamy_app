@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import {
   updateProduct,
   deleteProduct,
@@ -16,12 +16,13 @@ import {
 } from "@/lib/services/R2Service";
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export async function PUT(request: Request, { params }: RouteParams) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    // Await the params since they're now a Promise in Next.js 15
+    const { id } = await params;
     const formData = await request.formData();
     const productDataString = formData.get("productData") as string;
     const mainImageFile = formData.get("mainImage") as File | null;
@@ -84,7 +85,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       productId: id,
     });
   } catch (error) {
-    console.error(`Failed to update product ${params.id}:`, error);
+    console.error(`Failed to update product:`, error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -92,9 +93,10 @@ export async function PUT(request: Request, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    // Await the params since they're now a Promise in Next.js 15
+    const { id } = await params;
     if (!id) {
       return NextResponse.json(
         { error: "Product ID is required" },
@@ -123,7 +125,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
       { status: 200 }
     );
   } catch (error) {
-    console.error(`Failed to delete product ${params.id}:`, error);
+    console.error(`Failed to delete product:`, error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

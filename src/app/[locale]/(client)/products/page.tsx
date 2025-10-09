@@ -49,7 +49,7 @@ const Pagination = ({
       totalPages - 2
     );
 
-    let pages: (number | string)[] = [...startPages];
+    const pages: (number | string)[] = [...startPages];
 
     if (siblingStart > 3) {
       pages.push("...");
@@ -396,7 +396,8 @@ export default function ProductsPage() {
       case "newest":
         filtered.sort(
           (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            new Date(b.createdAt ?? 0).getTime() -
+            new Date(a.createdAt ?? 0).getTime()
         );
         break;
     }

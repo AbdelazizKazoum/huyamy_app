@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import {
   getCategoryById,
   updateCategory,
@@ -9,12 +9,13 @@ import { Category } from "@/types";
 import { deleteImageFromR2, uploadImageToR2 } from "@/lib/services/R2Service";
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-export async function PUT(request: Request, { params }: RouteParams) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    // Await the params since they're now a Promise in Next.js 15
+    const { id } = await params;
     const formData = await request.formData();
     const nameAr = formData.get("name[ar]") as string;
     const nameFr = formData.get("name[fr]") as string;
@@ -40,7 +41,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ message: "Category updated successfully" });
   } catch (error) {
-    console.error(`Failed to update category ${params.id}:`, error);
+    console.error(`Failed to update category:`, error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -48,9 +49,10 @@ export async function PUT(request: Request, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = params;
+    // Await the params since they're now a Promise in Next.js 15
+    const { id } = await params;
     const categoryToDelete = await getCategoryById(id);
 
     if (categoryToDelete?.image) {
@@ -61,7 +63,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ message: "Category deleted successfully" });
   } catch (error) {
-    console.error(`Failed to delete category ${params.id}:`, error);
+    console.error(`Failed to delete category:`, error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
