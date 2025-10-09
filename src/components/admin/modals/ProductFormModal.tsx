@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 
 import {
@@ -11,10 +10,12 @@ import {
 import { Category, Language, Product } from "@/types";
 import { Loader2, PlusCircle, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
-import FormInput from "./ui/FormInput";
-import FormTextarea from "./ui/FormTextarea";
-import FormSelect from "./ui/FormSelect";
-import FormToggle from "./ui/FormToggle";
+import FormInput from "../ui/FormInput";
+import FormTextarea from "../ui/FormTextarea";
+import FormSelect from "../ui/FormSelect";
+import FormToggle from "../ui/FormToggle";
+import SubmitButton from "../ui/SubmitButton";
+import CancelButton from "../ui/CancelButton";
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -258,7 +259,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         onSubmit={handleSubmit}
         className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"
       >
-        <div className="flex justify-between items-center p-4 border-b">
+        <div className="flex justify-between items-center p-4 border-b border-neutral-200">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
           <button
             type="button" // Change to type="button" to prevent form submission
@@ -483,29 +484,13 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
           </fieldset>
         </div>
-        <div className="flex justify-end items-center gap-4 p-4 border-t bg-gray-50 rounded-b-lg">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="px-6 py-2.5 rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
-          >
+        <div className="flex justify-end items-center gap-4 p-4 border-t border-neutral-200 bg-gray-50 rounded-b-lg">
+          <CancelButton onClick={onClose} isSubmitting={isSubmitting}>
             إلغاء
-          </button>
-          <button
-            type="submit" // This will now correctly trigger the form's onSubmit
-            disabled={isSubmitting}
-            className="px-6 py-2.5 rounded-lg text-white bg-green-700 hover:bg-green-800 disabled:bg-green-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={20} className="animate-spin" />
-                <span>جاري الحفظ...</span>
-              </>
-            ) : (
-              <span>{product ? "حفظ التغييرات" : "إنشاء المنتج"}</span>
-            )}
-          </button>
+          </CancelButton>
+          <SubmitButton isSubmitting={isSubmitting}>
+            <span>{product ? "حفظ التغييرات" : "إنشاء المنتج"}</span>
+          </SubmitButton>
         </div>
       </form>
     </div>

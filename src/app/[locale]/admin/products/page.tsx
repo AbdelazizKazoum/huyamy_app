@@ -7,7 +7,7 @@ import { Category, Language, Product } from "@/types";
 import { Edit, Eye, PlusCircle, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState, useEffect } from "react";
-import ProductFormModal from "@/components/admin/ProductFormModal";
+import ProductFormModal from "@/components/admin/modals/ProductFormModal";
 import { useProductStore } from "@/store/useProductStore";
 import { fetchAllCategoriesAPI } from "@/lib/api/categories";
 

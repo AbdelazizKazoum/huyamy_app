@@ -4,6 +4,10 @@ import { ChangeEvent, FormEvent, useEffect, useState, useRef } from "react";
 import { Category, Language } from "@/types";
 import { Loader2, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
+import FormInput from "../ui/FormInput";
+import FormTextarea from "../ui/FormTextarea";
+import CancelButton from "../ui/CancelButton";
+import SubmitButton from "../ui/SubmitButton";
 
 interface CategoryFormModalProps {
   isOpen: boolean;
@@ -102,7 +106,7 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
         onSubmit={handleSubmit}
         className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"
       >
-        <div className="flex justify-between items-center p-4 border-b">
+        <div className="flex justify-between items-center p-4 border-b border-neutral-200">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
           <button
             type="button"
@@ -116,91 +120,37 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
         <div className="overflow-y-auto p-6 space-y-6">
           <fieldset disabled={isSubmitting} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label
-                  htmlFor="nameAr"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  اسم الفئة (العربية)
-                </label>
-                <input
-                  type="text"
-                  id="nameAr"
-                  value={nameAr}
-                  onChange={(e) => setNameAr(e.target.value)}
-                  className={`w-full p-2.5 border rounded-lg ${
-                    errors.nameAr ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {errors.nameAr && (
-                  <p className="text-red-500 text-sm mt-1">{errors.nameAr}</p>
-                )}
-              </div>
-              <div>
-                <label
-                  htmlFor="nameFr"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  اسم الفئة (الفرنسية)
-                </label>
-                <input
-                  type="text"
-                  id="nameFr"
-                  value={nameFr}
-                  onChange={(e) => setNameFr(e.target.value)}
-                  className={`w-full p-2.5 border rounded-lg ${
-                    errors.nameFr ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {errors.nameFr && (
-                  <p className="text-red-500 text-sm mt-1">{errors.nameFr}</p>
-                )}
-              </div>
+              <FormInput
+                label="اسم الفئة (العربية)"
+                id="nameAr"
+                value={nameAr}
+                onChange={(e) => setNameAr(e.target.value)}
+                error={errors.nameAr}
+              />
+              <FormInput
+                label="اسم الفئة (الفرنسية)"
+                id="nameFr"
+                value={nameFr}
+                onChange={(e) => setNameFr(e.target.value)}
+                error={errors.nameFr}
+              />
             </div>
-            <div>
-              <label
-                htmlFor="descriptionAr"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                الوصف (العربية)
-              </label>
-              <textarea
-                id="descriptionAr"
-                value={descriptionAr}
-                onChange={(e) => setDescriptionAr(e.target.value)}
-                rows={3}
-                className={`w-full p-2.5 border rounded-lg ${
-                  errors.descriptionAr ? "border-red-500" : "border-gray-300"
-                }`}
-              ></textarea>
-              {errors.descriptionAr && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.descriptionAr}
-                </p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="descriptionFr"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                الوصف (الفرنسية)
-              </label>
-              <textarea
-                id="descriptionFr"
-                value={descriptionFr}
-                onChange={(e) => setDescriptionFr(e.target.value)}
-                rows={3}
-                className={`w-full p-2.5 border rounded-lg ${
-                  errors.descriptionFr ? "border-red-500" : "border-gray-300"
-                }`}
-              ></textarea>
-              {errors.descriptionFr && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.descriptionFr}
-                </p>
-              )}
-            </div>
+            <FormTextarea
+              label="الوصف (العربية)"
+              id="descriptionAr"
+              value={descriptionAr}
+              onChange={(e) => setDescriptionAr(e.target.value)}
+              rows={3}
+              error={errors.descriptionAr}
+            />
+            <FormTextarea
+              label="الوصف (الفرنسية)"
+              id="descriptionFr"
+              value={descriptionFr}
+              onChange={(e) => setDescriptionFr(e.target.value)}
+              rows={3}
+              error={errors.descriptionFr}
+            />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 صورة الفئة
@@ -248,29 +198,13 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
             </div>
           </fieldset>
         </div>
-        <div className="flex justify-end items-center gap-4 p-4 border-t bg-gray-50 rounded-b-lg">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="px-6 py-2.5 rounded-lg text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
-          >
+        <div className="flex justify-end items-center gap-4 p-4 border-t border-neutral-200 bg-gray-50 rounded-b-lg">
+          <CancelButton onClick={onClose} isSubmitting={isSubmitting}>
             إلغاء
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-6 py-2.5 rounded-lg text-white bg-green-700 hover:bg-green-800 disabled:bg-green-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 size={20} className="animate-spin" />
-                <span>جاري الحفظ...</span>
-              </>
-            ) : (
-              <span>{category ? "حفظ التغييرات" : "إنشاء الفئة"}</span>
-            )}
-          </button>
+          </CancelButton>
+          <SubmitButton isSubmitting={isSubmitting}>
+            <span>{category ? "حفظ التغييرات" : "إنشاء الفئة"}</span>
+          </SubmitButton>
         </div>
       </form>
     </div>
