@@ -2,6 +2,7 @@
 import { adminDb } from "@/lib/firebaseAdmin";
 import { Section, SectionWithProducts, Product } from "@/types";
 import { getProductsByIds } from "./productService";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function getAllSections(): Promise<Section[]> {
   const snap = await adminDb
@@ -199,6 +200,36 @@ export async function getLandingPageSectionsWithProducts(): Promise<
   );
 
   return sectionsWithProducts;
+}
+
+// --- CRUD Operations ---
+
+export async function createSection(
+  sectionData: Omit<Section, "id">
+): Promise<Section> {
+  const sectionRef = adminDb.collection("sections").doc();
+  const newSection = {
+    ...sectionData,
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+  await sectionRef.set(newSection);
+  return { id: sectionRef.id, ...newSection } as Section;
+}
+
+export async function updateSection(
+  sectionId: string,
+  sectionData: Partial<Section>
+): Promise<void> {
+  const sectionRef = adminDb.collection("sections").doc(sectionId);
+  await sectionRef.update({
+    ...sectionData,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+}
+
+export async function deleteSection(sectionId: string): Promise<void> {
+  await adminDb.collection("sections").doc(sectionId).delete();
 }
 
 // Test function to verify the service is working correctly

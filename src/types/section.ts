@@ -14,6 +14,8 @@ export type SectionData = {
   subtitle?: LocalizedString;
   description?: LocalizedString;
   ctaProductIds?: string[];
+  ctaProducts?: Product[];
+
   ctaText?: LocalizedString;
   ctaUrl?: string;
   imageUrl?: string;
