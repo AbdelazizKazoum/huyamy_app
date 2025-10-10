@@ -1,104 +1,154 @@
 "use client";
-import DataTable from "@/components/admin/DataTable";
-import { LocalizedString } from "@/types";
-import { Language } from "firebase/ai";
-import { Edit, PlusCircle, Trash2 } from "lucide-react";
 
-type Section = {
-  id: string;
-  type: string;
-  title: LocalizedString;
-  subtitle: LocalizedString;
-  ctaProductIds: string[];
-  createdAt: Date;
-  updatedAt: Date;
-};
+import { useEffect, useState } from "react";
+import { Language, Section, SectionWithProducts } from "@/types";
+import { useSectionStore } from "@/store/useSectionStore";
+import { useProductStore } from "@/store/useProductStore";
+import DataTable from "@/components/admin/DataTable";
+import SectionFormModal from "@/components/admin/modals/SectionFormModal";
+import { Edit, PlusCircle, Trash2, CheckCircle, XCircle } from "lucide-react";
 
 const SectionsPage: React.FC = () => {
   const lang = "ar" as Language;
-  const sections: Section[] = [
-    {
-      id: "landing-popular",
-      type: "landing-page",
-      title: { ar: "الأكثر مبيعاً", fr: "Les plus vendus" },
-      subtitle: {
-        ar: "المنتجات التي يحبها عملاؤنا أكثر",
-        fr: "Les produits que nos clients préfèrent",
-      },
-      ctaProductIds: ["prod-3", "prod-6", "prod-7", "prod-5"],
-      createdAt: new Date("2025-10-02T20:50:11Z"),
-      updatedAt: new Date("2025-10-02T20:50:11Z"),
-    },
-    {
-      id: "landing-new",
-      type: "landing-page",
-      title: { ar: "وصل حديثاً", fr: "Nouveautés" },
-      subtitle: {
-        ar: "اكتشف أحدث إضافاتنا إلى المجموعة",
-        fr: "Découvrez nos dernières additions à la collection",
-      },
-      ctaProductIds: ["prod-1", "prod-4", "prod-9"],
-      createdAt: new Date("2025-10-01T10:00:00Z"),
-      updatedAt: new Date("2025-10-01T10:00:00Z"),
-    },
-  ];
 
-  const columns: {
-    key: keyof Section;
-    label: string;
-    sortable: boolean;
-    render?: (item: Section) => React.ReactNode;
-  }[] = [
+  // Zustand Store Integration
+  const {
+    sections,
+    isLoading,
+    fetchSections,
+    addSection,
+    updateSection,
+    deleteSection,
+  } = useSectionStore();
+  const { products, fetchProducts } = useProductStore();
+
+  // State for UI and Modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingSection, setEditingSection] = useState<Section | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Fetch initial data from stores
+  useEffect(() => {
+    fetchSections();
+    fetchProducts();
+  }, [fetchSections, fetchProducts]);
+
+  // Modal and Form Handlers
+  const handleOpenAddModal = () => {
+    setEditingSection(null);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (section: Section) => {
+    setEditingSection(section);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    if (isSubmitting) return;
+    setIsModalOpen(false);
+  };
+
+  const handleFormSubmit = async (formData: FormData) => {
+    setIsSubmitting(true);
+    try {
+      if (editingSection) {
+        await updateSection(editingSection.id, formData);
+      } else {
+        await addSection(formData);
+      }
+      handleCloseModal();
+    } catch (err) {
+      console.error("Failed to submit section form:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (sectionId: string) => {
+    if (window.confirm("هل أنت متأكد من رغبتك في حذف هذا القسم؟")) {
+      await deleteSection(sectionId);
+    }
+  };
+
+  const columns = [
+    { key: "order", label: "الترتيب", sortable: true },
+    { key: "type", label: "النوع", sortable: true },
     {
       key: "title",
       label: "العنوان",
       sortable: true,
-      render: (item) => (
-        // @ts-expect-error: LocalizedString index type mismatch
-        <span className="font-medium text-gray-800">{item.title[lang]}</span>
-      ),
+      render: (item: SectionWithProducts) => item.data.title?.[lang] || "N/A",
     },
     {
-      key: "type",
-      label: "النوع",
-      sortable: true,
-      render: (item) => (
-        <span className="bg-indigo-100 text-indigo-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded">
-          {item.type}
-        </span>
-      ),
-    },
-    {
-      key: "ctaProductIds",
-      label: "عدد المنتجات",
+      key: "products",
+      label: "المنتجات",
       sortable: false,
-      render: (item) => item.ctaProductIds.length,
+      render: (item: SectionWithProducts) =>
+        item.products?.length || item.data.ctaProductIds?.length || 0,
+    },
+    {
+      key: "isActive",
+      label: "فعال",
+      sortable: true,
+      render: (item: Section) =>
+        item.isActive ? (
+          <CheckCircle className="text-green-500" />
+        ) : (
+          <XCircle className="text-red-500" />
+        ),
     },
   ];
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">إدارة الأقسام</h1>
-        <button className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors">
+        <h1 className="text-3xl font-bold text-gray-800">
+          إدارة الأقسام ({sections.length})
+        </h1>
+        <button
+          onClick={handleOpenAddModal}
+          className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800"
+        >
           <PlusCircle size={20} />
-          <span className="hidden sm:inline">قسم جديد</span>
-          <span className="sm:hidden">إضافة</span>
+          <span>قسم جديد</span>
         </button>
       </div>
+
       <DataTable
         columns={columns}
         data={sections}
-        renderActions={() => (
+        isLoading={isLoading}
+        itemsPerPage={10}
+        renderActions={(item: Section) => (
           <div className="flex gap-2">
-            <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-md">
+            <button
+              onClick={() => handleOpenEditModal(item)}
+              className="p-2 text-blue-600 hover:bg-blue-50 rounded-md"
+            >
               <Edit size={18} />
             </button>
-            <button className="p-2 text-red-600 hover:bg-red-50 rounded-md">
+            <button
+              onClick={() => handleDelete(item.id)}
+              className="p-2 text-red-600 hover:bg-red-50 rounded-md"
+            >
               <Trash2 size={18} />
             </button>
           </div>
         )}
       />
+
+      {isModalOpen && (
+        <SectionFormModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSubmit={handleFormSubmit}
+          section={editingSection}
+          products={products}
+          lang={lang}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </div>
   );
 };
