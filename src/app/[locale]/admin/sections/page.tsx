@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Language, Section, SectionWithProducts } from "@/types";
 import { useSectionStore } from "@/store/useSectionStore";
-import { useProductStore } from "@/store/useProductStore";
 import DataTable from "@/components/admin/DataTable";
 import SectionFormModal from "@/components/admin/modals/SectionFormModal";
 import { Edit, PlusCircle, Trash2, CheckCircle, XCircle } from "lucide-react";
@@ -20,7 +19,6 @@ const SectionsPage: React.FC = () => {
     updateSection,
     deleteSection,
   } = useSectionStore();
-  const { products, fetchProducts } = useProductStore();
 
   // State for UI and Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,8 +28,7 @@ const SectionsPage: React.FC = () => {
   // Fetch initial data from stores
   useEffect(() => {
     fetchSections();
-    fetchProducts();
-  }, [fetchSections, fetchProducts]);
+  }, [fetchSections]);
 
   // Modal and Form Handlers
   const handleOpenAddModal = () => {
@@ -71,11 +68,15 @@ const SectionsPage: React.FC = () => {
     }
   };
 
-  const columns = [
-    { key: "order", label: "الترتيب", sortable: true },
+  const columns: {
+    key: keyof SectionWithProducts;
+    label: string;
+    sortable: boolean;
+    render?: (item: SectionWithProducts) => React.ReactNode;
+  }[] = [
     { key: "type", label: "النوع", sortable: true },
     {
-      key: "title",
+      key: "data",
       label: "العنوان",
       sortable: true,
       render: (item: SectionWithProducts) => item.data.title?.[lang] || "N/A",
@@ -91,7 +92,7 @@ const SectionsPage: React.FC = () => {
       key: "isActive",
       label: "فعال",
       sortable: true,
-      render: (item: Section) =>
+      render: (item: SectionWithProducts) =>
         item.isActive ? (
           <CheckCircle className="text-green-500" />
         ) : (
@@ -144,7 +145,6 @@ const SectionsPage: React.FC = () => {
           onClose={handleCloseModal}
           onSubmit={handleFormSubmit}
           section={editingSection}
-          products={products}
           lang={lang}
           isSubmitting={isSubmitting}
         />

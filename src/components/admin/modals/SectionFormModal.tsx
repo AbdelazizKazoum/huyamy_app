@@ -8,16 +8,16 @@ import {
   useRef,
   useMemo,
 } from "react";
-import { Section, SectionType, Language, Product } from "@/types";
-import { ChevronDown, UploadCloud, X } from "lucide-react";
+import { Section, SectionType, Language } from "@/types";
+import { PackageSearch, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
 import FormInput from "../ui/FormInput";
 import FormSelect from "../ui/FormSelect";
 import FormToggle from "../ui/FormToggle";
 import { useProductStore } from "@/store/useProductStore";
-import ProductSelector from "../ProductSelector";
 import CancelButton from "../ui/CancelButton";
 import SubmitButton from "../ui/SubmitButton";
+import ProductSelector from "../ProductSelector";
 
 interface SectionFormModalProps {
   isOpen: boolean;
@@ -29,12 +29,16 @@ interface SectionFormModalProps {
   isSubmitting?: boolean;
 }
 
-const sectionTypes: SectionType[] = [
-  "hero",
-  "featured",
-  "popular",
-  "banner",
-  "newsletter",
+// Define the simplified and localized section type options
+const sectionTypeOptions: {
+  value: string;
+  label: { [key in Language]: string };
+}[] = [
+  { value: "landing-page", label: { ar: "صفحة الهبوط", fr: "Page d'accueil" } },
+  {
+    value: "featured",
+    label: { ar: "منتجات موصى بها", fr: "Produits Recommandés" },
+  },
 ];
 
 const SectionFormModal: React.FC<SectionFormModalProps> = ({
@@ -49,9 +53,8 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
   const { products, fetchProducts } = useProductStore();
 
   // Section-level state
-  const [type, setType] = useState<SectionType>("featured");
+  const [type, setType] = useState<string>("landing-page"); // Default to landing-page
   const [isActive, setIsActive] = useState(true);
-  const [order, setOrder] = useState<number | string>(0);
 
   // 'data' object state
   const [titleAr, setTitleAr] = useState("");
@@ -79,7 +82,6 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
     if (section) {
       setType(section.type);
       setIsActive(section.isActive ?? true);
-      setOrder(section.order ?? 0);
       setTitleAr(section.data.title?.ar || "");
       setTitleFr(section.data.title?.fr || "");
       setSubtitleAr(section.data.subtitle?.ar || "");
@@ -92,9 +94,8 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
       setImagePreview(section.data.imageUrl || null);
     } else {
       // Reset form
-      setType("featured");
+      setType("landing-page"); // Default to landing-page
       setIsActive(true);
-      setOrder(0);
       setTitleAr("");
       setTitleFr("");
       setSubtitleAr("");
@@ -144,13 +145,13 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
     const sectionData = {
       type,
       isActive,
-      order: Number(order),
       data: {
         title: { ar: titleAr, fr: titleFr },
         subtitle: { ar: subtitleAr, fr: subtitleFr },
         ctaText: { ar: ctaTextAr, fr: ctaTextFr },
         ctaUrl,
         ctaProductIds: selectedProductIds,
+        ctaProducts: selectedProducts,
       },
     };
 
@@ -189,34 +190,29 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
         <div className="overflow-y-auto p-6 space-y-6">
           <fieldset disabled={isSubmitting} className="space-y-6">
             {/* Core Section Fields */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormSelect
                 label="نوع القسم"
                 id="type"
                 value={type}
                 onChange={(e) => setType(e.target.value as SectionType)}
               >
-                {sectionTypes.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
+                {sectionTypeOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label[lang]}
                   </option>
                 ))}
               </FormSelect>
-              <FormInput
-                label="الترتيب"
-                id="order"
-                type="number"
-                value={order}
-                onChange={(e) => setOrder(e.target.value)}
-              />
-              <FormToggle
-                label="فعال؟"
-                checked={isActive}
-                onChange={(e) => setIsActive(e.target.checked)}
-              />
+              <div className="flex items-end pb-2">
+                <FormToggle
+                  label="فعال؟"
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                />
+              </div>
             </div>
 
-            <hr />
+            <hr className="border-gray-200" />
 
             {/* Dynamic Data Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -270,53 +266,56 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
               </div>
             )}
 
-            {/* REPLACED Product Selector UI */}
-            {(type === "featured" || type === "popular") && (
-              <div className="space-y-4">
-                <ProductSelector
-                  availableProducts={availableProducts}
-                  onProductSelect={addProductToSection}
-                  lang={lang}
-                  label="المنتجات المعروضة"
-                />
+            {/* Product Selector UI - Now always visible */}
+            <div className="space-y-4">
+              <ProductSelector
+                availableProducts={availableProducts}
+                onProductSelect={addProductToSection}
+                lang={lang}
+                label="المنتجات المعروضة"
+              />
 
-                {/* ENHANCED Selected Products Display (no changes here) */}
-                <div className="p-4 border border-gray-200 rounded-lg bg-gray-50/50 min-h-[150px]">
-                  {selectedProducts.length > 0 ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {selectedProducts.map((p) => (
-                        <div
-                          key={p.id}
-                          className="relative border border-gray-200 bg-white rounded-lg p-2 flex flex-col items-center text-center shadow-sm transition-all duration-200 hover:shadow-md hover:border-green-400"
+              <div className="p-4 border border-gray-200 rounded-lg bg-gray-50/50 min-h-[150px]">
+                {selectedProducts.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {selectedProducts.map((p) => (
+                      <div
+                        key={p.id}
+                        className="relative border border-gray-200 bg-white rounded-lg p-2 flex flex-col items-center text-center shadow-sm transition-all duration-200 hover:shadow-md hover:border-green-400"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => removeProductFromSection(p.id)}
+                          className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5 z-10 hover:bg-red-700 transition-colors"
                         >
-                          <button
-                            type="button"
-                            onClick={() => removeProductFromSection(p.id)}
-                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5 z-10 hover:bg-red-700 transition-colors"
-                          >
-                            <X size={14} />
-                          </button>
-                          <Image
-                            src={p.image}
-                            alt={p.name[lang]}
-                            width={80}
-                            height={80}
-                            className="w-20 h-20 object-cover rounded-md bg-gray-100"
-                          />
-                          <span className="mt-2 text-xs font-medium text-gray-700 w-full truncate">
-                            {p.name[lang]}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-sm text-gray-500">
-                      لم يتم اختيار أي منتجات بعد.
-                    </div>
-                  )}
-                </div>
+                          <X size={14} />
+                        </button>
+                        <Image
+                          src={p.image}
+                          alt={p.name[lang]}
+                          width={80}
+                          height={80}
+                          className="w-20 h-20 object-cover rounded-md bg-gray-100"
+                        />
+                        <span className="mt-2 text-xs font-medium text-gray-700 w-full truncate">
+                          {p.name[lang]}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 py-8">
+                    <PackageSearch size={48} className="mb-4 text-gray-400" />
+                    <h3 className="font-semibold text-gray-600">
+                      لم يتم اختيار أي منتجات
+                    </h3>
+                    <p className="text-sm">
+                      استخدم شريط البحث أعلاه لإضافة منتجات إلى هذا القسم.
+                    </p>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
 
             {/* Image Upload */}
             {(type === "hero" || type === "banner") && (

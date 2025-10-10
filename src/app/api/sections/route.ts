@@ -1,14 +1,11 @@
 import { NextResponse } from "next/server";
-import {
-  getAllSectionsWithProducts,
-  createSection,
-} from "@/lib/services/sectionService";
+import { createSection, getAllSections } from "@/lib/services/sectionService";
 import { Section } from "@/types";
 import { uploadImageToR2 } from "@/lib/services/R2Service";
 
 export async function GET() {
   try {
-    const sections = await getAllSectionsWithProducts();
+    const sections = await getAllSections();
     return NextResponse.json(sections);
   } catch (error) {
     console.error("Failed to fetch sections:", error);

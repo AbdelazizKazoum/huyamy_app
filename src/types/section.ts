@@ -1,13 +1,7 @@
 import { LocalizedString } from "./common";
 import { Product } from "./product";
 
-export type SectionType =
-  | "hero"
-  | "featured"
-  | "popular"
-  | "newsletter"
-  | "banner"
-  | "landing-page";
+export type SectionType = "featured" | "landing-page";
 
 export type SectionData = {
   title?: LocalizedString;
@@ -25,7 +19,7 @@ export type SectionData = {
 
 export type Section = {
   id: string;
-  type: SectionType;
+  type: string;
   data: SectionData;
   createdAt?: FirebaseFirestore.Timestamp | null;
   updatedAt?: FirebaseFirestore.Timestamp | null;
