@@ -45,7 +45,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const productData = JSON.parse(productDataString);
     const updateData: Partial<Product> = {
       ...productData,
-      slug: generateSlug(productData.name.ar),
+      slug: generateSlug(productData.name.fr),
     };
 
     const oldProduct = await getProductById(id);

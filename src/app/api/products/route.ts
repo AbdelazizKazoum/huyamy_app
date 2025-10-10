@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     // 2. Prepare the final product object for the database
     const finalProduct: Omit<Product, "id"> = {
       ...productData,
-      slug: generateSlug(productData.name.ar),
+      slug: generateSlug(productData.name.fr),
       image: mainImageUrl,
       // Save subImages as a direct array of strings
       subImages: subImageUrls,
