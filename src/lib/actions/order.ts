@@ -3,8 +3,6 @@
 import { checkoutSchema, FormState } from "@/lib/schemas";
 import { createGuestOrder } from "@/lib/services/orderService";
 import { revalidatePath } from "next/cache";
-import { Product } from "@/types";
-import { OrderData } from "@/types/order";
 
 // Localized messages for order processing
 const messages = {
@@ -24,6 +22,23 @@ const messages = {
 };
 
 // Updated interface for order data
+interface OrderData {
+  products: Array<{
+    id: string;
+    name: Record<string, string>;
+    price: number;
+    quantity: number;
+    image: string;
+  }>;
+  shippingInfo: {
+    fullName: string;
+    phone: string;
+    address: string;
+  };
+  orderDate: string;
+  totalAmount: number;
+  locale: "ar" | "fr";
+}
 
 // This is the Server Action that our form will call.
 export async function createOrderAction(
@@ -87,7 +102,8 @@ export async function createOrderAction(
     locale: data.locale,
   };
 
-  // 7. If validation succeeds, call the Firebase service
+  // 7. If validation succeeds, call the Firebase service directly
+  // (This bypasses the API layer since we're on the server)
   try {
     await createGuestOrder(orderData);
 

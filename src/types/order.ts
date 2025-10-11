@@ -15,3 +15,10 @@ export interface OrderData {
   totalAmount: number;
   locale: "ar" | "fr";
 }
+
+export interface Order extends OrderData {
+  id: string;
+  status: "pending" | "shipped" | "delivered" | "cancelled";
+  createdAt: Date | null;
+  updatedAt: Date | null;
+}
