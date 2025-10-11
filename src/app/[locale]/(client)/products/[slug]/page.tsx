@@ -480,7 +480,7 @@ export default async function ProductDetailsPage({ params }: Props) {
                 </div>
 
                 {/* Checkout Form */}
-                <CheckoutForm lang={locale} />
+                <CheckoutForm lang={locale} product={product} />
 
                 {/* Features/Benefits Section */}
                 <div className="mt-10 pt-8 border-t border-border-light">

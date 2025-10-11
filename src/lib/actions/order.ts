@@ -3,6 +3,7 @@
 import { checkoutSchema, FormState } from "@/lib/schemas";
 import { createGuestOrder } from "@/lib/services/orderService";
 import { revalidatePath } from "next/cache";
+import { Product } from "@/types";
 
 // Localized messages for order processing
 const messages = {
@@ -21,6 +22,25 @@ const messages = {
   },
 };
 
+// Updated interface for order data
+interface OrderData {
+  products: Array<{
+    id: string;
+    name: Record<string, string>;
+    price: number;
+    quantity: number;
+    image: string;
+  }>;
+  shippingInfo: {
+    fullName: string;
+    phone: string;
+    address: string;
+  };
+  orderDate: string;
+  totalAmount: number;
+  locale: "ar" | "fr";
+}
+
 // This is the Server Action that our form will call.
 export async function createOrderAction(
   prevState: FormState,
@@ -31,10 +51,12 @@ export async function createOrderAction(
     fullName: formData.get("fullName"),
     phone: formData.get("phone"),
     address: formData.get("address"),
-    locale: (formData.get("locale") as "ar" | "fr") || "fr", // Get locale from form
+    locale: (formData.get("locale") as "ar" | "fr") || "fr",
+    // Get products data (JSON string)
+    productsData: formData.get("productsData") as string,
   };
 
-  // 2. Validate the data using our Zod schema
+  // 2. Validate the shipping info using our Zod schema
   const parsed = checkoutSchema.safeParse({
     fullName: data.fullName,
     phone: data.phone,
@@ -49,14 +71,46 @@ export async function createOrderAction(
     };
   }
 
-  // 4. If validation succeeds, call the Firebase service
+  // 4. Parse and validate products data
+  let products;
   try {
-    await createGuestOrder(parsed.data);
+    products = JSON.parse(data.productsData);
+    if (!Array.isArray(products) || products.length === 0) {
+      throw new Error("Invalid products data");
+    }
+  } catch (error) {
+    console.error("Failed to parse products data:", error);
+    return {
+      message: messages[data.locale].error,
+    };
+  }
+
+  // 5. Calculate total amount
+  const totalAmount = products.reduce((total, product) => {
+    return total + product.price * product.quantity;
+  }, 0);
+
+  // 6. Prepare order data
+  const orderData: OrderData = {
+    products,
+    shippingInfo: {
+      fullName: parsed.data.fullName,
+      phone: parsed.data.phone,
+      address: parsed.data.address,
+    },
+    orderDate: new Date().toISOString(),
+    totalAmount,
+    locale: data.locale,
+  };
+
+  // 7. If validation succeeds, call the Firebase service
+  try {
+    await createGuestOrder(orderData);
 
     // Optional: Revalidate a path if you have a page that lists orders
     // revalidatePath('/admin/orders');
 
-    // 5. Return a success message
+    // 8. Return a success message
     return {
       message: messages[data.locale].success,
     };

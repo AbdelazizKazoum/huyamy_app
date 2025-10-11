@@ -1,19 +1,26 @@
 "use client";
 
-import { Language } from "@/types";
-import { ShoppingCart, Loader2, CheckCircle, X, Home } from "lucide-react";
-import { useActionState } from "react";
+import { Language, Product } from "@/types";
+import { ShoppingCart, Loader2 } from "lucide-react";
+import React, { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import { createOrderAction } from "@/lib/actions/order";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
 import SuccessModal from "../modals/CheckoutSuccessModal";
 
 const initialState = {
   message: "",
   errors: {},
 };
+
+// Updated interface for checkout form props
+interface CheckoutFormProps {
+  lang: Language;
+  products?: Product[]; // For multiple products (cart/checkout page)
+  product?: Product; // For single product (product detail page)
+  quantities?: Record<string, number>; // For cart quantities
+}
 
 // A separate component for the button to use the `useFormStatus` hook.
 const SubmitButton = ({ lang }: { lang: Language }) => {
@@ -170,12 +177,43 @@ const SubmitButton = ({ lang }: { lang: Language }) => {
   );
 };
 
-export const CheckoutForm: React.FC<{ lang: Language }> = ({ lang }) => {
+export const CheckoutForm: React.FC<CheckoutFormProps> = ({
+  lang,
+  products,
+  product,
+  quantities = {},
+}) => {
   const [state, formAction] = useActionState(createOrderAction, initialState);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const t = useTranslations("checkout");
   const locale = useLocale();
+
+  // Prepare products data for the order
+  const orderProducts = React.useMemo(() => {
+    if (products) {
+      // Multiple products (from cart/checkout page)
+      return products.map((p) => ({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        quantity: quantities[p.id] || 1,
+        image: p.image,
+      }));
+    } else if (product) {
+      // Single product (from product detail page)
+      return [
+        {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          quantity: 1,
+          image: product.image,
+        },
+      ];
+    }
+    return [];
+  }, [products, product, quantities]);
 
   // Effect to handle success state
   useEffect(() => {
@@ -239,6 +277,13 @@ export const CheckoutForm: React.FC<{ lang: Language }> = ({ lang }) => {
       <form ref={formRef} action={formAction} className="space-y-4">
         {/* Hidden input to pass locale to server action */}
         <input type="hidden" name="locale" value={locale} />
+
+        {/* Hidden input to pass products data to server action */}
+        <input
+          type="hidden"
+          name="productsData"
+          value={JSON.stringify(orderProducts)}
+        />
 
         <div className="bg-white p-6 rounded-3xl shadow-2xl border-[5px] border-green-700 space-y-4">
           <h2 className="text-xl font-bold text-center text-gray-800">
