@@ -13,9 +13,9 @@ interface LanguageSelectorProps {
   isMobile?: boolean;
 }
 
-const LANGUAGES: { code: Locale; labelKey: string }[] = [
-  { code: "ar", labelKey: "arabic" },
-  { code: "fr", labelKey: "french" },
+const LANGUAGES: { code: Locale; label: string }[] = [
+  { code: "ar", label: "العربية" },
+  { code: "fr", label: "Français" },
 ];
 
 const LanguageSelector: React.FC<LanguageSelectorProps> = ({
@@ -26,66 +26,63 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   isMobile = false,
 }) => {
   const t = useTranslations("languageSelector");
-
-  // Hook to handle clicks outside the component
   const dropdownRef = useClickOutside(() => {
-    if (isOpen) {
-      onToggle();
-    }
+    if (isOpen) onToggle();
   });
 
   const handleLanguageSelect = (selectedLang: Locale) => {
-    onLanguageChange(selectedLang);
-    onToggle(); // Close the dropdown
+    if (selectedLang !== lang) onLanguageChange(selectedLang);
+    onToggle();
   };
 
-  // Get selected language label
-  const selectedLabel =
-    LANGUAGES.find((l) => l.code === lang)?.labelKey ?? lang.toUpperCase();
+  // Unified button style
+  const buttonClass =
+    "flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300";
+
+  // Dropdown style
+  const dropdownClass =
+    "absolute top-full right-0 mt-2 w-36 bg-white rounded-lg shadow-xl z-50 py-2";
 
   return (
     <div
-      className={`relative ${isMobile ? "w-full" : ""}`}
+      className={`relative ${isMobile ? "w-auto flex justify-center" : ""}`}
       ref={dropdownRef}
-      aria-haspopup="listbox"
-      aria-expanded={isOpen}
     >
       <button
         onClick={onToggle}
-        className={`flex items-center justify-between w-full px-4 py-2 rounded-xl shadow-sm border border-neutral-200 bg-white hover:bg-neutral-50 transition-all duration-200 ${
-          isMobile ? "text-base" : "text-sm font-semibold"
-        }`}
-        aria-label={t("selectLanguage")}
+        className="flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300"
+        aria-label="Change language"
       >
-        <div className="flex items-center gap-2">
-          <Globe size={isMobile ? 22 : 24} />
-          <span>{t(selectedLabel)}</span>
-        </div>
+        <Globe size={22} className={lang === "ar" ? "ml-2" : "mr-2"} />
+        <span className="font-semibold text-sm">
+          {LANGUAGES.find((l) => l.code === lang)?.label || lang.toUpperCase()}
+        </span>
         <ChevronDown
           size={16}
-          className={`transition-transform duration-200 ${
+          className={`ml-2 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
       </button>
       {isOpen && (
         <div
-          className={`absolute top-full ${
-            isMobile ? "left-0 w-full" : "right-0 w-44"
-          } mt-2 bg-white rounded-xl shadow-lg border border-neutral-200 z-50 py-2`}
-          role="listbox"
+          className={
+            isMobile
+              ? "absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[90vw] max-w-xs bg-white rounded-xl shadow-2xl z-50 py-4"
+              : "absolute top-full right-0 mt-2 w-36 bg-white rounded-lg shadow-xl z-50 py-2"
+          }
         >
-          {LANGUAGES.map(({ code, labelKey }) => (
+          {LANGUAGES.map(({ code, label }) => (
             <button
               key={code}
               onClick={() => handleLanguageSelect(code)}
-              className={`block w-full text-left px-4 py-2 rounded-lg text-neutral-700 hover:bg-primary-50 hover:text-primary-800 transition-colors duration-150 ${
-                lang === code ? "bg-neutral-100 font-bold" : ""
+              className={`block w-full text-left px-4 py-2 text-neutral-700 hover:bg-neutral-100 rounded ${
+                lang === code
+                  ? "bg-neutral-100 font-semibold text-primary-800"
+                  : ""
               }`}
-              role="option"
-              aria-selected={lang === code}
             >
-              {t(labelKey)}
+              {label}
             </button>
           ))}
         </div>
