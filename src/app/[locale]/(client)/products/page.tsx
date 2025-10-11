@@ -36,7 +36,6 @@ const getCachedCategories = unstable_cache(
       const categories = await getCategories();
       return categories;
     } catch (error) {
-      console.error("Error in getCachedCategories:", error);
       // Return empty array to prevent complete failure
       return [];
     }
@@ -50,11 +49,11 @@ const getCachedCategories = unstable_cache(
 
 // Server component for data fetching and SEO
 export default async function ProductsPage({
-  params: { locale },
+  params,
 }: {
-  params: { locale: Locale };
+  params: Promise<{ locale: Locale }>;
 }) {
-  console.log("ProductsPage rendering for locale:", locale);
+  const { locale } = await params;
 
   try {
     const t = await getTranslations("products");
@@ -121,10 +120,12 @@ export default async function ProductsPage({
 
 // Generate metadata for SEO
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: Locale };
+  params: Promise<{ locale: Locale }>;
 }) {
+  const { locale } = await params;
+
   try {
     const t = await getTranslations("products");
 
