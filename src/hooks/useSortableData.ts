@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMemo, useState } from "react";
 
 // --- Helper Hooks ---
@@ -10,8 +11,26 @@ const useSortableData = <T extends object>(
     const sortableItems = [...items];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
-        const aVal = a[sortConfig.key];
-        const bVal = b[sortConfig.key];
+        // Extract 'ar' value if present, otherwise use the value directly
+        const getArValue = (val: any) => {
+          if (val && typeof val === "object" && "ar" in val) {
+            return val.ar;
+          }
+          return val;
+        };
+
+        const aVal = getArValue(a[sortConfig.key]);
+        const bVal = getArValue(b[sortConfig.key]);
+
+        // Use localeCompare for Arabic strings
+        if (typeof aVal === "string" && typeof bVal === "string") {
+          const comparison = aVal.localeCompare(bVal, "ar");
+          return sortConfig.direction === "ascending"
+            ? comparison
+            : -comparison;
+        }
+
+        // Fallback for non-string values
         if (aVal < bVal) {
           return sortConfig.direction === "ascending" ? -1 : 1;
         }
