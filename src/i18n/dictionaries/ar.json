@@ -64,6 +64,18 @@
     "priceRange": "نطاق السعر",
     "currency": "د.م.",
     "showingResults": "عرض {count} من النتائج",
+
+    "pagination": {
+      "previous": "السابق",
+      "next": "التالي",
+      "page": "صفحة {current} من {total}"
+    },
+    "noProductsFound": "لم يتم العثور على منتجات",
+    "tryAdjustingFilters": "حاول تعديل الفلاتر للحصول على نتائج أفضل.",
+    "pageTitle": "المنتجات",
+    "pageDescription": "اكتشف مجموعتنا الواسعة من المنتجات عالية الجودة",
+    "fetchError": "فشل في تحميل البيانات. يرجى المحاولة مرة أخرى لاحقاً.",
+
     "sortBy": {
       "default": "الترتيب الافتراضي",
       "newest": "الأحدث",
@@ -73,16 +85,11 @@
       "nameDesc": "الاسم: ي-أ"
     },
     "noResults": {
-      "title": "لم يتم العثور على منتجات",
-      "description": "حاول تعديل الفلاتر للحصول على نتائج أفضل."
+      "title": "لم يتم العثور على نتائج",
+      "description": "جرب تعديل الفلاتر أو البحث عن شيء آخر"
     },
-    "pagination": {
-      "previous": "السابق",
-      "next": "التالي",
-      "page": "صفحة {current} من {total}"
-    },
-    "noProductsFound": "لم يتم العثور على منتجات",
-    "tryAdjustingFilters": "حاول تعديل الفلاتر للحصول على نتائج أفضل."
+
+    "applyFilters": "تطبيق الفلاتر"
   },
   "newsletter": {
     "title": "انضمي إلى قائمتنا البريدية",

@@ -80,7 +80,11 @@
       "previous": "Précédent",
       "next": "Suivant",
       "page": "Page {current} sur {total}"
-    }
+    },
+    "pageTitle": "Produits",
+    "pageDescription": "Découvrez notre large gamme de produits de haute qualité",
+    "fetchError": "Échec du chargement des données. Veuillez réessayer plus tard.",
+    "applyFilters": "Appliquer les filtres"
   },
   "newsletter": {
     "title": "Rejoignez notre newsletter",
