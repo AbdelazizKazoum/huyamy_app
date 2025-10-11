@@ -5,70 +5,20 @@ import { Product, Category, Locale } from "@/types";
 import { CACHE_CONFIG } from "@/lib/cache/tags";
 import ProductsClient from "./components/ProductsClient";
 import ProductsLoadingSkeleton from "./components/ProductsLoadingSkeleton";
+import { getAllProducts } from "@/lib/services/productService";
+import { getCategories } from "@/lib/services/categoryService";
 
-// Get the base URL for server-side fetching with detailed logging
-const getBaseUrl = () => {
-  const vercelUrl = process.env.VERCEL_URL;
-  const publicUrl = process.env.NEXT_PUBLIC_APP_URL;
-  const nodeEnv = process.env.NODE_ENV;
-  
-  console.log('Environment check:', {
-    VERCEL_URL: vercelUrl,
-    NEXT_PUBLIC_APP_URL: publicUrl,
-    NODE_ENV: nodeEnv,
-  });
-
-  if (vercelUrl) {
-    const url = `https://${vercelUrl}`;
-    console.log('Using Vercel URL:', url);
-    return url;
-  }
-  if (publicUrl) {
-    console.log('Using public URL:', publicUrl);
-    return publicUrl;
-  }
-  
-  const fallbackUrl = nodeEnv === "development"
-    ? "http://localhost:3000"
-    : "https://your-domain.com";
-  
-  console.log('Using fallback URL:', fallbackUrl);
-  return fallbackUrl;
-};
-
-// Cached function to fetch products with detailed error logging
+// Cached function to fetch products directly from database
 const getCachedProducts = unstable_cache(
   async (): Promise<Product[]> => {
-    const baseUrl = getBaseUrl();
-    const endpoint = `${baseUrl}/api/products`;
-    
-    console.log('Fetching products from:', endpoint);
-    
+    console.log("Getting cached products...");
     try {
-      const response = await fetch(endpoint, {
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'NextJS-Server',
-        },
-        // Remove next.revalidate and tags from here for unstable_cache
-        cache: 'no-store',
-      });
-
-      console.log('Products response status:', response.status);
-      console.log('Products response headers:', Object.fromEntries(response.headers.entries()));
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Products API Error Response:', errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('Products data received, count:', Array.isArray(data) ? data.length : 'not an array');
-      return Array.isArray(data) ? data : [];
+      const products = await getAllProducts();
+      return products;
     } catch (error) {
-      console.error('Products fetch error:', error);
-      throw error; // Re-throw to let unstable_cache handle it
+      console.error("Error in getCachedProducts:", error);
+      // Return empty array to prevent complete failure
+      return [];
     }
   },
   CACHE_CONFIG.PRODUCTS.key,
@@ -78,37 +28,17 @@ const getCachedProducts = unstable_cache(
   }
 );
 
-// Cached function to fetch categories with detailed error logging
+// Cached function to fetch categories directly from database
 const getCachedCategories = unstable_cache(
   async (): Promise<Category[]> => {
-    const baseUrl = getBaseUrl();
-    const endpoint = `${baseUrl}/api/categories`;
-    
-    console.log('Fetching categories from:', endpoint);
-    
+    console.log("Getting cached categories...");
     try {
-      const response = await fetch(endpoint, {
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'NextJS-Server',
-        },
-        cache: 'no-store',
-      });
-
-      console.log('Categories response status:', response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Categories API Error Response:', errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log('Categories data received, count:', Array.isArray(data) ? data.length : 'not an array');
-      return Array.isArray(data) ? data : [];
+      const categories = await getCategories();
+      return categories;
     } catch (error) {
-      console.error('Categories fetch error:', error);
-      throw error;
+      console.error("Error in getCachedCategories:", error);
+      // Return empty array to prevent complete failure
+      return [];
     }
   },
   CACHE_CONFIG.CATEGORIES.key,
@@ -124,8 +54,8 @@ export default async function ProductsPage({
 }: {
   params: { locale: Locale };
 }) {
-  console.log('ProductsPage rendering for locale:', locale);
-  
+  console.log("ProductsPage rendering for locale:", locale);
+
   try {
     const t = await getTranslations("products");
 
@@ -135,21 +65,28 @@ export default async function ProductsPage({
       getCachedCategories(),
     ]);
 
-    const maxPrice = products.length > 0 
-      ? Math.ceil(products.reduce((max, p) => (p.price > max ? p.price : max), 0))
-      : 1000;
+    console.log("Data fetched:", {
+      productsCount: products.length,
+      categoriesCount: categories.length,
+    });
+
+    // Handle empty data gracefully
+    if (products.length === 0 && categories.length === 0) {
+      console.warn("No products or categories found");
+    }
+
+    const maxPrice =
+      products.length > 0
+        ? Math.ceil(
+            products.reduce((max, p) => (p.price > max ? p.price : max), 0)
+          )
+        : 1000;
 
     const initialData = {
       products,
       categories,
       maxPrice: maxPrice > 0 ? maxPrice : 1000,
     };
-
-    console.log('Initial data prepared:', {
-      productsCount: products.length,
-      categoriesCount: categories.length,
-      maxPrice,
-    });
 
     return (
       <div className="bg-neutral-50/70">
@@ -164,8 +101,12 @@ export default async function ProductsPage({
     return (
       <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[60vh] text-center">
         <div className="text-red-600 bg-red-50 p-8 rounded-lg max-w-md">
-          <h2 className="text-2xl font-bold mb-2">Something went wrong</h2>
-          <p className="mb-4">Error: {error instanceof Error ? error.message : 'Unknown error'}</p>
+          <h2 className="text-2xl font-bold mb-2">Unable to Load Products</h2>
+          <p className="mb-4">
+            {error instanceof Error
+              ? error.message
+              : "An unexpected error occurred"}
+          </p>
           <a
             href={`/${locale}/products`}
             className="inline-block px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -211,7 +152,7 @@ export async function generateMetadata({
       },
     };
   } catch (error) {
-    console.error('Metadata generation error:', error);
+    console.error("Metadata generation error:", error);
     return {
       title: "Products",
       description: "Browse our product catalog",
