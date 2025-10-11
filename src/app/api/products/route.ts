@@ -1,10 +1,27 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createProduct, getAllProducts } from "@/lib/services/productService";
 import { generateSlug } from "@/lib/utils";
 import { Product } from "@/types";
 import { uploadImagesToR2, uploadImageToR2 } from "@/lib/services/R2Service";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  console.log("Products API called");
+  console.log(
+    "Request headers:",
+    Object.fromEntries(request.headers.entries())
+  );
+  console.log("Environment variables check:", {
+    FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? "Set" : "Not set",
+    FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL
+      ? "Set"
+      : "Not set",
+    FIREBASE_PRIVATE_KEY:
+      process.env.FIREBASE_PRIVATE_KEY &&
+      process.env.FIREBASE_PRIVATE_KEY.length > 0
+        ? "Set (length: " + process.env.FIREBASE_PRIVATE_KEY.length + ")"
+        : "Not set",
+  });
+
   try {
     const products = await getAllProducts();
     return NextResponse.json(products);
