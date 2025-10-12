@@ -12,13 +12,16 @@ interface DataTableProps<T extends object> {
   renderActions?: (item: T) => React.ReactNode;
   isLoading?: boolean;
   itemsPerPage?: number;
+  emptyMessage?: string;
 }
+
 const DataTable = <T extends { id: string }>({
   columns,
   data,
   renderActions,
   isLoading = false,
   itemsPerPage = 8,
+  emptyMessage = "لا توجد بيانات للعرض",
 }: DataTableProps<T>) => {
   const { items: sortedItems, requestSort, sortConfig } = useSortableData(data);
   const getSortIcon = (key: keyof T) => {
@@ -66,43 +69,54 @@ const DataTable = <T extends { id: string }>({
     </div>
   );
 
+  const EmptyState = () => (
+    <div className="text-center py-12">
+      <div className="text-gray-400 text-lg mb-2">📋</div>
+      <p className="text-gray-500">{emptyMessage}</p>
+    </div>
+  );
+
   return (
     <div className="bg-white/50 rounded-lg shadow-md">
       {/* Mobile Card View */}
       <div className="md:hidden">
         <div className="space-y-4 p-4">
-          {isLoading
-            ? Array.from({ length: itemsPerPage }).map((_, i) => (
-                <MobileSkeletonCard key={i} />
-              ))
-            : sortedItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white rounded-lg border border-neutral-200 p-4 space-y-3"
-                >
-                  {columns.map((col) => (
-                    <div
-                      key={`${item.id}-${col.key as string}`}
-                      className="flex justify-between items-start"
-                    >
-                      <span className="font-semibold text-sm text-gray-600">
-                        {col.label}
-                      </span>
-                      <div className="text-left">
-                        {col.render ? col.render(item) : String(item[col.key])}
-                      </div>
+          {isLoading ? (
+            Array.from({ length: itemsPerPage }).map((_, i) => (
+              <MobileSkeletonCard key={i} />
+            ))
+          ) : sortedItems.length === 0 ? (
+            <EmptyState />
+          ) : (
+            sortedItems.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white rounded-lg border border-neutral-200 p-4 space-y-3"
+              >
+                {columns.map((col) => (
+                  <div
+                    key={`${item.id}-${col.key as string}`}
+                    className="flex justify-between items-start"
+                  >
+                    <span className="font-semibold text-sm text-gray-600">
+                      {col.label}
+                    </span>
+                    <div className="text-left">
+                      {col.render ? col.render(item) : String(item[col.key])}
                     </div>
-                  ))}
-                  {renderActions && (
-                    <div className="flex justify-between items-center pt-3 border-t border-neutral-200">
-                      <span className="font-semibold text-sm text-gray-600">
-                        إجراءات
-                      </span>
-                      {renderActions(item)}
-                    </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                ))}
+                {renderActions && (
+                  <div className="flex justify-between items-center pt-3 border-t border-neutral-200">
+                    <span className="font-semibold text-sm text-gray-600">
+                      إجراءات
+                    </span>
+                    {renderActions(item)}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -135,25 +149,36 @@ const DataTable = <T extends { id: string }>({
             </tr>
           </thead>
           <tbody>
-            {isLoading
-              ? Array.from({ length: itemsPerPage }).map((_, i) => (
-                  <SkeletonRow key={i} />
-                ))
-              : sortedItems.map((item) => (
-                  <tr key={item.id} className="border-t border-neutral-200">
-                    {columns.map((col) => (
-                      <td
-                        key={`${item.id}-${col.key as string}`}
-                        className="p-4 text-gray-600"
-                      >
-                        {col.render ? col.render(item) : String(item[col.key])}
-                      </td>
-                    ))}
-                    {renderActions && (
-                      <td className="p-4">{renderActions(item)}</td>
-                    )}
-                  </tr>
-                ))}
+            {isLoading ? (
+              Array.from({ length: itemsPerPage }).map((_, i) => (
+                <SkeletonRow key={i} />
+              ))
+            ) : sortedItems.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={columns.length + (renderActions ? 1 : 0)}
+                  className="p-8"
+                >
+                  <EmptyState />
+                </td>
+              </tr>
+            ) : (
+              sortedItems.map((item) => (
+                <tr key={item.id} className="border-t border-neutral-200">
+                  {columns.map((col) => (
+                    <td
+                      key={`${item.id}-${col.key as string}`}
+                      className="p-4 text-gray-600"
+                    >
+                      {col.render ? col.render(item) : String(item[col.key])}
+                    </td>
+                  ))}
+                  {renderActions && (
+                    <td className="p-4">{renderActions(item)}</td>
+                  )}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

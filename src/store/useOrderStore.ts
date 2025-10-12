@@ -113,7 +113,9 @@ export const useOrderStore = create<OrderStore>()(
           const transformedOrders = result.orders.map(transformOrder);
 
           set((state) => ({
-            orders: reset ? transformedOrders : [...state.orders, ...transformedOrders],
+            orders: reset
+              ? transformedOrders
+              : [...state.orders, ...transformedOrders],
             pagination: {
               ...state.pagination,
               page: currentPage,

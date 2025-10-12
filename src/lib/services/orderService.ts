@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { adminDb, default as admin, adminAuth } from "@/lib/firebaseAdmin";
 import { OrderData } from "@/types/order";
@@ -145,6 +146,7 @@ export async function getOrdersWithPagination(
     let countQuery = adminDb.collection("orders");
 
     if (filters.status && filters.status !== "all") {
+      //@ts-ignore
       countQuery = countQuery.where("status", "==", filters.status);
     }
 
@@ -152,6 +154,7 @@ export async function getOrdersWithPagination(
       const fromDate = admin.firestore.Timestamp.fromDate(
         new Date(filters.dateFrom)
       );
+      //@ts-ignore
       countQuery = countQuery.where("createdAt", ">=", fromDate);
     }
 
@@ -159,6 +162,7 @@ export async function getOrdersWithPagination(
       const toDate = admin.firestore.Timestamp.fromDate(
         new Date(new Date(filters.dateTo).setHours(23, 59, 59, 999))
       );
+      //@ts-ignore
       countQuery = countQuery.where("createdAt", "<=", toDate);
     }
 
@@ -177,8 +181,10 @@ export async function getOrdersWithPagination(
     if (filters.searchTerm) {
       const searchLower = filters.searchTerm.toLowerCase();
       filteredOrders = orders.filter((order) => {
+        //@ts-ignore
         const customerName = order.shippingInfo?.fullName?.toLowerCase() || "";
         const orderId = order.id.toLowerCase();
+        //@ts-ignore
         const phone = order.shippingInfo?.phone || "";
 
         return (

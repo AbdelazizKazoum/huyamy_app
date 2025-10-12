@@ -4,11 +4,10 @@ import DataTable from "@/components/admin/DataTable";
 import Pagination from "@/components/admin/Pagination";
 import DateInput from "@/components/admin/ui/DateInput";
 import SearchInput from "@/components/admin/ui/SearchInput";
-import useSortableData from "@/hooks/useSortableData";
 import { Language } from "@/types";
 import { Eye, Loader2, RefreshCw } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useOrderStore, Order } from "@/store/useOrderStore";
 import { toast } from "react-hot-toast";
 import OrderViewModal from "@/components/admin/modals/OrderViewModal";
@@ -268,15 +267,15 @@ const OrdersPage: React.FC = () => {
     setSelectedOrder(null);
   };
 
-  // Sort orders (client-side for UI responsiveness)
-  const {
-    items: sortedOrders,
-    requestSort,
-    sortConfig,
-  } = useSortableData<Order>(orders, {
-    key: "createdAt",
-    direction: "descending",
-  });
+  // Remove this sorting logic since DataTable handles it internally
+  // const {
+  //   items: sortedOrders,
+  //   requestSort,
+  //   sortConfig,
+  // } = useSortableData<Order>(orders, {
+  //   key: "createdAt",
+  //   direction: "descending",
+  // });
 
   // Calculate total pages
   const totalPages = Math.ceil(pagination.total / pagination.limit);
@@ -526,10 +525,8 @@ const OrdersPage: React.FC = () => {
       ) : (
         <DataTable
           columns={columns}
-          data={sortedOrders}
-          loading={loading && !isFilterLoading}
-          sortConfig={sortConfig}
-          onSort={requestSort}
+          data={orders}
+          isLoading={loading && !isFilterLoading}
           renderActions={(order) => (
             <div className="flex gap-2">
               <button
