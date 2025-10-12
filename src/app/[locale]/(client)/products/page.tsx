@@ -85,11 +85,6 @@ export default async function ProductsPage({
       getCachedCategories(),
     ]);
 
-    console.log("Data fetched:", {
-      productsCount: products.length,
-      categoriesCount: categories.length,
-    });
-
     // Handle empty data gracefully
     if (products.length === 0 && categories.length === 0) {
       console.warn("No products or categories found");
