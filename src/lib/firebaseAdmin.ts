@@ -1,38 +1,69 @@
 // lib/firebaseAdmin.ts
 import admin from "firebase-admin";
 
-// Function to get Firebase credentials
+// Function to get Firebase credentials from environment variables
 function getFirebaseCredentials() {
-  // First try environment variables (preferred for production)
+  // Check if all required environment variables are present
   if (
-    process.env.FIREBASE_PROJECT_ID &&
-    process.env.FIREBASE_CLIENT_EMAIL &&
-    process.env.FIREBASE_PRIVATE_KEY
+    process.env.FIREBASE_ADMIN_PROJECT_ID &&
+    process.env.FIREBASE_ADMIN_CLIENT_EMAIL &&
+    process.env.FIREBASE_ADMIN_PRIVATE_KEY
   ) {
     return {
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      type: "service_account",
+      project_id: process.env.FIREBASE_ADMIN_PROJECT_ID,
+      private_key_id: process.env.FIREBASE_ADMIN_PRIVATE_KEY_ID,
+      private_key: process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      client_email: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+      client_id: process.env.FIREBASE_ADMIN_CLIENT_ID,
+      auth_uri: "https://accounts.google.com/o/oauth2/auth",
+      token_uri: "https://oauth2.googleapis.com/token",
+      auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+      client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${encodeURIComponent(
+        process.env.FIREBASE_ADMIN_CLIENT_EMAIL
+      )}`,
+      universe_domain: "googleapis.com",
     };
   }
 
   // If no environment variables, throw error with helpful message
   throw new Error(
-    `Firebase credentials not found. Please add the following environment variables:
-    FIREBASE_PROJECT_ID=your-project-id
-    FIREBASE_CLIENT_EMAIL=your-service-account-email
-    FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\nYour private key\\n-----END PRIVATE KEY-----\\n"
-    
-    You can get these values from your Firebase project's service account key.`
+    `Firebase Admin credentials not found. Please ensure the following environment variables are set in .env.local:
+    FIREBASE_ADMIN_PROJECT_ID=huyamy-6923a
+    FIREBASE_ADMIN_CLIENT_EMAIL=firebase-adminsdk-fbsvc@huyamy-6923a.iam.gserviceaccount.com
+    FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\nYour private key\\n-----END PRIVATE KEY-----\\n"
+    FIREBASE_ADMIN_PRIVATE_KEY_ID=your-private-key-id
+    FIREBASE_ADMIN_CLIENT_ID=your-client-id
+
+    Current environment variables status:
+    - FIREBASE_ADMIN_PROJECT_ID: ${!!process.env.FIREBASE_ADMIN_PROJECT_ID}
+    - FIREBASE_ADMIN_CLIENT_EMAIL: ${!!process.env.FIREBASE_ADMIN_CLIENT_EMAIL}
+    - FIREBASE_ADMIN_PRIVATE_KEY: ${!!process.env.FIREBASE_ADMIN_PRIVATE_KEY}
+    - FIREBASE_ADMIN_PRIVATE_KEY_ID: ${!!process.env
+      .FIREBASE_ADMIN_PRIVATE_KEY_ID}
+    - FIREBASE_ADMIN_CLIENT_ID: ${!!process.env.FIREBASE_ADMIN_CLIENT_ID}
+
+    Make sure the file is named .env.local and is in the root directory of your project.`
   );
 }
 
+// Initialize Firebase Admin only if it hasn't been initialized already
 if (!admin.apps.length) {
-  const credentials = getFirebaseCredentials();
+  try {
+    const credentials = getFirebaseCredentials();
 
-  admin.initializeApp({
-    credential: admin.credential.cert(credentials),
-  });
+    admin.initializeApp({
+      credential: admin.credential.cert(credentials as admin.ServiceAccount),
+      projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+    });
+
+    console.log("Firebase Admin initialized successfully"); // Keep this
+  } catch (error) {
+    console.error("Failed to initialize Firebase Admin:", error); // Keep this
+    throw error;
+  }
+} else {
+  console.log("Firebase Admin already initialized");
 }
 
 export const adminAuth = admin.auth();

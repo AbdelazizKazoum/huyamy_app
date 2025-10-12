@@ -147,6 +147,7 @@ const OrdersPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isFilterLoading, setIsFilterLoading] = useState(false); // New state for filter loading
 
   // Fetch orders on component mount
   useEffect(() => {
@@ -160,15 +161,24 @@ const OrdersPage: React.FC = () => {
 
   // Fetch orders when filters change
   useEffect(() => {
-    if (
-      filters.status !== "all" ||
-      filters.searchTerm ||
-      filters.dateFrom ||
-      filters.dateTo
-    ) {
-      fetchOrders(true); // Reset pagination when filters change
+    const applyFilters = async () => {
+      // Don't show filter loading on initial load
+      if (!isInitialLoading) {
+        setIsFilterLoading(true);
+      }
+
+      await fetchOrders(true); // Reset pagination when filters change
+
+      if (!isInitialLoading) {
+        setIsFilterLoading(false);
+      }
+    };
+
+    // Only trigger if it's not the initial load
+    if (!isInitialLoading) {
+      applyFilters();
     }
-  }, [filters, fetchOrders]);
+  }, [filters, fetchOrders, isInitialLoading]);
 
   // Show error toast
   useEffect(() => {
@@ -186,9 +196,10 @@ const OrdersPage: React.FC = () => {
     [setFilters]
   );
 
-  // Handle status filter
+  // Handle status filter - Fixed to properly trigger re-fetch
   const handleStatusFilter = useCallback(
     (status: Order["status"] | "all") => {
+      // Always trigger a filter update, even for "all"
       setFilters({ status });
     },
     [setFilters]
@@ -412,8 +423,8 @@ const OrdersPage: React.FC = () => {
           />
           <button
             onClick={handleRefresh}
-            disabled={loading || isRefreshing}
-            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors"
+            disabled={loading || isRefreshing || isFilterLoading}
+            className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors disabled:opacity-50"
             title="تحديث"
           >
             <RefreshCw
@@ -435,13 +446,17 @@ const OrdersPage: React.FC = () => {
               <button
                 key={status.id}
                 onClick={() => handleStatusFilter(status.id)}
-                className={`px-3 py-1.5 text-sm font-semibold rounded-full transition-all duration-200 ${
+                disabled={isFilterLoading}
+                className={`px-3 py-1.5 text-sm font-semibold rounded-full transition-all duration-200 disabled:opacity-50 ${
                   filters.status === status.id
                     ? "bg-green-700 text-white shadow-md"
                     : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
                 }`}
               >
                 {status.label}
+                {isFilterLoading && filters.status === status.id && (
+                  <Loader2 size={12} className="inline ml-1 animate-spin" />
+                )}
               </button>
             ))}
           </div>
@@ -453,19 +468,22 @@ const OrdersPage: React.FC = () => {
             value={filters.dateFrom}
             onChange={(e) => handleDateFilter(e.target.value, filters.dateTo)}
             placeholder="من تاريخ"
+            disabled={isFilterLoading}
           />
           <DateInput
             id="date-to"
             value={filters.dateTo}
             onChange={(e) => handleDateFilter(filters.dateFrom, e.target.value)}
             placeholder="إلى تاريخ"
+            disabled={isFilterLoading}
           />
           <button
             onClick={() => {
               const today = new Date().toISOString().split("T")[0];
               handleDateFilter(today, today);
             }}
-            className={`px-4 py-2 font-semibold rounded-lg transition-colors text-sm ${
+            disabled={isFilterLoading}
+            className={`px-4 py-2 font-semibold rounded-lg transition-colors text-sm disabled:opacity-50 ${
               filters.dateFrom === new Date().toISOString().split("T")[0]
                 ? "bg-green-700 text-white"
                 : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
@@ -479,7 +497,8 @@ const OrdersPage: React.FC = () => {
             filters.status !== "all") && (
             <button
               onClick={resetFilters}
-              className="px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors"
+              disabled={isFilterLoading}
+              className="px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
             >
               مسح المرشحات
             </button>
@@ -489,10 +508,10 @@ const OrdersPage: React.FC = () => {
 
       {/* Results summary */}
       <div className="mb-4 text-sm text-gray-600">
-        {loading ? (
+        {loading || isFilterLoading ? (
           <div className="flex items-center gap-2">
             <Loader2 size={16} className="animate-spin" />
-            جاري التحميل...
+            {isFilterLoading ? "جاري تطبيق التصفية..." : "جاري التحميل..."}
           </div>
         ) : (
           <span>
@@ -501,29 +520,33 @@ const OrdersPage: React.FC = () => {
         )}
       </div>
 
-      {/* Data Table */}
-      <DataTable
-        columns={columns}
-        data={sortedOrders}
-        loading={loading && !isInitialLoading}
-        sortConfig={sortConfig}
-        onSort={requestSort}
-        renderActions={(order) => (
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleViewOrder(order)}
-              className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-              title="عرض التفاصيل"
-            >
-              <Eye size={18} />
-            </button>
-          </div>
-        )}
-        emptyMessage="لا توجد طلبات"
-      />
+      {/* Data Table - Show skeleton when filtering */}
+      {isFilterLoading ? (
+        <OrdersSkeletonTable />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={sortedOrders}
+          loading={loading && !isFilterLoading}
+          sortConfig={sortConfig}
+          onSort={requestSort}
+          renderActions={(order) => (
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleViewOrder(order)}
+                className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                title="عرض التفاصيل"
+              >
+                <Eye size={18} />
+              </button>
+            </div>
+          )}
+          emptyMessage="لا توجد طلبات"
+        />
+      )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {totalPages > 1 && !isFilterLoading && (
         <Pagination
           currentPage={pagination.page}
           totalPages={totalPages}
@@ -546,7 +569,29 @@ const OrdersPage: React.FC = () => {
       {/* Error Display */}
       {error && (
         <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800 text-sm">{error}</p>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-xs">!</span>
+            </div>
+            <p className="text-red-800 text-sm font-medium">
+              خطأ في تحميل البيانات
+            </p>
+          </div>
+          <p className="text-red-700 text-sm mt-2">{error}</p>
+          {error.includes("index") && (
+            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
+              <p className="text-yellow-800 text-sm">
+                📝 يتم إنشاء فهرس قاعدة البيانات. قد يستغرق الأمر بضع دقائق.
+                يرجى المحاولة مرة أخرى لاحقاً.
+              </p>
+              <button
+                onClick={handleRefresh}
+                className="mt-2 px-4 py-2 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700 transition-colors"
+              >
+                إعادة المحاولة
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
