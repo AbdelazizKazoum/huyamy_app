@@ -8,13 +8,34 @@ import ProductsLoadingSkeleton from "./components/ProductsLoadingSkeleton";
 import { getAllProducts } from "@/lib/services/productService";
 import { getCategories } from "@/lib/services/categoryService";
 
+// Helper function to serialize Firestore data
+function serializeFirestoreData<T>(data: T): T {
+  return JSON.parse(
+    JSON.stringify(data, (key, value) => {
+      // Convert Firestore timestamps to ISO strings
+      if (
+        value &&
+        typeof value === "object" &&
+        "_seconds" in value &&
+        "_nanoseconds" in value
+      ) {
+        return new Date(
+          (value._seconds as number) * 1000 +
+            (value._nanoseconds as number) / 1000000
+        ).toISOString();
+      }
+      return value;
+    })
+  );
+}
+
 // Cached function to fetch products directly from database
 const getCachedProducts = unstable_cache(
   async (): Promise<Product[]> => {
     console.log("Getting cached products...");
     try {
       const products = await getAllProducts();
-      return products;
+      return serializeFirestoreData(products);
     } catch (error) {
       console.error("Error in getCachedProducts:", error);
       // Return empty array to prevent complete failure
@@ -34,7 +55,7 @@ const getCachedCategories = unstable_cache(
     console.log("Getting cached categories...");
     try {
       const categories = await getCategories();
-      return categories;
+      return serializeFirestoreData(categories);
     } catch (error) {
       // Return empty array to prevent complete failure
       return [];
@@ -147,7 +168,6 @@ export async function generateMetadata({
         canonical: `/products`,
         languages: {
           ar: "/ar/products",
-          en: "/en/products",
           fr: "/fr/products",
         },
       },
