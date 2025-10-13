@@ -1,7 +1,7 @@
 "use client";
 
-import { currencies, initialCartItems } from "@/data";
-import { CartItem, Locale, LocalizedString } from "@/types";
+import { currencies } from "@/data";
+import { Locale, LocalizedString } from "@/types";
 import { Menu, Search, ShoppingCart, X } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
@@ -9,6 +9,7 @@ import { Link, usePathname, useRouter } from "@/i18n/config";
 import { useLocale } from "next-intl";
 import CartSidebar from "../CartSidebar";
 import { LanguageSelector } from "../ui";
+import { useCartStore } from "@/store/useCartStore"; // 1. Import the cart store
 
 type HeaderProps = Record<string, never>;
 
@@ -56,8 +57,10 @@ const Header: React.FC<HeaderProps> = () => {
   const [isMobileLangMenuOpen, setIsMobileLangMenuOpen] =
     useState<boolean>(false);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
   const [isLangLoading, setIsLangLoading] = useState(false);
+
+  // 2. Get cart items from the global store
+  const { items: cartItems } = useCartStore();
 
   const currentLocale = useLocale() as Locale;
   const pathname = usePathname();
@@ -77,26 +80,7 @@ const Header: React.FC<HeaderProps> = () => {
     fr: "Recherchez votre produit préféré...",
   };
 
-  const handleUpdateQuantity = (productId: string, newQuantity: number) => {
-    if (newQuantity < 1) {
-      handleRemoveItem(productId);
-      return;
-    }
-    setCartItems((currentItems) =>
-      currentItems.map((item) =>
-        item.product.id === productId
-          ? { ...item, quantity: newQuantity }
-          : item
-      )
-    );
-  };
-
-  const handleRemoveItem = (productId: string) => {
-    setCartItems((currentItems) =>
-      currentItems.filter((item) => item.product.id !== productId)
-    );
-  };
-
+  // 3. Remove local state handlers for cart
   const handleLanguageChange = async (newLocale: Locale) => {
     setIsLangLoading(true);
     setIsLangMenuOpen(false);
@@ -124,12 +108,10 @@ const Header: React.FC<HeaderProps> = () => {
 
   return (
     <>
+      {/* 4. Update CartSidebar props */}
       <CartSidebar
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
-        items={cartItems}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemoveItem={handleRemoveItem}
         lang={currentLocale}
         currency={currency}
       />
@@ -207,16 +189,27 @@ const Header: React.FC<HeaderProps> = () => {
 
               {/* Mobile buttons: visible only on mobile */}
               <div className="flex md:hidden items-center gap-2 rtl:gap-x-reverse">
-                {/* Place your mobile menu, search, cart, and language selector buttons here as before */}
-              </div>
+                {/* 5. Add Cart button for mobile */}
+                <button
+                  onClick={() => setIsCartOpen(true)}
+                  className="p-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300 relative"
+                >
+                  <ShoppingCart size={24} />
+                  {cartItems.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-primary-700 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                      {cartItems.length}
+                    </span>
+                  )}
+                </button>
 
-              {/* Menu Button */}
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden p-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors"
-              >
-                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-              </button>
+                {/* Menu Button */}
+                <button
+                  onClick={() => setIsMenuOpen(!isMenuOpen)}
+                  className="p-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors"
+                >
+                  {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+              </div>
             </div>
           </div>
 

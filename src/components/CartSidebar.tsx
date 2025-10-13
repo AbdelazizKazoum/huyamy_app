@@ -68,18 +68,16 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
         <Transition.Child
           as={Fragment}
           enter="transform transition ease-in-out duration-300"
-          // Corrected enter/leave animations for RTL
-          enterFrom={lang === "ar" ? "translate-x-full" : "-translate-x-full"}
+          // Always slide from the left
+          enterFrom="-translate-x-full"
           enterTo="translate-x-0"
           leave="transform transition ease-in-out duration-300"
           leaveFrom="translate-x-0"
-          leaveTo={lang === "ar" ? "translate-x-full" : "-translate-x-full"}
+          // Always slide to the left
+          leaveTo="-translate-x-full"
         >
           <div
-            className={`fixed top-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col ${
-              // Correctly position the sidebar based on language direction
-              lang === "ar" ? "right-0" : "left-0"
-            }`}
+            className={`fixed top-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col left-0`} // Always position on the left
           >
             <div className="flex items-center justify-between p-4 border-b border-slate-200">
               <h2 className="text-xl font-bold text-slate-800">
@@ -151,7 +149,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                         <p className="text-slate-500 text-xs mt-1">
                           {item.product.price.toFixed(2)} {currency}
                         </p>
-                        <div className="flex items-center justify-between mt-3">
+                        <div className="flex items-end justify-between mt-3">
                           <div className="flex items-center border border-slate-200 rounded-md">
                             <button
                               onClick={() =>
@@ -180,12 +178,20 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                               <Plus size={14} />
                             </button>
                           </div>
-                          <button
-                            onClick={() => removeItem(item.product.id)}
-                            className="p-2 text-slate-400 hover:text-red-600"
-                          >
-                            <Trash2 size={16} />
-                          </button>
+                          {/* Item Subtotal Added Here */}
+                          <div className="flex items-center gap-2">
+                            {/* Changed text color to green */}
+                            <span className="font-bold text-green-700 text-sm">
+                              {(item.product.price * item.quantity).toFixed(2)}{" "}
+                              {currency}
+                            </span>
+                            <button
+                              onClick={() => removeItem(item.product.id)}
+                              className="p-1 text-slate-400 hover:text-red-600"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -197,25 +203,29 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                     <span className="text-base text-slate-600">
                       {t("subtotal")} ({selectedItems.length} {t("items")})
                     </span>
-                    <span className="text-xl font-bold text-slate-900">
+                    {/* Changed text color to green */}
+                    <span className="text-xl font-bold text-green-700">
                       {subtotal.toFixed(2)} {currency}
                     </span>
                   </div>
+                  {/* "View Cart" is the primary button */}
+                  <Link
+                    href="/cart"
+                    onClick={onClose}
+                    className="block w-full text-center bg-primary-800 text-white font-bold py-3 px-6 rounded-lg text-base border-2 border-transparent hover:bg-primary-900 transition-all duration-300"
+                  >
+                    {t("viewCart")}
+                  </Link>
+                  {/* "Checkout" is now a neutral outlined button with primary text */}
                   <Link href="/checkout" passHref>
                     <button
                       onClick={onClose}
-                      className="w-full bg-primary-800 text-white font-bold py-3 px-6 rounded-lg text-base hover:bg-primary-900 transition-all duration-300 disabled:bg-slate-300 disabled:cursor-not-allowed"
+                      className="w-full mt-3 text-center font-bold py-3 px-6 rounded-lg text-base border-2 border-slate-300 text-primary-800 hover:bg-primary-800/10 hover:border-primary-800/30 transition-all duration-300 disabled:border-slate-200 disabled:text-slate-400 disabled:bg-white disabled:cursor-not-allowed cursor-pointer"
                       disabled={selectedItems.length === 0}
                     >
                       {t("checkout")}
                     </button>
                   </Link>
-                  <button
-                    onClick={onClose}
-                    className="w-full text-center mt-3 text-primary-800 font-medium text-sm hover:underline"
-                  >
-                    {t("continueShopping")}
-                  </button>
                 </div>
               </>
             ) : (
