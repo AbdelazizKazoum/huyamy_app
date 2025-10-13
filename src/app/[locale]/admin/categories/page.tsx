@@ -76,15 +76,12 @@ const CategoriesPage: React.FC = () => {
     try {
       if (editingCategory) {
         await updateCategory(editingCategory.id, formData);
-        // Optionally show success toast
       } else {
         await addCategory(formData);
-        // Optionally show success toast
       }
       handleCloseModal();
     } catch (err) {
       console.error("Failed to submit category form:", err);
-      // Optionally show error toast
     } finally {
       setIsSubmitting(false);
     }
@@ -94,10 +91,8 @@ const CategoriesPage: React.FC = () => {
     if (window.confirm("هل أنت متأكد من رغبتك في حذف هذه الفئة؟")) {
       try {
         await deleteCategory(categoryId);
-        // Optionally show success toast
       } catch (err) {
         console.error("Failed to delete category:", err);
-        // Optionally show error toast
       }
     }
   };
@@ -107,10 +102,13 @@ const CategoriesPage: React.FC = () => {
     label: string;
     sortable: boolean;
     render?: (item: Category) => React.ReactNode;
+    mobileLabel?: string;
+    hiddenOnMobile?: boolean;
   }[] = [
     {
       key: "name",
       label: "الفئة",
+      mobileLabel: "اسم الفئة",
       sortable: true,
       render: (item) => (
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
@@ -133,6 +131,7 @@ const CategoriesPage: React.FC = () => {
     {
       key: "description",
       label: "الوصف",
+      mobileLabel: "الوصف",
       sortable: true,
       render: (item) => (
         <div className="min-w-0 max-w-[150px] sm:max-w-[300px]">
@@ -183,110 +182,34 @@ const CategoriesPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Card View */}
-      <div className="block sm:hidden space-y-3 mb-6">
-        {paginatedCategories.map((category) => (
-          <div
-            key={category.id}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4"
-          >
-            <div className="flex items-start gap-3">
-              <Image
-                src={category.image}
-                alt={category.name[lang]}
-                width={60}
-                height={60}
-                className="w-15 h-15 rounded-full object-cover bg-gray-100 flex-shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-800 text-base mb-1 truncate">
-                  {category.name[lang]}
-                </h3>
-                <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                  {category.description[lang]}
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleOpenEditModal(category)}
-                    className="flex items-center gap-1 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md text-sm transition-colors"
-                  >
-                    <Edit size={14} />
-                    <span>تعديل</span>
-                  </button>
-                  <button
-                    onClick={() => handleDelete(category.id)}
-                    className="flex items-center gap-1 px-3 py-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-md text-sm transition-colors"
-                  >
-                    <Trash2 size={14} />
-                    <span>حذف</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {isLoading && categories.length === 0 && (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-4"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-15 h-15 bg-gray-200 rounded-full animate-pulse flex-shrink-0"></div>
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                    <div className="h-3 bg-gray-200 rounded animate-pulse w-full"></div>
-                    <div className="h-3 bg-gray-200 rounded animate-pulse w-2/3"></div>
-                    <div className="flex gap-2 mt-3">
-                      <div className="h-7 bg-gray-200 rounded animate-pulse w-16"></div>
-                      <div className="h-7 bg-gray-200 rounded animate-pulse w-12"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* DataTable with built-in mobile cards */}
+      <DataTable
+        columns={columns}
+        data={paginatedCategories}
+        isLoading={isLoading && categories.length === 0}
+        itemsPerPage={itemsPerPage}
+        emptyMessage="لا توجد فئات"
+        renderActions={(item: Category) => (
+          <>
+            <button
+              onClick={() => handleOpenEditModal(item)}
+              className="flex items-center gap-1 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm transition-colors flex-1 justify-center"
+              title="تعديل"
+            >
+              <Edit size={14} />
+              <span>تعديل</span>
+            </button>
+            <button
+              onClick={() => handleDelete(item.id)}
+              className="flex items-center gap-1 px-3 py-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-sm transition-colors flex-1 justify-center"
+              title="حذف"
+            >
+              <Trash2 size={14} />
+              <span>حذف</span>
+            </button>
+          </>
         )}
-
-        {paginatedCategories.length === 0 && !isLoading && (
-          <div className="text-center py-8 text-gray-500">
-            {searchTerm ? "لا توجد فئات مطابقة للبحث" : "لا توجد فئات"}
-          </div>
-        )}
-      </div>
-
-      {/* Desktop Table View */}
-      <div className="hidden sm:block overflow-hidden">
-        <div className="overflow-x-auto">
-          <DataTable
-            columns={columns}
-            data={paginatedCategories}
-            isLoading={isLoading && categories.length === 0}
-            itemsPerPage={itemsPerPage}
-            renderActions={(item: Category) => (
-              <div className="flex gap-1 sm:gap-2">
-                <button
-                  onClick={() => handleOpenEditModal(item)}
-                  className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                  title="تعديل"
-                >
-                  <Edit size={16} className="sm:w-[18px] sm:h-[18px]" />
-                </button>
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                  title="حذف"
-                >
-                  <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
-                </button>
-              </div>
-            )}
-            emptyMessage="لا توجد فئات"
-          />
-        </div>
-      </div>
+      />
 
       {/* Pagination */}
       {totalPages > 1 && (

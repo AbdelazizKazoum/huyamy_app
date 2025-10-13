@@ -98,7 +98,7 @@ const FiltersSkeleton = () => (
         ))}
       </div>
     </div>
-    
+
     {/* Date Filters Skeleton */}
     <div className="flex flex-col gap-3">
       <div className="h-5 bg-gray-200 rounded animate-pulse w-32"></div>
@@ -356,24 +356,30 @@ const OrdersPage: React.FC = () => {
     }
   };
 
-  // Table columns
+  // Table columns - Updated to include all fields in mobile
   const columns: {
     key: keyof Order;
     label: string;
     sortable: boolean;
     render?: (item: Order) => React.ReactNode;
+    mobileLabel?: string;
+    hiddenOnMobile?: boolean;
   }[] = [
     {
       key: "id",
       label: "رقم الطلب",
+      mobileLabel: "رقم الطلب",
       sortable: true,
       render: (item) => (
-        <span className="font-mono text-xs sm:text-sm">{item.id.slice(0, 8)}...</span>
+        <span className="font-mono text-xs sm:text-sm">
+          {item.id.slice(0, 8)}...
+        </span>
       ),
     },
     {
       key: "shippingInfo" as keyof Order,
       label: "العميل",
+      mobileLabel: "العميل",
       sortable: true,
       render: (item) => (
         <div>
@@ -389,13 +395,15 @@ const OrdersPage: React.FC = () => {
     {
       key: "createdAt",
       label: "التاريخ",
+      mobileLabel: "التاريخ",
       sortable: true,
+      hiddenOnMobile: false, // Changed from hidden to visible on mobile
       render: (item) => (
-        <div className="hidden sm:block">
+        <div>
           <span className="block text-xs sm:text-sm">
             {item.createdAt?.toLocaleDateString("ar-MA") || "غير محدد"}
           </span>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 hidden sm:inline">
             {item.createdAt?.toLocaleTimeString("ar-MA", {
               hour: "2-digit",
               minute: "2-digit",
@@ -407,15 +415,18 @@ const OrdersPage: React.FC = () => {
     {
       key: "status",
       label: "الحالة",
+      mobileLabel: "الحالة",
       sortable: true,
       render: (item) => getStatusChip(item.status),
     },
     {
       key: "totalAmount",
       label: "الإجمالي",
+      mobileLabel: "المبلغ الإجمالي",
       sortable: true,
+      hiddenOnMobile: false, // Changed from hidden to visible on mobile
       render: (item) => (
-        <span className="font-mono font-semibold text-xs sm:text-sm hidden md:block">
+        <span className="font-mono font-semibold text-xs sm:text-sm text-green-600">
           {item.totalAmount.toFixed(2)} د.م.
         </span>
       ),
@@ -423,9 +434,11 @@ const OrdersPage: React.FC = () => {
     {
       key: "products" as keyof Order,
       label: "المنتجات",
+      mobileLabel: "عدد المنتجات",
       sortable: false,
+      hiddenOnMobile: false, // Changed from hidden to visible on mobile
       render: (item) => (
-        <span className="text-xs text-gray-600 hidden lg:block">
+        <span className="text-xs sm:text-sm text-gray-600">
           {item.products.length} منتج
         </span>
       ),
@@ -481,9 +494,7 @@ const OrdersPage: React.FC = () => {
       <div className="mb-6 space-y-4">
         {/* Status Filters */}
         <div className="flex flex-col gap-3">
-          <div className="font-semibold text-gray-700">
-            تصفية حسب:
-          </div>
+          <div className="font-semibold text-gray-700">تصفية حسب:</div>
           <div className="flex flex-wrap items-center gap-2">
             {statusOptions.map((status) => (
               <button
@@ -507,9 +518,7 @@ const OrdersPage: React.FC = () => {
 
         {/* Date Filters */}
         <div className="flex flex-col gap-3">
-          <div className="font-semibold text-gray-700">
-            تصفية حسب التاريخ:
-          </div>
+          <div className="font-semibold text-gray-700">تصفية حسب التاريخ:</div>
           <div className="flex flex-col sm:flex-row sm:items-end gap-3">
             <div className="flex flex-col gap-1 flex-1 min-w-0">
               <label
@@ -521,7 +530,9 @@ const OrdersPage: React.FC = () => {
               <DateInput
                 id="date-from"
                 value={filters.dateFrom}
-                onChange={(e) => handleDateFilter(e.target.value, filters.dateTo)}
+                onChange={(e) =>
+                  handleDateFilter(e.target.value, filters.dateTo)
+                }
                 placeholder="اختر التاريخ"
                 disabled={isFilterLoading}
                 className="w-full"
@@ -611,15 +622,14 @@ const OrdersPage: React.FC = () => {
               data={orders}
               isLoading={loading && !isFilterLoading}
               renderActions={(order) => (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleViewOrder(order)}
-                    className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                    title="عرض التفاصيل"
-                  >
-                    <Eye size={16} className="sm:w-[18px] sm:h-[18px]" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleViewOrder(order)}
+                  className="flex items-center gap-1 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm transition-colors flex-1 justify-center"
+                  title="عرض التفاصيل"
+                >
+                  <Eye size={14} />
+                  <span>عرض</span>
+                </button>
               )}
               emptyMessage="لا توجد طلبات"
             />
