@@ -4,21 +4,26 @@ import { useCartStore } from "@/store/useCartStore";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/config";
-import { Minus, Plus, ShoppingCart, X } from "lucide-react";
-import { useMemo, useState, useEffect } from "react"; // Import useState and useEffect
-import { ButtonPrimary } from "@/components/ui";
+import {
+  Minus,
+  Plus,
+  ShoppingCart,
+  X,
+  ClipboardList,
+  Truck,
+  Wallet,
+} from "lucide-react"; // Import new icons
+import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { ButtonPrimary } from "@/components/ui";
 
 const CartPage = () => {
   const t = useTranslations("cart");
   const router = useRouter();
   const { items, updateQuantity, removeItem } = useCartStore();
-  const [isHydrating, setIsHydrating] = useState(true); // State to track hydration
+  const [isHydrating, setIsHydrating] = useState(true);
 
-  // Effect to handle client-side hydration
   useEffect(() => {
-    // This effect runs only on the client after the component mounts,
-    // by which time the cart store will be hydrated.
     setIsHydrating(false);
   }, []);
 
@@ -109,7 +114,7 @@ const CartPage = () => {
   }
 
   return (
-    <div className="bg-white">
+    <div className="bg-white min-h-screen">
       <div className="container mx-auto px-4 py-12">
         <div className="mb-10 ltr:text-left rtl:text-right">
           <h1 className="text-3xl font-bold text-slate-800">{t("title")}</h1>
@@ -175,24 +180,34 @@ const CartPage = () => {
           {/* Order Summary */}
           <div className="lg:col-span-1 mt-8 lg:mt-0">
             <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200/80 sticky top-24">
-              <h2 className="text-xl font-bold text-slate-800 border-b border-slate-200 pb-4 mb-4">
+              <h2 className="text-xl font-bold text-slate-800 border-b border-slate-200 pb-4 mb-4 flex items-center gap-3">
+                <ClipboardList className="h-6 w-6 text-primary-800" />
                 {t("orderSummary")}
               </h2>
               <dl className="space-y-3 text-slate-600">
-                <div className="flex justify-between">
-                  <dt>{t("subtotal")}</dt>
+                <div className="flex items-center justify-between">
+                  <dt className="flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5 text-slate-500" />
+                    {t("subtotal")}
+                  </dt>
                   <dd className="font-semibold text-slate-800">
                     {subtotal.toFixed(2)} {t("currency")}
                   </dd>
                 </div>
-                <div className="flex justify-between">
-                  <dt>{t("shipping")}</dt>
+                <div className="flex items-center justify-between">
+                  <dt className="flex items-center gap-2">
+                    <Truck className="h-5 w-5 text-slate-500" />
+                    {t("shipping")}
+                  </dt>
                   <dd className="font-medium">{t("calculatedAtCheckout")}</dd>
                 </div>
               </dl>
               <div className="border-t border-slate-200 mt-4 pt-4">
-                <div className="flex justify-between text-lg font-bold">
-                  <dt className="text-slate-900">{t("total")}</dt>
+                <div className="flex items-center justify-between text-lg font-bold">
+                  <dt className="flex items-center gap-2 text-slate-900">
+                    <Wallet className="h-5 w-5 text-slate-800" />
+                    {t("total")}
+                  </dt>
                   <dd className="text-slate-900">
                     {subtotal.toFixed(2)} {t("currency")}
                   </dd>
@@ -205,7 +220,7 @@ const CartPage = () => {
                   onClick={() => router.push("/checkout")}
                 >
                   {t("completePurchase")}
-                </ButtonPrimary>
+                </ButtonPrimary>    
                 <div className="text-center">
                   <Link
                     href="/products"
