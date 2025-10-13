@@ -81,7 +81,13 @@
       "error": "Une erreur inattendue s'est produite. Veuillez réessayer."
     },
     "pageSubtitle": "Entrez vos informations de livraison pour confirmer votre commande",
-    "quantityLabel": "Quantité"
+    "quantityLabel": "Quantité",
+    "orderSuccessMessage": "Nous avons reçu votre commande et vous contacterons bientôt pour confirmation. Merci pour votre confiance !",
+    "empty": {
+      "title": "Votre panier est vide",
+      "description": "Vous n'avez aucun article sélectionné pour le paiement.",
+      "startShopping": "Commencer les achats"
+    }
   },
   "hero": {
     "promoAlt": "Offre promotionnelle - Produits naturels de haute qualité"

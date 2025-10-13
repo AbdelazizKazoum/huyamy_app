@@ -4,15 +4,31 @@ import { useCartStore } from "@/store/useCartStore";
 import { useOrderStore } from "@/store/useOrderStore";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useMemo, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input } from "@/components/ui/Input";
 import { OrderData } from "@/types/order";
 import { toast } from "react-hot-toast";
-import { Button } from "@/components/ui";
+import {
+  User,
+  Phone,
+  MapPin,
+  Home,
+  Mail,
+  ClipboardList,
+  Truck,
+  Wallet,
+  Contact,
+  ShoppingCart,
+  ShoppingBag,
+} from "lucide-react";
+import { ButtonPrimary } from "@/components/ui";
+import SuccessModal from "@/components/modals/CheckoutSuccessModal";
+import { Language } from "@/types";
+import { Link } from "@/i18n/config";
 
 // Define validation schema with Zod
 const createShippingSchema = (t: (key: string) => string) =>
@@ -28,11 +44,25 @@ type ShippingFormData = z.infer<ReturnType<typeof createShippingSchema>>;
 
 const CheckoutPage = () => {
   const t = useTranslations("checkout");
+  const tCart = useTranslations("cart");
   const tValidation = useTranslations("checkout.validation");
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as Language;
 
-  const { items, clearCart } = useCartStore();
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
+  // 1. Get all items, but derive selected items for this page
+  const allItems = useCartStore((state) => state.items);
+  const { clearCart } = useCartStore();
+
   const { createOrder, loading: isCreatingOrder } = useOrderStore();
+
+  // 2. Use only selected items for all calculations and display
+  const items = useMemo(
+    () => allItems.filter((item) => item.selected),
+    [allItems]
+  );
 
   const shippingSchema = createShippingSchema(tValidation);
 
@@ -50,13 +80,6 @@ const CheckoutPage = () => {
     [items]
   );
 
-  // Redirect if cart is empty
-  useEffect(() => {
-    if (items.length === 0) {
-      router.replace("/cart");
-    }
-  }, [items, router]);
-
   const onSubmit = async (data: ShippingFormData) => {
     const orderData: OrderData = {
       shippingInfo: data,
@@ -68,147 +91,193 @@ const CheckoutPage = () => {
         image: item.product.image,
       })),
       totalAmount: subtotal,
-      locale: "ar", // Or get from params
+      locale: locale,
       orderDate: new Date().toISOString(),
     };
 
     try {
       await createOrder(orderData);
-      toast.success(t("orderSuccessToast"));
       clearCart();
-      router.push("/order-success"); // Redirect to a success page
+      setIsSuccessModalOpen(true); // This will now correctly show the modal
     } catch (error) {
       toast.error(t("orderErrorToast"));
       console.error("Failed to create order:", error);
     }
   };
 
-  if (items.length === 0) {
-    return null; // Or a loading spinner, as redirect is handling it
+  // 3. Show an empty cart message if there are no items and the modal isn't open
+  if (items.length === 0 && !isSuccessModalOpen) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-slate-100">
+          <ShoppingBag size={48} className="text-slate-400" strokeWidth={1.5} />
+        </div>
+        <h1 className="mt-6 text-3xl font-bold text-slate-800">
+          {t("empty.title")}
+        </h1>
+        <p className="mt-2 text-lg text-slate-500">{t("empty.description")}</p>
+        <Link
+          href="/products"
+          className="mt-8 inline-block bg-primary-800 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-primary-900 transition-all duration-300"
+        >
+          {t("empty.startShopping")}
+        </Link>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-white min-h-screen">
-      <div className="container mx-auto px-4 py-12">
-        <div className="mb-12 ltr:text-left rtl:text-right">
-          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
-            {t("title")}
-          </h1>
-          <p className="mt-2 text-lg text-slate-600">{t("pageSubtitle")}</p>
-        </div>
+    <>
+      <div className="bg-white min-h-screen">
+        <div className="container mx-auto px-4 py-12">
+          <div className="mb-12 ltr:text-left rtl:text-right">
+            <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+              {t("title")}
+            </h1>
+            <p className="mt-2 text-lg text-slate-600">{t("pageSubtitle")}</p>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-12">
-          {/* Shipping Information Form (Left Column) */}
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="lg:col-span-7 bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80"
-          >
-            <h2 className="text-2xl font-bold text-slate-800 mb-6">
-              {t("shippingTitle")}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-6">
-              <div className="sm:col-span-2">
-                <Input
-                  label={t("fullName")}
-                  {...register("fullName")}
-                  error={errors.fullName?.message}
-                />
-              </div>
-              <div>
-                <Input
-                  label={t("phone")}
-                  {...register("phone")}
-                  error={errors.phone?.message}
-                />
-              </div>
-              <div>
-                <Input
-                  label={t("city")}
-                  {...register("city")}
-                  error={errors.city?.message}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <Input
-                  label={t("address")}
-                  {...register("address")}
-                  error={errors.address?.message}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <Input
-                  label={`${t("email")} (${t("optional")})`}
-                  type="email"
-                  {...register("email")}
-                  error={errors.email?.message}
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <Button
-                  type="submit"
-                  disabled={isCreatingOrder}
-                  className="w-full text-lg py-3 mt-4"
-                >
-                  {isCreatingOrder ? t("placingOrder") : t("placeOrder")}
-                </Button>
-              </div>
-            </div>
-          </form>
-
-          {/* Order Summary (Right Column) */}
-          <div className="lg:col-span-5 mt-10 lg:mt-0">
-            <div className="bg-white p-6 rounded-2xl shadow-xl border border-slate-200/80 sticky top-24">
-              <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4 mb-4">
-                {t("summaryTitle")}
+          <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-12">
+            {/* Shipping Information Form (Left Column) */}
+            <form
+              id="shipping-form"
+              onSubmit={handleSubmit(onSubmit)}
+              className="lg:col-span-7 bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80"
+            >
+              <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                <Contact className="h-6 w-6 text-primary-800" />
+                {t("shippingTitle")}
               </h2>
-              <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
-                {items.map((item) => (
-                  <div key={item.product.id} className="flex items-start gap-4">
-                    <Image
-                      src={item.product.image}
-                      alt={item.product.name["ar"]}
-                      width={64}
-                      height={64}
-                      className="w-16 h-16 object-cover rounded-lg border"
-                    />
-                    <div className="flex-grow">
-                      <p className="font-semibold text-slate-800">
-                        {item.product.name["ar"]}
-                      </p>
-                      <p className="text-sm text-slate-500">
-                        {t("quantityLabel")}: {item.quantity}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-6">
+                <div>
+                  <Input
+                    label={`${t("fullName")} *`}
+                    icon={<User className="h-4 w-4 text-slate-400" />}
+                    {...register("fullName")}
+                    error={errors.fullName?.message}
+                  />
+                </div>
+                <div>
+                  <Input
+                    label={`${t("phone")} *`}
+                    icon={<Phone className="h-4 w-4 text-slate-400" />}
+                    {...register("phone")}
+                    error={errors.phone?.message}
+                  />
+                </div>
+                <div>
+                  <Input
+                    label={`${t("city")} *`}
+                    icon={<MapPin className="h-4 w-4 text-slate-400" />}
+                    {...register("city")}
+                    error={errors.city?.message}
+                  />
+                </div>
+                <div>
+                  <Input
+                    label={`${t("address")} *`}
+                    icon={<Home className="h-4 w-4 text-slate-400" />}
+                    {...register("address")}
+                    error={errors.address?.message}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <Input
+                    label={`${t("email")} (${t("optional")})`}
+                    icon={<Mail className="h-4 w-4 text-slate-400" />}
+                    type="email"
+                    {...register("email")}
+                    error={errors.email?.message}
+                  />
+                </div>
+              </div>
+            </form>
+
+            {/* Order Summary (Right Column) */}
+            <div className="lg:col-span-5 mt-10 lg:mt-0">
+              <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80 sticky top-24">
+                <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4 mb-4 flex items-center gap-3">
+                  <ShoppingCart className="h-6 w-6 text-primary-800" />
+                  {t("summaryTitle")}
+                </h2>
+                <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
+                  {items.map((item) => (
+                    <div
+                      key={item.product.id}
+                      className="flex items-start gap-4"
+                    >
+                      <Image
+                        src={item.product.image}
+                        alt={item.product.name["ar"]}
+                        width={64}
+                        height={64}
+                        className="w-16 h-16 object-cover rounded-lg border"
+                      />
+                      <div className="flex-grow">
+                        <p className="font-semibold text-slate-800">
+                          {item.product.name["ar"]}
+                        </p>
+                        <p className="text-sm text-slate-500">
+                          {t("quantityLabel")}: {item.quantity}
+                        </p>
+                      </div>
+                      <p className="font-medium text-slate-800 whitespace-nowrap">
+                        {(item.product.price * item.quantity).toFixed(2)}{" "}
+                        {t("currency")}
                       </p>
                     </div>
-                    <p className="font-medium text-slate-800 whitespace-nowrap">
-                      {(item.product.price * item.quantity).toFixed(2)}{" "}
-                      {t("currency")}
-                    </p>
+                  ))}
+                </div>
+                <dl className="space-y-3 text-slate-600 border-t border-slate-200 mt-4 pt-4">
+                  <div className="flex items-center justify-between font-medium">
+                    <dt className="flex items-center gap-2">
+                      <ClipboardList className="h-5 w-5 text-slate-500" />
+                      {t("subtotal")}
+                    </dt>
+                    <dd className="text-slate-800">
+                      {subtotal.toFixed(2)} {t("currency")}
+                    </dd>
                   </div>
-                ))}
+                  <div className="flex items-center justify-between font-medium">
+                    <dt className="flex items-center gap-2">
+                      <Truck className="h-5 w-5 text-slate-500" />
+                      {t("shipping")}
+                    </dt>
+                    <dd className="text-slate-800">{t("cod")}</dd>
+                  </div>
+                  <div className="flex items-center justify-between text-xl font-bold border-t border-slate-200 pt-4 mt-4">
+                    <dt className="flex items-center gap-2">
+                      <Wallet className="h-5 w-5 text-slate-800" />
+                      {t("total")}
+                    </dt>
+                    <dd className="text-primary-800">
+                      {subtotal.toFixed(2)} {t("currency")}
+                    </dd>
+                  </div>
+                </dl>
+                <ButtonPrimary
+                  type="submit"
+                  form="shipping-form"
+                  disabled={isCreatingOrder || items.length === 0}
+                  className="w-full text-lg py-3 mt-6"
+                >
+                  {isCreatingOrder ? t("placingOrder") : t("placeOrder")}
+                </ButtonPrimary>
               </div>
-              <dl className="space-y-3 text-slate-600 border-t mt-4 pt-4">
-                <div className="flex justify-between font-medium">
-                  <dt>{t("subtotal")}</dt>
-                  <dd className="text-slate-800">
-                    {subtotal.toFixed(2)} {t("currency")}
-                  </dd>
-                </div>
-                <div className="flex justify-between font-medium">
-                  <dt>{t("shipping")}</dt>
-                  <dd className="text-slate-800">{t("cod")}</dd>
-                </div>
-                <div className="flex justify-between text-xl font-bold border-t pt-4 mt-4">
-                  <dt className="text-slate-900">{t("total")}</dt>
-                  <dd className="text-primary-800">
-                    {subtotal.toFixed(2)} {t("currency")}
-                  </dd>
-                </div>
-              </dl>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      <SuccessModal
+        isOpen={isSuccessModalOpen}
+        onClose={() => {
+          setIsSuccessModalOpen(false);
+          router.push(`/${locale}/products`); // Navigate away after closing modal
+        }}
+        message={t("orderSuccessMessage")}
+        lang={locale}
+      />
+    </>
   );
 };
 

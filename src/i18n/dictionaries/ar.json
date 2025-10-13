@@ -26,8 +26,8 @@
     "checkout": "إتمام الشراء",
     "continueShopping": "أو متابعة التسوق",
     "empty": {
-      "title": "سلة التسوق فارغة",
-      "description": "لم تقم بإضافة أي منتجات بعد.",
+      "title": "سلة الشراء فارغة",
+      "description": "ليس لديك أي منتجات مختارة لإتمام الشراء.",
       "startShopping": "ابدأ التسوق"
     },
     "unitPrice": "سعر الوحدة",
@@ -58,6 +58,7 @@
     "placeOrder": "تأكيد الطلب",
     "placingOrder": "جاري تأكيد الطلب...",
     "orderSuccessToast": "تم إرسال طلبك بنجاح!",
+    "orderSuccessMessage": "لقد تلقينا طلبك وسنتصل بك قريباً للتأكيد. شكراً لثقتكم!",
     "orderErrorToast": "حدث خطأ أثناء إرسال الطلب.",
     "currency": "د.م.",
     "validation": {
@@ -66,6 +67,11 @@
       "cityRequired": "المدينة مطلوبة",
       "addressRequired": "العنوان مطلوب",
       "emailInvalid": "البريد الإلكتروني غير صالح"
+    },
+    "empty": {
+      "title": "سلة الشراء فارغة",
+      "description": "ليس لديك أي منتجات مختارة لإتمام الشراء.",
+      "startShopping": "ابدأ التسوق"
     },
 
     "customerInfo": "معلومات الزبون",
