@@ -190,10 +190,10 @@ const CategoriesPage: React.FC = () => {
         itemsPerPage={itemsPerPage}
         emptyMessage="لا توجد فئات"
         renderActions={(item: Category) => (
-          <>
+          <div className="flex items-center justify-center gap-2">
             <button
               onClick={() => handleOpenEditModal(item)}
-              className="flex items-center gap-1 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm transition-colors flex-1 justify-center"
+              className="flex items-center gap-1 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm transition-colors justify-center"
               title="تعديل"
             >
               <Edit size={14} />
@@ -201,13 +201,13 @@ const CategoriesPage: React.FC = () => {
             </button>
             <button
               onClick={() => handleDelete(item.id)}
-              className="flex items-center gap-1 px-3 py-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-sm transition-colors flex-1 justify-center"
+              className="flex items-center gap-1 px-3 py-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-sm transition-colors justify-center"
               title="حذف"
             >
               <Trash2 size={14} />
               <span>حذف</span>
             </button>
-          </>
+          </div>
         )}
       />
 
