@@ -137,7 +137,8 @@ const CheckoutPage = () => {
             <p className="mt-2 text-lg text-slate-600">{t("pageSubtitle")}</p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-12">
+          {/* Added lg:items-start to prevent columns from stretching */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-12 lg:items-start">
             {/* Shipping Information Form (Left Column) */}
             <form
               id="shipping-form"
