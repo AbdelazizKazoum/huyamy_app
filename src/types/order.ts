@@ -9,7 +9,7 @@ export interface OrderData {
   shippingInfo: {
     fullName: string;
     phone: string;
-    city: string;
+    city?: string;
     address: string;
     email?: string;
   };

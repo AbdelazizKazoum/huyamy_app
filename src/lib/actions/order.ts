@@ -2,8 +2,6 @@
 
 import { checkoutSchema, FormState } from "@/lib/schemas";
 import { createGuestOrder } from "@/lib/services/orderService";
-import { revalidatePath } from "next/cache";
-import { Product } from "@/types";
 import { OrderData } from "@/types/order";
 
 // Localized messages for order processing
