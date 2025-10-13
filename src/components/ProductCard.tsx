@@ -112,13 +112,27 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Product Information */}
         <div className="p-4 text-center flex flex-col flex-grow">
-          {/* Product Name with Schema */}
-          <h3
-            className="text-lg font-semibold text-neutral-800 truncate mb-2 h-14 flex items-center justify-center"
-            itemProp="name"
-          >
-            {product.name[lang || "ar"]}
-          </h3>
+          {/* Product Name with proper text handling */}
+          <div className="h-14 flex items-center justify-center mb-2">
+            <h3
+              className="text-lg font-semibold text-neutral-800 leading-tight px-1"
+              itemProp="name"
+              title={product.name[lang || "ar"]} // Tooltip shows full text on hover
+              style={{
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: 2,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                wordBreak: "break-word",
+                hyphens: "auto",
+                lineHeight: "1.4",
+                maxHeight: "3.5rem", // 2 lines * 1.75rem line height
+              }}
+            >
+              {product.name[lang || "ar"]}
+            </h3>
+          </div>
 
           {/* Hidden description for SEO */}
           <meta
