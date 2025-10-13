@@ -6,6 +6,7 @@ import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/config";
 import { Geist, Geist_Mono, Noto_Sans_Arabic, Inter } from "next/font/google";
 import "../globals.css";
+import ToasterProvider from "@/providers/ToasterProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -164,6 +165,8 @@ export default async function LocaleLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${notoSansArabic.variable} ${inter.variable} antialiased`}
       >
         <NextIntlClientProvider locale={typedLocale} messages={messages}>
+          <ToasterProvider />
+
           {children}
         </NextIntlClientProvider>
       </body>

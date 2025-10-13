@@ -1,8 +1,14 @@
+"use client";
+
 import { Locale, Product } from "@/types";
 import Image from "next/image";
 import { ButtonPrimary } from "./ui";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/config";
+import { useCartStore } from "@/store/useCartStore";
+import { ShoppingCart } from "lucide-react";
+import toast from "react-hot-toast";
+import AddedToCartToast from "./AddedToCartToast";
 
 interface ProductCardProps {
   product: Product;
@@ -16,6 +22,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   currency = "د.م.",
 }) => {
   const t = useTranslations("products");
+  const { addItem } = useCartStore();
   const originalPriceNum = product.originalPrice || 0;
   let discountPercentage = 0;
 
@@ -25,13 +32,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
     );
   }
 
-  // Create a URL-friendly name by replacing spaces and special characters
   const productSlug = product.name[lang || "ar"]
     .toLowerCase()
     .replace(/\s+/g, "-")
-    .replace(/[^\w\-\u0600-\u06FF]/g, ""); // Keep Arabic characters and Latin letters/numbers
+    .replace(/[^\w\-\u0600-\u06FF]/g, "");
 
-  // SEO-optimized alt text
   const seoAltText = `${product.name[lang || "ar"]} - ${product.price.toFixed(
     2
   )} ${currency}${
@@ -46,9 +51,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
       : "Produit marocain naturel de Huyamy"
   }`;
 
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(product);
+    toast.custom((t) => (
+      <AddedToCartToast toastInstance={t} product={product} lang={lang} />
+    ));
+  };
+
   return (
     <Link href={`/products/${product.slug}`} className="block">
-      {/* Schema.org Product Microdata */}
       <article
         className="group bg-white rounded-lg shadow-sm border border-neutral-200/60 overflow-hidden flex flex-col h-full transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer"
         itemScope
@@ -84,6 +97,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
           />
           <meta itemProp="width" content="400" />
           <meta itemProp="height" content="224" />
+
+          {/* Add to Cart Icon Button - Centered at the bottom of the image */}
+          <button
+            onClick={handleAddToCart}
+            aria-label={t("addToCart")}
+            className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-sm text-primary-800 p-3 rounded-full shadow-md transition-transform duration-300 hover:scale-110 hover:bg-white"
+          >
+            <ShoppingCart size={20} />
+          </button>
 
           {/* Product Status Badges */}
           {product.isNew && (
@@ -178,33 +200,18 @@ const ProductCard: React.FC<ProductCardProps> = ({
               {product.price.toFixed(2)} {currency}
             </p>
             {product.originalPrice && (
-              <p
-                className="text-sm text-neutral-400 line-through"
-                itemProp="priceSpecification"
-                itemScope
-                itemType="https://schema.org/PriceSpecification"
-              >
-                <meta
-                  itemProp="price"
-                  content={product.originalPrice.toFixed(2)}
-                />
-                <meta itemProp="priceCurrency" content="MAD" />
+              <p className="text-sm text-neutral-500 line-through">
                 {product.originalPrice.toFixed(2)} {currency}
               </p>
             )}
           </div>
 
-          {/* Add to Cart Button */}
+          {/* Buy Now Button */}
           <ButtonPrimary
             className="w-full mt-auto"
-            aria-label={`${t("addToCart")} - ${product.name[lang || "ar"]}`}
-            // onClick={(e) => {
-            //   e.preventDefault(); // Prevent navigation when clicking the button
-            //   e.stopPropagation();
-            //   // Add to cart logic here
-            // }}
+            aria-label={`${t("buyNow")} - ${product.name[lang || "ar"]}`}
           >
-            {t("addToCart")}
+            {t("buyNow")}
           </ButtonPrimary>
         </div>
       </article>

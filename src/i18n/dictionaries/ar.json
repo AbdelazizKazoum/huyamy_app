@@ -14,7 +14,11 @@
   },
   "cart": {
     "title": "سلة التسوق",
+    "addedToCartSuccess": "تمت الإضافة إلى السلة!",
     "subtotal": "المجموع الفرعي",
+    "quantity": "الكمية",
+    "currency": "د.م.",
+    "viewCart": "عرض السلة",
     "checkout": "إتمام الشراء",
     "continueShopping": "أو متابعة التسوق",
     "empty": {
@@ -50,8 +54,9 @@
   },
   "products": {
     "viewAll": "عرض كل المنتجات",
-    "addToCart": "أضف للسلة",
+    "addToCart": "أضف إلى السلة",
     "discount": "خصم",
+    "buyNow": "اشتر الآن",
     "originalPrice": "السعر الأصلي",
     "productsList": "قائمة المنتجات",
     "errorTitle": "خطأ في تحميل المنتجات",
@@ -62,7 +67,6 @@
     "searchPlaceholder": "ابحث عن منتج...",
     "categories": "الفئات",
     "priceRange": "نطاق السعر",
-    "currency": "د.م.",
     "showingResults": "عرض {count} من النتائج",
 
     "pagination": {

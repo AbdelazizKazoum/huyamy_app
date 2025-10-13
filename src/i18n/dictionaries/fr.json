@@ -13,8 +13,12 @@
     "whatsappMessage": "Bonjour, je souhaiterais me renseigner sur vos produits naturels"
   },
   "cart": {
-    "title": "Panier",
+    "title": "Panier d'achat",
+    "addedToCartSuccess": "Ajouté au panier !",
     "subtotal": "Sous-total",
+    "quantity": "Qté",
+    "currency": "MAD",
+    "viewCart": "Voir le panier",
     "checkout": "Passer la commande",
     "continueShopping": "ou continuer vos achats",
     "empty": {
@@ -52,6 +56,7 @@
     "viewAll": "Voir tous les produits",
     "addToCart": "Ajouter au panier",
     "discount": "Réduction",
+    "buyNow": "Acheter maintenant",
     "originalPrice": "Prix original",
     "productsList": "Liste des produits",
     "errorTitle": "Erreur de chargement des produits",
@@ -62,7 +67,6 @@
     "searchPlaceholder": "Rechercher un produit...",
     "categories": "Catégories",
     "priceRange": "Fourchette de prix",
-    "currency": "MAD",
     "showingResults": "Affichage de {count} résultats",
     "sortBy": {
       "default": "Tri par défaut",

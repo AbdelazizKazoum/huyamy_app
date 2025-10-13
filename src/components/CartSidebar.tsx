@@ -1,16 +1,14 @@
-import { CartItem, Locale } from "@/types";
+import { Locale } from "@/types";
 import { Transition } from "@headlessui/react";
 import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import { Fragment } from "react";
 import { useTranslations } from "next-intl";
+import { useCartStore } from "@/store/useCartStore"; // Import the cart store
 
 interface CartSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  items: CartItem[];
-  onUpdateQuantity: (productId: string, newQuantity: number) => void;
-  onRemoveItem: (productId: string) => void;
   lang: Locale;
   currency: string;
 }
@@ -18,18 +16,16 @@ interface CartSidebarProps {
 const CartSidebar: React.FC<CartSidebarProps> = ({
   isOpen,
   onClose,
-  items,
-  onUpdateQuantity,
-  onRemoveItem,
   lang,
   currency,
 }) => {
   const t = useTranslations("cart");
+  const { items, updateQuantity, removeItem, toggleItemSelected } =
+    useCartStore();
 
-  const subtotal = items.reduce(
-    (total, item) => total + item.product.price * item.quantity,
-    0
-  );
+  const subtotal = items
+    .filter((item) => item.selected)
+    .reduce((total, item) => total + item.product.price * item.quantity, 0);
 
   return (
     <Transition show={isOpen} as={Fragment}>
@@ -79,8 +75,14 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                   {items.map((item) => (
                     <div
                       key={item.product.id}
-                      className="flex items-center gap-4"
+                      className="flex items-start gap-4"
                     >
+                      <input
+                        type="checkbox"
+                        checked={item.selected}
+                        onChange={() => toggleItemSelected(item.product.id)}
+                        className="mt-1 h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+                      />
                       <Image
                         src={item.product.image}
                         alt={item.product.name[lang || "ar"]}
@@ -101,7 +103,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                           <div className="flex items-center border border-neutral-200 rounded-full">
                             <button
                               onClick={() =>
-                                onUpdateQuantity(
+                                updateQuantity(
                                   item.product.id,
                                   item.quantity - 1
                                 )
@@ -115,7 +117,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                             </span>
                             <button
                               onClick={() =>
-                                onUpdateQuantity(
+                                updateQuantity(
                                   item.product.id,
                                   item.quantity + 1
                                 )
@@ -126,7 +128,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                             </button>
                           </div>
                           <button
-                            onClick={() => onRemoveItem(item.product.id)}
+                            onClick={() => removeItem(item.product.id)}
                             className="mr-auto p-2 text-red-500 hover:bg-red-50 rounded-full"
                           >
                             <Trash2 size={18} />
@@ -146,7 +148,10 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                       {subtotal.toFixed(2)} {currency}
                     </span>
                   </div>
-                  <button className="w-full bg-primary-800 text-white font-bold py-4 px-6 rounded-full text-lg hover:bg-primary-900 transition-all duration-300">
+                  <button
+                    className="w-full bg-primary-800 text-white font-bold py-4 px-6 rounded-full text-lg hover:bg-primary-900 transition-all duration-300 disabled:bg-neutral-400 disabled:cursor-not-allowed"
+                    disabled={subtotal === 0}
+                  >
                     {t("checkout")}
                   </button>
                   <button
