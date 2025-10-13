@@ -110,10 +110,13 @@ const ProductsPage: React.FC = () => {
     label: string;
     sortable: boolean;
     render?: (item: Product) => React.ReactNode;
+    mobileLabel?: string;
+    hiddenOnMobile?: boolean;
   }[] = [
     {
       key: "name",
       label: "المنتج",
+      mobileLabel: "اسم المنتج",
       sortable: true,
       render: (item) => (
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
@@ -136,6 +139,7 @@ const ProductsPage: React.FC = () => {
     {
       key: "category",
       label: "الفئة",
+      mobileLabel: "الفئة",
       sortable: true,
       render: (item) => (
         <span
@@ -149,9 +153,10 @@ const ProductsPage: React.FC = () => {
     {
       key: "price",
       label: "السعر",
+      mobileLabel: "السعر",
       sortable: true,
       render: (item) => (
-        <span className="font-mono text-sm sm:text-base">
+        <span className="font-mono text-sm sm:text-base font-semibold text-green-600">
           {item.price.toFixed(2)} د.م.
         </span>
       ),
@@ -194,154 +199,41 @@ const ProductsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Card View */}
-      <div className="block sm:hidden space-y-3 mb-6">
-        {paginatedProducts.map((product) => (
-          <div
-            key={product.id}
-            className="bg-white rounded-lg shadow-sm border border-gray-200 p-4"
-          >
-            <div className="flex items-start gap-3">
-              <Image
-                src={product.image}
-                alt={product.name[lang]}
-                width={60}
-                height={60}
-                className="w-15 h-15 rounded-md object-cover bg-gray-100 flex-shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                {/* Product Name with Label */}
-                <div className="mb-2">
-                  <span className="text-xs text-gray-500 font-medium block mb-1">
-                    اسم المنتج:
-                  </span>
-                  <h3 className="font-medium text-gray-800 text-base truncate">
-                    {product.name[lang]}
-                  </h3>
-                </div>
-
-                {/* Category with Label */}
-                <div className="mb-2">
-                  <span className="text-xs text-gray-500 font-medium block mb-1">
-                    الفئة:
-                  </span>
-                  <p className="text-sm text-gray-600 truncate">
-                    {product.category.name[lang]}
-                  </p>
-                </div>
-
-                {/* Price with Label */}
-                <div className="mb-3">
-                  <span className="text-xs text-gray-500 font-medium block mb-1">
-                    السعر:
-                  </span>
-                  <p className="text-lg font-bold text-green-600">
-                    {product.price.toFixed(2)} د.م.
-                  </p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleOpenEditModal(product)}
-                    className="flex items-center gap-1 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-md text-sm transition-colors flex-1 justify-center"
-                  >
-                    <Edit size={14} />
-                    <span>تعديل</span>
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="flex items-center gap-1 px-3 py-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-md text-sm transition-colors flex-1 justify-center"
-                  >
-                    <Trash2 size={14} />
-                    <span>حذف</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-
-        {isLoading && products.length === 0 && (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 p-4"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-15 h-15 bg-gray-200 rounded-md animate-pulse flex-shrink-0"></div>
-                  <div className="flex-1 min-w-0 space-y-3">
-                    {/* Name skeleton with label */}
-                    <div>
-                      <div className="h-3 bg-gray-200 rounded animate-pulse w-16 mb-1"></div>
-                      <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                    </div>
-                    {/* Category skeleton with label */}
-                    <div>
-                      <div className="h-3 bg-gray-200 rounded animate-pulse w-12 mb-1"></div>
-                      <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
-                    </div>
-                    {/* Price skeleton with label */}
-                    <div>
-                      <div className="h-3 bg-gray-200 rounded animate-pulse w-10 mb-1"></div>
-                      <div className="h-5 bg-gray-200 rounded animate-pulse w-1/3"></div>
-                    </div>
-                    {/* Buttons skeleton */}
-                    <div className="flex gap-2 mt-3">
-                      <div className="h-8 bg-gray-200 rounded animate-pulse flex-1"></div>
-                      <div className="h-8 bg-gray-200 rounded animate-pulse flex-1"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* DataTable with built-in mobile cards */}
+      <DataTable
+        columns={columns}
+        data={paginatedProducts}
+        isLoading={isLoading && products.length === 0}
+        itemsPerPage={itemsPerPage}
+        emptyMessage="لا توجد منتجات"
+        renderActions={(item: Product) => (
+          <>
+            <button
+              title="عرض المنتج"
+              className="flex items-center gap-1 px-3 py-1.5 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm transition-colors flex-1 justify-center"
+            >
+              <Eye size={14} />
+              <span className="hidden sm:inline">عرض</span>
+            </button>
+            <button
+              title="تعديل المنتج"
+              onClick={() => handleOpenEditModal(item)}
+              className="flex items-center gap-1 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm transition-colors flex-1 justify-center"
+            >
+              <Edit size={14} />
+              <span>تعديل</span>
+            </button>
+            <button
+              title="حذف المنتج"
+              onClick={() => handleDelete(item.id)}
+              className="flex items-center gap-1 px-3 py-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-sm transition-colors flex-1 justify-center"
+            >
+              <Trash2 size={14} />
+              <span>حذف</span>
+            </button>
+          </>
         )}
-
-        {paginatedProducts.length === 0 && !isLoading && (
-          <div className="text-center py-8 text-gray-500">
-            {searchTerm ? "لا توجد منتجات مطابقة للبحث" : "لا توجد منتجات"}
-          </div>
-        )}
-      </div>
-
-      {/* Desktop Table View */}
-      <div className="hidden sm:block overflow-hidden">
-        <div className="overflow-x-auto">
-          <DataTable
-            columns={columns}
-            data={paginatedProducts}
-            isLoading={isLoading && products.length === 0}
-            itemsPerPage={itemsPerPage}
-            renderActions={(item: Product) => (
-              <div className="flex gap-1 sm:gap-2">
-                <button
-                  title="عرض المنتج"
-                  className="p-1.5 sm:p-2 text-gray-500 hover:bg-gray-100 rounded-md transition-colors"
-                >
-                  <Eye size={16} className="sm:w-[18px] sm:h-[18px]" />
-                </button>
-                <button
-                  title="تعديل المنتج"
-                  onClick={() => handleOpenEditModal(item)}
-                  className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                >
-                  <Edit size={16} className="sm:w-[18px] sm:h-[18px]" />
-                </button>
-                <button
-                  title="حذف المنتج"
-                  onClick={() => handleDelete(item.id)}
-                  className="p-1.5 sm:p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                >
-                  <Trash2 size={16} className="sm:w-[18px] sm:h-[18px]" />
-                </button>
-              </div>
-            )}
-            emptyMessage="لا توجد منتجات"
-          />
-        </div>
-      </div>
+      />
 
       {/* Pagination */}
       {totalPages > 1 && (
