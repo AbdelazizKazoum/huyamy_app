@@ -132,7 +132,7 @@ const CartPage = () => {
   }
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white">
       <div className="container mx-auto px-4 py-12">
         <div className="mb-10 ltr:text-left rtl:text-right">
           <h1 className="text-3xl font-bold text-slate-800">{t("title")}</h1>

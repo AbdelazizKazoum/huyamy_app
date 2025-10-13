@@ -42,7 +42,8 @@
     "completePurchase": "Finaliser l'achat",
     "selectAll": "Tout sélectionner",
     "deselectAll": "Tout désélectionner",
-    "items": "articles"
+    "items": "articles",
+    "remove": "Retirer"
   },
   "checkout": {
     "title": "Finaliser la commande",

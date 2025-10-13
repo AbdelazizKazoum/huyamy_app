@@ -18,7 +18,8 @@ interface CartState {
   toggleItemSelected: (productId: string) => void;
   clearCart: () => void;
   getSelectedItems: () => CartItem[];
-  toggleSelectAll: (selected: boolean) => void; // Add this line
+  toggleSelectAll: (selected: boolean) => void;
+  removeSelectedItems: () => void;
 }
 
 // Create the store with persistence
@@ -99,6 +100,13 @@ export const useCartStore = create<CartState>()(
       toggleSelectAll: (selected) => {
         set((state) => ({
           items: state.items.map((item) => ({ ...item, selected })),
+        }));
+      },
+
+      // Add the new action implementation
+      removeSelectedItems: () => {
+        set((state) => ({
+          items: state.items.filter((item) => !item.selected),
         }));
       },
     }),

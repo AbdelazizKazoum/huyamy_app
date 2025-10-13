@@ -2,9 +2,11 @@ import { Locale } from "@/types";
 import { Transition } from "@headlessui/react";
 import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
 import Image from "next/image";
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { useCartStore } from "@/store/useCartStore"; // Import the cart store
+import { useCartStore } from "@/store/useCartStore";
+import { Checkbox } from "@/components/ui/Checkbox"; // Import custom Checkbox
+import { Link } from "@/i18n/config"; // Import Link for navigation
 
 interface CartSidebarProps {
   isOpen: boolean;
@@ -20,16 +22,35 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   currency,
 }) => {
   const t = useTranslations("cart");
-  const { items, updateQuantity, removeItem, toggleItemSelected } =
-    useCartStore();
+  const {
+    items,
+    updateQuantity,
+    removeItem,
+    toggleItemSelected,
+    toggleSelectAll,
+    removeSelectedItems,
+  } = useCartStore();
 
-  const subtotal = items
-    .filter((item) => item.selected)
-    .reduce((total, item) => total + item.product.price * item.quantity, 0);
+  const selectedItems = useMemo(
+    () => items.filter((item) => item.selected),
+    [items]
+  );
+
+  const subtotal = useMemo(
+    () =>
+      selectedItems.reduce(
+        (total, item) => total + item.product.price * item.quantity,
+        0
+      ),
+    [selectedItems]
+  );
+
+  const isAllSelected =
+    items.length > 0 && selectedItems.length === items.length;
 
   return (
     <Transition show={isOpen} as={Fragment}>
-      <div className="fixed inset-0 z-50">
+      <div className="fixed inset-0 z-50" dir={lang === "ar" ? "rtl" : "ltr"}>
         {/* Backdrop */}
         <Transition.Child
           as={Fragment}
@@ -40,67 +61,98 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="absolute inset-0 bg-black/50" onClick={onClose}></div>
+          <div className="absolute inset-0 bg-black/60" onClick={onClose}></div>
         </Transition.Child>
 
         {/* Cart Panel */}
         <Transition.Child
           as={Fragment}
           enter="transform transition ease-in-out duration-300"
-          enterFrom="-translate-x-full"
+          // Corrected enter/leave animations for RTL
+          enterFrom={lang === "ar" ? "translate-x-full" : "-translate-x-full"}
           enterTo="translate-x-0"
           leave="transform transition ease-in-out duration-300"
           leaveFrom="translate-x-0"
-          leaveTo="-translate-x-full"
+          leaveTo={lang === "ar" ? "translate-x-full" : "-translate-x-full"}
         >
-          <div className="fixed top-0 left-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b border-neutral-200">
-              <h2
-                className="text-2xl font-bold text-neutral-800"
-                style={{ fontFamily: "'Cairo', sans-serif" }}
-              >
-                {t("title")}
+          <div
+            className={`fixed top-0 h-full w-full max-w-md bg-white shadow-xl flex flex-col ${
+              // Correctly position the sidebar based on language direction
+              lang === "ar" ? "right-0" : "left-0"
+            }`}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+              <h2 className="text-xl font-bold text-slate-800">
+                {t("title")} ({items.length})
               </h2>
               <button
                 onClick={onClose}
-                className="p-2 text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 rounded-full"
+                className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full"
               >
-                <X size={24} />
+                <X size={22} />
               </button>
             </div>
 
             {items.length > 0 ? (
               <>
-                <div className="flex-grow overflow-y-auto p-6 space-y-4">
+                <div className="p-4 border-b border-slate-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        id="sidebar-select-all"
+                        checked={isAllSelected}
+                        onCheckedChange={(checked) =>
+                          toggleSelectAll(!!checked)
+                        }
+                      />
+                      <label
+                        htmlFor="sidebar-select-all"
+                        className="font-medium text-sm text-slate-700"
+                      >
+                        {isAllSelected ? t("deselectAll") : t("selectAll")}
+                      </label>
+                    </div>
+                    {selectedItems.length > 0 && (
+                      <button
+                        onClick={() => removeSelectedItems()}
+                        className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800 font-medium"
+                      >
+                        <Trash2 size={14} />
+                        {t("remove")}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex-grow overflow-y-auto p-4 space-y-4">
                   {items.map((item) => (
                     <div
                       key={item.product.id}
                       className="flex items-start gap-4"
                     >
-                      <input
-                        type="checkbox"
+                      <Checkbox
+                        className="mt-1"
                         checked={item.selected}
-                        onChange={() => toggleItemSelected(item.product.id)}
-                        className="mt-1 h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+                        onCheckedChange={() =>
+                          toggleItemSelected(item.product.id)
+                        }
                       />
                       <Image
                         src={item.product.image}
                         alt={item.product.name[lang || "ar"]}
                         width={80}
                         height={80}
-                        className="w-20 h-20 object-cover rounded-md border border-neutral-200"
-                        style={{ width: "80px", height: "80px" }}
-                        unoptimized={false}
+                        className="w-20 h-20 object-cover rounded-md border border-slate-200"
                       />
                       <div className="flex-grow">
-                        <h3 className="font-semibold text-neutral-800">
+                        <h3 className="font-semibold text-slate-800 text-sm leading-tight">
                           {item.product.name[lang || "ar"]}
                         </h3>
-                        <p className="text-primary-800 text-sm font-semibold">
+                        <p className="text-slate-500 text-xs mt-1">
                           {item.product.price.toFixed(2)} {currency}
                         </p>
-                        <div className="flex items-center mt-2">
-                          <div className="flex items-center border border-neutral-200 rounded-full">
+                        <div className="flex items-center justify-between mt-3">
+                          <div className="flex items-center border border-slate-200 rounded-md">
                             <button
                               onClick={() =>
                                 updateQuantity(
@@ -108,11 +160,12 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                                   item.quantity - 1
                                 )
                               }
-                              className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-r-full"
+                              disabled={item.quantity <= 1}
+                              className="p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
                             >
-                              <Minus size={16} />
+                              <Minus size={14} />
                             </button>
-                            <span className="px-3 text-lg font-bold">
+                            <span className="px-3 font-bold text-slate-800 text-sm">
                               {item.quantity}
                             </span>
                             <button
@@ -122,16 +175,16 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                                   item.quantity + 1
                                 )
                               }
-                              className="p-2 text-neutral-500 hover:bg-neutral-100 rounded-l-full"
+                              className="p-1.5 text-slate-500 hover:bg-slate-100"
                             >
-                              <Plus size={16} />
+                              <Plus size={14} />
                             </button>
                           </div>
                           <button
                             onClick={() => removeItem(item.product.id)}
-                            className="mr-auto p-2 text-red-500 hover:bg-red-50 rounded-full"
+                            className="p-2 text-slate-400 hover:text-red-600"
                           >
-                            <Trash2 size={18} />
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </div>
@@ -139,24 +192,27 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                   ))}
                 </div>
 
-                <div className="p-6 border-t border-neutral-200 bg-neutral-50">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-lg text-neutral-600">
-                      {t("subtotal")}
+                <div className="p-4 border-t border-slate-200 bg-white">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-base text-slate-600">
+                      {t("subtotal")} ({selectedItems.length} {t("items")})
                     </span>
-                    <span className="text-2xl font-bold text-primary-800">
+                    <span className="text-xl font-bold text-slate-900">
                       {subtotal.toFixed(2)} {currency}
                     </span>
                   </div>
-                  <button
-                    className="w-full bg-primary-800 text-white font-bold py-4 px-6 rounded-full text-lg hover:bg-primary-900 transition-all duration-300 disabled:bg-neutral-400 disabled:cursor-not-allowed"
-                    disabled={subtotal === 0}
-                  >
-                    {t("checkout")}
-                  </button>
+                  <Link href="/checkout" passHref>
+                    <button
+                      onClick={onClose}
+                      className="w-full bg-primary-800 text-white font-bold py-3 px-6 rounded-lg text-base hover:bg-primary-900 transition-all duration-300 disabled:bg-slate-300 disabled:cursor-not-allowed"
+                      disabled={selectedItems.length === 0}
+                    >
+                      {t("checkout")}
+                    </button>
+                  </Link>
                   <button
                     onClick={onClose}
-                    className="w-full text-center mt-3 text-primary-800 font-semibold hover:underline"
+                    className="w-full text-center mt-3 text-primary-800 font-medium text-sm hover:underline"
                   >
                     {t("continueShopping")}
                   </button>
@@ -164,16 +220,14 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
               </>
             ) : (
               <div className="flex-grow flex flex-col items-center justify-center text-center p-6">
-                <ShoppingCart size={64} className="text-neutral-300 mb-4" />
-                <h3 className="text-xl font-semibold text-neutral-800">
+                <ShoppingCart size={64} className="text-slate-300 mb-4" />
+                <h3 className="text-xl font-semibold text-slate-800">
                   {t("empty.title")}
                 </h3>
-                <p className="text-neutral-500 mt-2">
-                  {t("empty.description")}
-                </p>
+                <p className="text-slate-500 mt-2">{t("empty.description")}</p>
                 <button
                   onClick={onClose}
-                  className="mt-6 bg-primary-800 text-white font-bold py-3 px-8 rounded-full hover:bg-primary-900 transition-all duration-300"
+                  className="mt-6 bg-primary-800 text-white font-bold py-3 px-8 rounded-lg hover:bg-primary-900 transition-all duration-300"
                 >
                   {t("empty.startShopping")}
                 </button>

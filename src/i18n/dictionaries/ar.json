@@ -42,7 +42,8 @@
     "completePurchase": "إتمام الشراء",
     "selectAll": "تحديد الكل",
     "deselectAll": "إلغاء تحديد الكل",
-    "items": "عناصر"
+    "items": "عناصر",
+    "remove": "إزالة"
   },
   "checkout": {
     "title": "إتمام الشراء",
