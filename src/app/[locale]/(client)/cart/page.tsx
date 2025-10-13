@@ -1,7 +1,7 @@
 "use client";
 
 import { useCartStore } from "@/store/useCartStore";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl"; // Import useLocale
 import Image from "next/image";
 import { Link } from "@/i18n/config";
 import {
@@ -15,12 +15,14 @@ import {
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Checkbox } from "@/components/ui/Checkbox"; // Import the Checkbox
+import { Checkbox } from "@/components/ui/Checkbox";
 import { ButtonPrimary } from "@/components/ui";
+import { Locale } from "@/types"; // Import Locale type
 
 const CartPage = () => {
   const t = useTranslations("cart");
   const router = useRouter();
+  const locale = useLocale() as Locale; // Get the current locale
   const {
     items,
     updateQuantity,
@@ -164,57 +166,64 @@ const CartPage = () => {
               {items.map((item) => (
                 <div
                   key={item.product.id}
-                  className="flex items-center gap-4 p-3 bg-white rounded-xl shadow-md border border-slate-200/80"
+                  className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-md border border-slate-200/80"
                 >
                   <Checkbox
+                    className="mt-1 flex-shrink-0"
                     checked={item.selected}
                     onCheckedChange={() => toggleItemSelected(item.product.id)}
-                    aria-label={`Select ${item.product.name["ar"]}`}
+                    aria-label={`Select ${item.product.name[locale]}`}
                   />
                   <Image
                     src={item.product.image}
-                    alt={item.product.name["ar"]}
+                    alt={item.product.name[locale]}
                     width={80}
                     height={80}
-                    className="w-20 h-20 object-cover rounded-lg"
+                    className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
                   />
-                  <div className="flex-grow">
-                    <h3 className="font-semibold text-base text-slate-800">
-                      {item.product.name["ar"]}
-                    </h3>
+                  <div className="flex-grow flex flex-col">
+                    {/* Top row: Name and Remove button */}
+                    <div className="flex justify-between items-start gap-2">
+                      <h3 className="font-semibold text-base text-slate-800">
+                        {item.product.name[locale]}
+                      </h3>
+                      <button
+                        onClick={() => removeItem(item.product.id)}
+                        className="p-1 text-slate-400 hover:text-red-600 flex-shrink-0"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+                    {/* Bottom row: Quantity and Price */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2">
+                      <div className="flex items-center border border-slate-200 rounded-md self-start sm:self-center">
+                        <button
+                          onClick={() =>
+                            updateQuantity(item.product.id, item.quantity - 1)
+                          }
+                          disabled={item.quantity <= 1}
+                          className="p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+                        >
+                          <Minus size={14} />
+                        </button>
+                        <span className="px-3 font-bold text-slate-800 text-sm">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() =>
+                            updateQuantity(item.product.id, item.quantity + 1)
+                          }
+                          className="p-1.5 text-slate-500 hover:bg-slate-100"
+                        >
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                      <p className="mt-2 sm:mt-0 font-bold text-slate-800 text-base">
+                        {(item.product.price * item.quantity).toFixed(2)}{" "}
+                        {t("currency")}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex items-center border border-slate-200 rounded-md">
-                    <button
-                      onClick={() =>
-                        updateQuantity(item.product.id, item.quantity - 1)
-                      }
-                      disabled={item.quantity <= 1}
-                      className="p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
-                    >
-                      <Minus size={14} />
-                    </button>
-                    <span className="px-3 font-bold text-slate-800 text-sm">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() =>
-                        updateQuantity(item.product.id, item.quantity + 1)
-                      }
-                      className="p-1.5 text-slate-500 hover:bg-slate-100"
-                    >
-                      <Plus size={14} />
-                    </button>
-                  </div>
-                  <p className="w-24 text-center font-bold text-slate-800 text-base">
-                    {(item.product.price * item.quantity).toFixed(2)}{" "}
-                    {t("currency")}
-                  </p>
-                  <button
-                    onClick={() => removeItem(item.product.id)}
-                    className="p-2 text-slate-400 hover:text-red-600"
-                  >
-                    <X size={18} />
-                  </button>
                 </div>
               ))}
             </div>
@@ -222,7 +231,7 @@ const CartPage = () => {
 
           {/* Order Summary */}
           <div className="lg:col-span-1 mt-8 lg:mt-0">
-            <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200/80 sticky top-24">
+            <div className="bg-white p-6 rounded-xl shadow-md border-slate-200/80 sticky top-24">
               <h2 className="text-xl font-bold text-slate-800 border-b border-slate-200 pb-4 mb-4 flex items-center gap-3">
                 <ClipboardList className="h-6 w-6 text-primary-800" />
                 {t("orderSummary")}
