@@ -61,6 +61,7 @@
     "total": "المجموع الإجمالي",
     "placeOrder": "تأكيد الطلب",
     "placingOrder": "جاري تأكيد الطلب...",
+    "processing": "جاري المعالجة...",
     "orderSuccessToast": "تم إرسال طلبك بنجاح!",
     "orderSuccessMessage": "لقد تلقينا طلبك وسنتصل بك قريباً للتأكيد. شكراً لثقتكم!",
     "orderErrorToast": "حدث خطأ أثناء إرسال الطلب.",

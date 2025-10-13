@@ -12,6 +12,7 @@ const ProductImageGallery: React.FC<{ product: Product; lang: Language }> = ({
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Main Image */}
       <div className="w-full h-96 bg-gray-100 rounded-lg overflow-hidden relative">
         <Image
           src={mainImage}
@@ -22,13 +23,17 @@ const ProductImageGallery: React.FC<{ product: Product; lang: Language }> = ({
           priority
         />
       </div>
-      <div className="flex gap-2">
+
+      {/* Sub Images Gallery */}
+      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-2 gap-2">
         {product.subImages.map((img, index) => (
           <button
             key={index}
             onClick={() => setMainImage(img)}
-            className={`w-20 h-20 rounded-md overflow-hidden border-2 relative ${
-              mainImage === img ? "border-green-700" : "border-transparent"
+            className={`aspect-square rounded-md overflow-hidden border-2 relative transition-all duration-200 hover:shadow-md ${
+              mainImage === img
+                ? "border-green-700 shadow-lg"
+                : "border-gray-200 hover:border-gray-300"
             }`}
           >
             <Image
@@ -38,7 +43,7 @@ const ProductImageGallery: React.FC<{ product: Product; lang: Language }> = ({
               }`}
               fill
               className="object-cover"
-              sizes="80px"
+              sizes="(max-width: 640px) 33vw, (max-width: 768px) 25vw, (max-width: 1024px) 50vw, 200px"
             />
           </button>
         ))}
