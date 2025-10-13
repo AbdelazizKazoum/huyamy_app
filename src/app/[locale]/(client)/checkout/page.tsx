@@ -248,7 +248,7 @@ const CheckoutPage = () => {
           {/* Added lg:items-start to prevent columns from stretching */}
           <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-12 lg:items-start">
             {/* Shipping Information Form (Left Column) */}
-            <div className="lg:col-span-7 bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80 sticky top-24">
+            <div className="lg:col-span-7 bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80 lg:sticky lg:top-24">
               <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
                 <Contact className="h-6 w-6 text-primary-800" />
                 {t("shippingTitle")}
@@ -304,7 +304,7 @@ const CheckoutPage = () => {
 
             {/* Order Summary (Right Column) */}
             <div className="lg:col-span-5 mt-10 lg:mt-0">
-              <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80 sticky top-24">
+              <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80 lg:sticky lg:top-24">
                 <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4 mb-4 flex items-center gap-3">
                   <ShoppingCart className="h-6 w-6 text-primary-800" />
                   {t("summaryTitle")}
