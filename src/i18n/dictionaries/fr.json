@@ -13,7 +13,11 @@
     "whatsappMessage": "Bonjour, je souhaiterais me renseigner sur vos produits naturels"
   },
   "cart": {
-    "title": "Panier d'achat",
+    "title": "Votre panier d'achat",
+    "pageSubtitle": "Vérifiez vos articles avant de finaliser",
+    "addedSuccessTitle": "Ajouté avec succès !",
+    "addedSuccessSubtitle": "Le produit a été ajouté à votre panier.",
+    "products": "produits",
     "addedToCartSuccess": "Ajouté au panier !",
     "subtotal": "Sous-total",
     "quantity": "Qté",
@@ -25,7 +29,17 @@
       "title": "Votre panier est vide",
       "description": "Vous n'avez encore ajouté aucun produit.",
       "startShopping": "Commencer les achats"
-    }
+    },
+    "unitPrice": "Prix unitaire",
+    "orderSummary": "Résumé de la commande",
+    "shipping": "Livraison",
+    "calculatedAtCheckout": "Calculé à la caisse",
+    "total": "Total",
+    "reviewYourItems": "Vérifiez les articles dans votre panier",
+    "product": "Produit",
+    "discountCodePlaceholder": "Entrez le code de réduction",
+    "apply": "Appliquer",
+    "completePurchase": "Finaliser l'achat"
   },
   "checkout": {
     "customerInfo": "Informations client",
@@ -57,6 +71,8 @@
     "addToCart": "Ajouter au panier",
     "discount": "Réduction",
     "buyNow": "Acheter maintenant",
+    "decreaseQuantity": "Diminuer la quantité",
+    "increaseQuantity": "Augmenter la quantité",
     "originalPrice": "Prix original",
     "productsList": "Liste des produits",
     "errorTitle": "Erreur de chargement des produits",

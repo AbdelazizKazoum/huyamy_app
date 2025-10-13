@@ -11,6 +11,7 @@ import { CACHE_CONFIG, getProductDetailTag } from "@/lib/cache/tags";
 import ProductImageGallery from "@/components/ProductImageGallery";
 import CountdownTimer from "@/components/CountdownTimer";
 import CheckoutForm from "@/components/forms/CheckoutForm";
+import AddToCartForm from "@/components/AddToCartForm";
 
 type Props = {
   params: Promise<{ locale: Language; slug: string }>;
@@ -481,6 +482,9 @@ export default async function ProductDetailsPage({ params }: Props) {
 
                 {/* Checkout Form */}
                 <CheckoutForm lang={locale} product={product} />
+
+                {/* Add to Cart Form */}
+                <AddToCartForm product={product} lang={locale} />
 
                 {/* Features/Benefits Section */}
                 <div className="mt-10 pt-8 border-t border-border-light">

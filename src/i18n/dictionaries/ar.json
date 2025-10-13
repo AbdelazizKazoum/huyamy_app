@@ -13,7 +13,11 @@
     "whatsappMessage": "مرحبا، أريد الاستفسار عن منتجاتكم الطبيعية"
   },
   "cart": {
-    "title": "سلة التسوق",
+    "title": "سلة التسوق الخاصة بك",
+    "pageSubtitle": "راجع المنتجات قبل إتمام الشراء",
+    "addedSuccessTitle": "تمت الإضافة بنجاح!",
+    "addedSuccessSubtitle": "تم إضافة المنتج إلى سلة التسوق",
+    "products": "منتجات",
     "addedToCartSuccess": "تمت الإضافة إلى السلة!",
     "subtotal": "المجموع الفرعي",
     "quantity": "الكمية",
@@ -25,7 +29,17 @@
       "title": "سلة التسوق فارغة",
       "description": "لم تقم بإضافة أي منتجات بعد.",
       "startShopping": "ابدأ التسوق"
-    }
+    },
+    "unitPrice": "سعر الوحدة",
+    "orderSummary": "ملخص الطلب",
+    "shipping": "الشحن",
+    "calculatedAtCheckout": "يحسب عند الدفع",
+    "total": "المجموع",
+    "reviewYourItems": "راجع المنتجات في سلتك",
+    "product": "المنتج",
+    "discountCodePlaceholder": "أدخل رمز الخصم",
+    "apply": "تطبيق",
+    "completePurchase": "إتمام الشراء"
   },
   "checkout": {
     "customerInfo": "معلومات الزبون",
@@ -57,6 +71,8 @@
     "addToCart": "أضف إلى السلة",
     "discount": "خصم",
     "buyNow": "اشتر الآن",
+    "decreaseQuantity": "إنقاص الكمية",
+    "increaseQuantity": "زيادة الكمية",
     "originalPrice": "السعر الأصلي",
     "productsList": "قائمة المنتجات",
     "errorTitle": "خطأ في تحميل المنتجات",

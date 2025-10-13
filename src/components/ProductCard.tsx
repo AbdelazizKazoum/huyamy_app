@@ -54,7 +54,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product);
+    addItem(product, 1);
     toast.custom((t) => (
       <AddedToCartToast toastInstance={t} product={product} lang={lang} />
     ));

@@ -12,7 +12,7 @@ export interface CartItem {
 // Define the state structure for the cart
 interface CartState {
   items: CartItem[];
-  addItem: (product: Product) => void;
+  addItem: (product: Product, quantity: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   toggleItemSelected: (productId: string) => void;
@@ -26,27 +26,27 @@ export const useCartStore = create<CartState>()(
     (set, get) => ({
       items: [],
 
-      // Action to add an item to the cart
-      addItem: (product) => {
+      // Action to add an item to the cart with a specific quantity
+      addItem: (product, quantity) => {
         const { items } = get();
         const existingItem = items.find(
           (item) => item.product.id === product.id
         );
 
         if (existingItem) {
-          // If item already exists, increment its quantity
+          // If item already exists, increment its quantity by the added amount
           const updatedItems = items.map((item) =>
             item.product.id === product.id
-              ? { ...item, quantity: item.quantity + 1 }
+              ? { ...item, quantity: item.quantity + quantity }
               : item
           );
           set({ items: updatedItems });
         } else {
-          // If item is new, add it to the cart
+          // If item is new, add it to the cart with the specified quantity
           set({
             items: [
               ...items,
-              { product, quantity: 1, selected: true }, // Default to selected
+              { product, quantity, selected: true }, // Default to selected
             ],
           });
         }
