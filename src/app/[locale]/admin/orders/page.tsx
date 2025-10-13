@@ -7,7 +7,7 @@ import SearchInput from "@/components/admin/ui/SearchInput";
 import { Language } from "@/types";
 import { Eye, Loader2, RefreshCw } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useOrderStore, Order } from "@/store/useOrderStore";
 import { toast } from "react-hot-toast";
 import OrderViewModal from "@/components/admin/modals/OrderViewModal";
@@ -15,32 +15,32 @@ import OrderViewModal from "@/components/admin/modals/OrderViewModal";
 // Loading Skeleton Components
 const OrderRowSkeleton = () => (
   <tr className="border-b border-gray-200">
-    <td className="p-4">
-      <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+    <td className="p-2 sm:p-4">
+      <div className="h-4 bg-gray-200 rounded animate-pulse w-12 sm:w-20"></div>
     </td>
-    <td className="p-4">
-      <div className="space-y-2">
-        <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
-        <div className="h-3 bg-gray-200 rounded animate-pulse w-24"></div>
+    <td className="p-2 sm:p-4">
+      <div className="space-y-1 sm:space-y-2">
+        <div className="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-20 sm:w-32"></div>
+        <div className="h-2 sm:h-3 bg-gray-200 rounded animate-pulse w-16 sm:w-24"></div>
       </div>
     </td>
-    <td className="p-4">
-      <div className="space-y-2">
-        <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
-        <div className="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
+    <td className="p-2 sm:p-4 hidden sm:table-cell">
+      <div className="space-y-1 sm:space-y-2">
+        <div className="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-16 sm:w-24"></div>
+        <div className="h-2 sm:h-3 bg-gray-200 rounded animate-pulse w-12 sm:w-16"></div>
       </div>
     </td>
-    <td className="p-4">
-      <div className="h-6 bg-gray-200 rounded-full animate-pulse w-20"></div>
+    <td className="p-2 sm:p-4">
+      <div className="h-5 sm:h-6 bg-gray-200 rounded-full animate-pulse w-16 sm:w-20"></div>
     </td>
-    <td className="p-4">
-      <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
+    <td className="p-2 sm:p-4 hidden md:table-cell">
+      <div className="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-12 sm:w-16"></div>
     </td>
-    <td className="p-4">
-      <div className="h-4 bg-gray-200 rounded animate-pulse w-12"></div>
+    <td className="p-2 sm:p-4 hidden lg:table-cell">
+      <div className="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-8 sm:w-12"></div>
     </td>
-    <td className="p-4">
-      <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+    <td className="p-2 sm:p-4">
+      <div className="h-6 w-6 sm:h-8 sm:w-8 bg-gray-200 rounded animate-pulse"></div>
     </td>
   </tr>
 );
@@ -48,28 +48,28 @@ const OrderRowSkeleton = () => (
 const OrdersSkeletonTable = () => (
   <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
     <div className="overflow-x-auto">
-      <table className="w-full">
+      <table className="w-full min-w-[600px]">
         <thead className="bg-gray-50 border-b border-gray-200">
           <tr>
-            <th className="p-4 text-right text-sm font-semibold text-gray-700">
+            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[80px]">
               رقم الطلب
             </th>
-            <th className="p-4 text-right text-sm font-semibold text-gray-700">
+            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[120px]">
               العميل
             </th>
-            <th className="p-4 text-right text-sm font-semibold text-gray-700">
+            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[100px] hidden sm:table-cell">
               التاريخ
             </th>
-            <th className="p-4 text-right text-sm font-semibold text-gray-700">
+            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[90px]">
               الحالة
             </th>
-            <th className="p-4 text-right text-sm font-semibold text-gray-700">
+            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[80px] hidden md:table-cell">
               الإجمالي
             </th>
-            <th className="p-4 text-right text-sm font-semibold text-gray-700">
+            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[80px] hidden lg:table-cell">
               المنتجات
             </th>
-            <th className="p-4 text-right text-sm font-semibold text-gray-700">
+            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[60px]">
               الإجراءات
             </th>
           </tr>
@@ -85,29 +85,44 @@ const OrdersSkeletonTable = () => (
 );
 
 const FiltersSkeleton = () => (
-  <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+  <div className="mb-6 space-y-4">
+    {/* Status Filters Skeleton */}
+    <div className="flex flex-col gap-3">
       <div className="h-5 bg-gray-200 rounded animate-pulse w-24"></div>
       <div className="flex flex-wrap items-center gap-2">
         {Array.from({ length: 5 }).map((_, index) => (
           <div
             key={index}
-            className="h-8 bg-gray-200 rounded-full animate-pulse w-20"
+            className="h-8 bg-gray-200 rounded-full animate-pulse w-16 sm:w-20"
           ></div>
         ))}
       </div>
     </div>
-    <div className="flex items-center gap-2">
-      <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-32"></div>
-      <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-32"></div>
-      <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-16"></div>
+    
+    {/* Date Filters Skeleton */}
+    <div className="flex flex-col gap-3">
+      <div className="h-5 bg-gray-200 rounded animate-pulse w-32"></div>
+      <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="h-4 bg-gray-200 rounded animate-pulse w-16 mb-1"></div>
+          <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-full"></div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="h-4 bg-gray-200 rounded animate-pulse w-16 mb-1"></div>
+          <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-full"></div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-16"></div>
+          <div className="h-10 bg-gray-200 rounded-lg animate-pulse w-24"></div>
+        </div>
+      </div>
     </div>
   </div>
 );
 
 const HeaderSkeleton = () => (
   <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-    <div className="h-8 bg-gray-200 rounded animate-pulse w-48 self-start md:self-center"></div>
+    <div className="h-6 sm:h-8 bg-gray-200 rounded animate-pulse w-40 sm:w-48 self-start md:self-center"></div>
     <div className="flex items-center gap-4 w-full md:w-auto">
       <div className="h-10 bg-gray-200 rounded-lg animate-pulse flex-1 md:w-64"></div>
       <div className="h-10 w-10 bg-gray-200 rounded-md animate-pulse"></div>
@@ -117,7 +132,35 @@ const HeaderSkeleton = () => (
 
 const SummarySkeleton = () => (
   <div className="mb-4">
-    <div className="h-4 bg-gray-200 rounded animate-pulse w-40"></div>
+    <div className="h-4 bg-gray-200 rounded animate-pulse w-32 sm:w-40"></div>
+  </div>
+);
+
+// Mobile-specific loading skeleton
+const MobileOrderCardSkeleton = () => (
+  <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-3">
+    <div className="flex justify-between items-start mb-3">
+      <div className="space-y-2 flex-1">
+        <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+        <div className="h-3 bg-gray-200 rounded animate-pulse w-32"></div>
+      </div>
+      <div className="h-6 bg-gray-200 rounded-full animate-pulse w-20"></div>
+    </div>
+    <div className="flex justify-between items-center">
+      <div className="space-y-1">
+        <div className="h-3 bg-gray-200 rounded animate-pulse w-16"></div>
+        <div className="h-3 bg-gray-200 rounded animate-pulse w-20"></div>
+      </div>
+      <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+    </div>
+  </div>
+);
+
+const MobileSkeletonView = () => (
+  <div className="block sm:hidden">
+    {Array.from({ length: 6 }).map((_, index) => (
+      <MobileOrderCardSkeleton key={index} />
+    ))}
   </div>
 );
 
@@ -146,38 +189,40 @@ const OrdersPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [isFilterLoading, setIsFilterLoading] = useState(false); // New state for filter loading
+  const [isFilterLoading, setIsFilterLoading] = useState(false);
 
-  // Fetch orders on component mount
+  // Ref to track if initial load is complete
+  const hasInitiallyLoaded = useRef(false);
+
+  // Fetch orders on component mount - ONLY ONCE
   useEffect(() => {
     const loadInitialData = async () => {
+      if (hasInitiallyLoaded.current) return; // Prevent multiple initial loads
+
       setIsInitialLoading(true);
       await fetchOrders(true); // Reset and fetch fresh data
       setIsInitialLoading(false);
+      hasInitiallyLoaded.current = true; // Mark as initially loaded
     };
+
     loadInitialData();
   }, [fetchOrders]);
 
-  // Fetch orders when filters change
+  // Fetch orders when filters change - BUT NOT on initial load
   useEffect(() => {
+    // Skip if initial loading hasn't completed yet
+    if (!hasInitiallyLoaded.current || isInitialLoading) {
+      return;
+    }
+
     const applyFilters = async () => {
-      // Don't show filter loading on initial load
-      if (!isInitialLoading) {
-        setIsFilterLoading(true);
-      }
-
+      setIsFilterLoading(true);
       await fetchOrders(true); // Reset pagination when filters change
-
-      if (!isInitialLoading) {
-        setIsFilterLoading(false);
-      }
+      setIsFilterLoading(false);
     };
 
-    // Only trigger if it's not the initial load
-    if (!isInitialLoading) {
-      applyFilters();
-    }
-  }, [filters, fetchOrders, isInitialLoading]);
+    applyFilters();
+  }, [filters, fetchOrders]); // Removed isInitialLoading dependency
 
   // Show error toast
   useEffect(() => {
@@ -195,13 +240,15 @@ const OrdersPage: React.FC = () => {
     [setFilters]
   );
 
-  // Handle status filter - Fixed to properly trigger re-fetch
+  // Handle status filter - Only trigger if it's actually different
   const handleStatusFilter = useCallback(
     (status: Order["status"] | "all") => {
-      // Always trigger a filter update, even for "all"
-      setFilters({ status });
+      // Only update if the status is actually different
+      if (filters.status !== status) {
+        setFilters({ status });
+      }
     },
-    [setFilters]
+    [setFilters, filters.status]
   );
 
   // Handle date filters
@@ -267,16 +314,6 @@ const OrdersPage: React.FC = () => {
     setSelectedOrder(null);
   };
 
-  // Remove this sorting logic since DataTable handles it internally
-  // const {
-  //   items: sortedOrders,
-  //   requestSort,
-  //   sortConfig,
-  // } = useSortableData<Order>(orders, {
-  //   key: "createdAt",
-  //   direction: "descending",
-  // });
-
   // Calculate total pages
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
@@ -331,7 +368,7 @@ const OrdersPage: React.FC = () => {
       label: "رقم الطلب",
       sortable: true,
       render: (item) => (
-        <span className="font-mono text-sm">{item.id.slice(0, 8)}...</span>
+        <span className="font-mono text-xs sm:text-sm">{item.id.slice(0, 8)}...</span>
       ),
     },
     {
@@ -340,10 +377,10 @@ const OrdersPage: React.FC = () => {
       sortable: true,
       render: (item) => (
         <div>
-          <span className="font-medium text-gray-800 block">
+          <span className="font-medium text-gray-800 block text-xs sm:text-sm">
             {item.shippingInfo.fullName}
           </span>
-          <span className="text-sm text-gray-500">
+          <span className="text-xs text-gray-500">
             {item.shippingInfo.phone}
           </span>
         </div>
@@ -354,11 +391,11 @@ const OrdersPage: React.FC = () => {
       label: "التاريخ",
       sortable: true,
       render: (item) => (
-        <div>
-          <span className="block">
+        <div className="hidden sm:block">
+          <span className="block text-xs sm:text-sm">
             {item.createdAt?.toLocaleDateString("ar-MA") || "غير محدد"}
           </span>
-          <span className="text-sm text-gray-500">
+          <span className="text-xs text-gray-500">
             {item.createdAt?.toLocaleTimeString("ar-MA", {
               hour: "2-digit",
               minute: "2-digit",
@@ -378,7 +415,7 @@ const OrdersPage: React.FC = () => {
       label: "الإجمالي",
       sortable: true,
       render: (item) => (
-        <span className="font-mono font-semibold">
+        <span className="font-mono font-semibold text-xs sm:text-sm hidden md:block">
           {item.totalAmount.toFixed(2)} د.م.
         </span>
       ),
@@ -388,7 +425,7 @@ const OrdersPage: React.FC = () => {
       label: "المنتجات",
       sortable: false,
       render: (item) => (
-        <span className="text-sm text-gray-600">
+        <span className="text-xs text-gray-600 hidden lg:block">
           {item.products.length} منتج
         </span>
       ),
@@ -398,20 +435,26 @@ const OrdersPage: React.FC = () => {
   // Show initial loading skeleton
   if (isInitialLoading && orders.length === 0) {
     return (
-      <div>
+      <div className="px-2 sm:px-0">
         <HeaderSkeleton />
         <FiltersSkeleton />
         <SummarySkeleton />
-        <OrdersSkeletonTable />
+        {/* Show mobile skeleton on mobile, table skeleton on larger screens */}
+        <div className="block sm:hidden">
+          <MobileSkeletonView />
+        </div>
+        <div className="hidden sm:block">
+          <OrdersSkeletonTable />
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="px-2 sm:px-0">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 self-start md:self-center">
+        <h1 className="text-xl sm:text-3xl font-bold text-gray-800 self-start md:self-center">
           إدارة الطلبات ({pagination.total})
         </h1>
         <div className="flex items-center gap-4 w-full md:w-auto">
@@ -435,9 +478,10 @@ const OrdersPage: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="font-semibold text-gray-700 whitespace-nowrap">
+      <div className="mb-6 space-y-4">
+        {/* Status Filters */}
+        <div className="flex flex-col gap-3">
+          <div className="font-semibold text-gray-700">
             تصفية حسب:
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -446,7 +490,7 @@ const OrdersPage: React.FC = () => {
                 key={status.id}
                 onClick={() => handleStatusFilter(status.id)}
                 disabled={isFilterLoading}
-                className={`px-3 py-1.5 text-sm font-semibold rounded-full transition-all duration-200 disabled:opacity-50 ${
+                className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-full transition-all duration-200 disabled:opacity-50 flex items-center gap-1 ${
                   filters.status === status.id
                     ? "bg-green-700 text-white shadow-md"
                     : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
@@ -454,54 +498,82 @@ const OrdersPage: React.FC = () => {
               >
                 {status.label}
                 {isFilterLoading && filters.status === status.id && (
-                  <Loader2 size={12} className="inline ml-1 animate-spin" />
+                  <Loader2 size={12} className="animate-spin" />
                 )}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <DateInput
-            id="date-from"
-            value={filters.dateFrom}
-            onChange={(e) => handleDateFilter(e.target.value, filters.dateTo)}
-            placeholder="من تاريخ"
-            disabled={isFilterLoading}
-          />
-          <DateInput
-            id="date-to"
-            value={filters.dateTo}
-            onChange={(e) => handleDateFilter(filters.dateFrom, e.target.value)}
-            placeholder="إلى تاريخ"
-            disabled={isFilterLoading}
-          />
-          <button
-            onClick={() => {
-              const today = new Date().toISOString().split("T")[0];
-              handleDateFilter(today, today);
-            }}
-            disabled={isFilterLoading}
-            className={`px-4 py-2 font-semibold rounded-lg transition-colors text-sm disabled:opacity-50 ${
-              filters.dateFrom === new Date().toISOString().split("T")[0]
-                ? "bg-green-700 text-white"
-                : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
-            }`}
-          >
-            اليوم
-          </button>
-          {(filters.dateFrom ||
-            filters.dateTo ||
-            filters.searchTerm ||
-            filters.status !== "all") && (
-            <button
-              onClick={resetFilters}
-              disabled={isFilterLoading}
-              className="px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
-            >
-              مسح المرشحات
-            </button>
-          )}
+        {/* Date Filters */}
+        <div className="flex flex-col gap-3">
+          <div className="font-semibold text-gray-700">
+            تصفية حسب التاريخ:
+          </div>
+          <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+            <div className="flex flex-col gap-1 flex-1 min-w-0">
+              <label
+                htmlFor="date-from"
+                className="text-xs font-medium text-gray-600"
+              >
+                من تاريخ
+              </label>
+              <DateInput
+                id="date-from"
+                value={filters.dateFrom}
+                onChange={(e) => handleDateFilter(e.target.value, filters.dateTo)}
+                placeholder="اختر التاريخ"
+                disabled={isFilterLoading}
+                className="w-full"
+              />
+            </div>
+            <div className="flex flex-col gap-1 flex-1 min-w-0">
+              <label
+                htmlFor="date-to"
+                className="text-xs font-medium text-gray-600"
+              >
+                إلى تاريخ
+              </label>
+              <DateInput
+                id="date-to"
+                value={filters.dateTo}
+                onChange={(e) =>
+                  handleDateFilter(filters.dateFrom, e.target.value)
+                }
+                placeholder="اختر التاريخ"
+                disabled={isFilterLoading}
+                className="w-full"
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <button
+                onClick={() => {
+                  const today = new Date().toISOString().split("T")[0];
+                  handleDateFilter(today, today);
+                }}
+                disabled={isFilterLoading}
+                className={`px-4 py-2 font-semibold rounded-lg transition-colors text-sm disabled:opacity-50 whitespace-nowrap ${
+                  filters.dateFrom === new Date().toISOString().split("T")[0]
+                    ? "bg-green-700 text-white"
+                    : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
+                }`}
+              >
+                اليوم
+              </button>
+              {(filters.dateFrom ||
+                filters.dateTo ||
+                filters.searchTerm ||
+                filters.status !== "all") && (
+                <button
+                  onClick={resetFilters}
+                  disabled={isFilterLoading}
+                  className="px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 whitespace-nowrap"
+                >
+                  مسح المرشحات
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -520,27 +592,40 @@ const OrdersPage: React.FC = () => {
       </div>
 
       {/* Data Table - Show skeleton when filtering */}
-      {isFilterLoading ? (
-        <OrdersSkeletonTable />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={orders}
-          isLoading={loading && !isFilterLoading}
-          renderActions={(order) => (
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleViewOrder(order)}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                title="عرض التفاصيل"
-              >
-                <Eye size={18} />
-              </button>
+      <div className="overflow-hidden">
+        {isFilterLoading ? (
+          <>
+            {/* Mobile skeleton */}
+            <div className="block sm:hidden">
+              <MobileSkeletonView />
             </div>
-          )}
-          emptyMessage="لا توجد طلبات"
-        />
-      )}
+            {/* Desktop skeleton */}
+            <div className="hidden sm:block">
+              <OrdersSkeletonTable />
+            </div>
+          </>
+        ) : (
+          <div className="overflow-x-auto">
+            <DataTable
+              columns={columns}
+              data={orders}
+              isLoading={loading && !isFilterLoading}
+              renderActions={(order) => (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleViewOrder(order)}
+                    className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                    title="عرض التفاصيل"
+                  >
+                    <Eye size={16} className="sm:w-[18px] sm:h-[18px]" />
+                  </button>
+                </div>
+              )}
+              emptyMessage="لا توجد طلبات"
+            />
+          </div>
+        )}
+      </div>
 
       {/* Pagination */}
       {totalPages > 1 && !isFilterLoading && (
