@@ -39,7 +39,10 @@
     "product": "Produit",
     "discountCodePlaceholder": "Entrez le code de réduction",
     "apply": "Appliquer",
-    "completePurchase": "Finaliser l'achat"
+    "completePurchase": "Finaliser l'achat",
+    "selectAll": "Tout sélectionner",
+    "deselectAll": "Tout désélectionner",
+    "items": "articles"
   },
   "checkout": {
     "title": "Finaliser la commande",

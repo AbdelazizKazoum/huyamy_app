@@ -12,31 +12,49 @@ import {
   ClipboardList,
   Truck,
   Wallet,
-} from "lucide-react"; // Import new icons
+} from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Checkbox } from "@/components/ui/Checkbox"; // Import the Checkbox
 import { ButtonPrimary } from "@/components/ui";
 
 const CartPage = () => {
   const t = useTranslations("cart");
   const router = useRouter();
-  const { items, updateQuantity, removeItem } = useCartStore();
+  const {
+    items,
+    updateQuantity,
+    removeItem,
+    toggleItemSelected,
+    toggleSelectAll,
+  } = useCartStore();
   const [isHydrating, setIsHydrating] = useState(true);
 
   useEffect(() => {
     setIsHydrating(false);
   }, []);
 
-  const subtotal = useMemo(
-    () =>
-      items.reduce((acc, item) => acc + item.product.price * item.quantity, 0),
+  const selectedItems = useMemo(
+    () => items.filter((item) => item.selected),
     [items]
   );
+
+  const subtotal = useMemo(
+    () =>
+      selectedItems.reduce(
+        (acc, item) => acc + item.product.price * item.quantity,
+        0
+      ),
+    [selectedItems]
+  );
+
+  const isAllSelected =
+    items.length > 0 && selectedItems.length === items.length;
 
   // Loading Skeleton UI
   if (isHydrating) {
     return (
-      <div className="bg-white min-h-screen">
+      <div className="bg-white">
         <div className="container mx-auto px-4 py-12">
           {/* Header Skeleton */}
           <div className="mb-10">
@@ -123,58 +141,83 @@ const CartPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-12">
           {/* Cart Items List */}
-          <div className="lg:col-span-2 space-y-4">
-            {items.map((item) => (
-              <div
-                key={item.product.id}
-                className="flex items-center gap-4 p-3 bg-white rounded-xl shadow-md border border-slate-200/80"
-              >
-                <Image
-                  src={item.product.image}
-                  alt={item.product.name["ar"]}
-                  width={80}
-                  height={80}
-                  className="w-20 h-20 object-cover rounded-lg"
+          <div className="lg:col-span-2">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  id="select-all"
+                  checked={isAllSelected}
+                  onCheckedChange={(checked: boolean | "indeterminate") =>
+                    toggleSelectAll(!!checked)
+                  }
                 />
-                <div className="flex-grow">
-                  <h3 className="font-semibold text-base text-slate-800">
-                    {item.product.name["ar"]}
-                  </h3>
-                </div>
-                <div className="flex items-center border border-slate-200 rounded-md">
-                  <button
-                    onClick={() =>
-                      updateQuantity(item.product.id, item.quantity - 1)
-                    }
-                    disabled={item.quantity <= 1}
-                    className="p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
-                  >
-                    <Minus size={14} />
-                  </button>
-                  <span className="px-3 font-bold text-slate-800 text-sm">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() =>
-                      updateQuantity(item.product.id, item.quantity + 1)
-                    }
-                    className="p-1.5 text-slate-500 hover:bg-slate-100"
-                  >
-                    <Plus size={14} />
-                  </button>
-                </div>
-                <p className="w-24 text-center font-bold text-slate-800 text-base">
-                  {(item.product.price * item.quantity).toFixed(2)}{" "}
-                  {t("currency")}
-                </p>
-                <button
-                  onClick={() => removeItem(item.product.id)}
-                  className="p-2 text-slate-400 hover:text-red-600"
+                <label
+                  htmlFor="select-all"
+                  className="font-medium text-slate-700"
                 >
-                  <X size={18} />
-                </button>
+                  {isAllSelected ? t("deselectAll") : t("selectAll")} (
+                  {items.length})
+                </label>
               </div>
-            ))}
+            </div>
+            <div className="space-y-4">
+              {items.map((item) => (
+                <div
+                  key={item.product.id}
+                  className="flex items-center gap-4 p-3 bg-white rounded-xl shadow-md border border-slate-200/80"
+                >
+                  <Checkbox
+                    checked={item.selected}
+                    onCheckedChange={() => toggleItemSelected(item.product.id)}
+                    aria-label={`Select ${item.product.name["ar"]}`}
+                  />
+                  <Image
+                    src={item.product.image}
+                    alt={item.product.name["ar"]}
+                    width={80}
+                    height={80}
+                    className="w-20 h-20 object-cover rounded-lg"
+                  />
+                  <div className="flex-grow">
+                    <h3 className="font-semibold text-base text-slate-800">
+                      {item.product.name["ar"]}
+                    </h3>
+                  </div>
+                  <div className="flex items-center border border-slate-200 rounded-md">
+                    <button
+                      onClick={() =>
+                        updateQuantity(item.product.id, item.quantity - 1)
+                      }
+                      disabled={item.quantity <= 1}
+                      className="p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="px-3 font-bold text-slate-800 text-sm">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() =>
+                        updateQuantity(item.product.id, item.quantity + 1)
+                      }
+                      className="p-1.5 text-slate-500 hover:bg-slate-100"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                  <p className="w-24 text-center font-bold text-slate-800 text-base">
+                    {(item.product.price * item.quantity).toFixed(2)}{" "}
+                    {t("currency")}
+                  </p>
+                  <button
+                    onClick={() => removeItem(item.product.id)}
+                    className="p-2 text-slate-400 hover:text-red-600"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Order Summary */}
@@ -188,7 +231,7 @@ const CartPage = () => {
                 <div className="flex items-center justify-between">
                   <dt className="flex items-center gap-2">
                     <ShoppingCart className="h-5 w-5 text-slate-500" />
-                    {t("subtotal")}
+                    {t("subtotal")} ({selectedItems.length} {t("items")})
                   </dt>
                   <dd className="font-semibold text-slate-800">
                     {subtotal.toFixed(2)} {t("currency")}
@@ -215,12 +258,12 @@ const CartPage = () => {
               </div>
               <div className="mt-6 space-y-4">
                 <ButtonPrimary
-                  disabled={items.length === 0}
+                  disabled={selectedItems.length === 0}
                   className="w-full text-lg py-3"
                   onClick={() => router.push("/checkout")}
                 >
                   {t("completePurchase")}
-                </ButtonPrimary>    
+                </ButtonPrimary>
                 <div className="text-center">
                   <Link
                     href="/products"

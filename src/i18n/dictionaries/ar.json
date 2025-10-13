@@ -39,7 +39,10 @@
     "product": "المنتج",
     "discountCodePlaceholder": "أدخل رمز الخصم",
     "apply": "تطبيق",
-    "completePurchase": "إتمام الشراء"
+    "completePurchase": "إتمام الشراء",
+    "selectAll": "تحديد الكل",
+    "deselectAll": "إلغاء تحديد الكل",
+    "items": "عناصر"
   },
   "checkout": {
     "title": "إتمام الشراء",
