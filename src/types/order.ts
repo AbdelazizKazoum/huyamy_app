@@ -9,7 +9,9 @@ export interface OrderData {
   shippingInfo: {
     fullName: string;
     phone: string;
+    city: string;
     address: string;
+    email?: string;
   };
   orderDate: string;
   totalAmount: number;

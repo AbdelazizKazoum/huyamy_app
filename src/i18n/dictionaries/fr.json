@@ -42,22 +42,46 @@
     "completePurchase": "Finaliser l'achat"
   },
   "checkout": {
+    "title": "Finaliser la commande",
     "customerInfo": "Informations client",
+    "shippingTitle": "Informations de livraison",
+    "summaryTitle": "Résumé de la commande",
+    "fullName": "Nom complet",
+    "phone": "Téléphone",
+    "city": "Ville",
+    "address": "Adresse",
+    "email": "Email",
+    "optional": "Optionnel",
+    "subtotal": "Sous-total",
+    "shipping": "Livraison",
+    "cod": "Paiement à la livraison",
+    "total": "Total",
+    "placeOrder": "Confirmer la commande",
+    "processing": "Traitement en cours...",
+    "placingOrder": "Confirmation en cours...",
+    "orderSuccessToast": "Votre commande a été passée avec succès !",
+    "orderErrorToast": "Erreur lors de la passation de la commande.",
+    "currency": "MAD",
+    "validation": {
+      "fullNameRequired": "Le nom complet est requis",
+      "phoneRequired": "Le numéro de téléphone est requis",
+      "cityRequired": "La ville est requise",
+      "addressRequired": "L'adresse est requise",
+      "emailInvalid": "L'email est invalide"
+    },
+
     "fullNamePlaceholder": "Prénom et Nom 🧑🏻‍",
     "phonePlaceholder": "Téléphone 📞",
     "addressPlaceholder": "Adresse 🏡",
     "buyNowButton": "Achetez maintenant et payez à la livraison",
-    "processing": "Traitement en cours...",
-    "validation": {
-      "fullNameRequired": "Le nom complet doit contenir au moins 3 caractères.",
-      "phoneRequired": "Veuillez entrer un numéro de téléphone valide (au moins 10 chiffres).",
-      "addressRequired": "L'adresse doit contenir au moins 5 caractères."
-    },
+
     "messages": {
       "formError": "Échec de soumission du formulaire. Veuillez vérifier les erreurs.",
       "success": "Votre commande a été passée avec succès !",
       "error": "Une erreur inattendue s'est produite. Veuillez réessayer."
-    }
+    },
+    "pageSubtitle": "Entrez vos informations de livraison pour confirmer votre commande",
+    "quantityLabel": "Quantité"
   },
   "hero": {
     "promoAlt": "Offre promotionnelle - Produits naturels de haute qualité"

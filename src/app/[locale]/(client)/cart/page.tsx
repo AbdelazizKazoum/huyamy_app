@@ -5,18 +5,84 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/config";
 import { Minus, Plus, ShoppingCart, X } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react"; // Import useState and useEffect
 import { ButtonPrimary } from "@/components/ui";
+import { useRouter } from "next/navigation";
 
 const CartPage = () => {
   const t = useTranslations("cart");
+  const router = useRouter();
   const { items, updateQuantity, removeItem } = useCartStore();
+  const [isHydrating, setIsHydrating] = useState(true); // State to track hydration
+
+  // Effect to handle client-side hydration
+  useEffect(() => {
+    // This effect runs only on the client after the component mounts,
+    // by which time the cart store will be hydrated.
+    setIsHydrating(false);
+  }, []);
 
   const subtotal = useMemo(
     () =>
       items.reduce((acc, item) => acc + item.product.price * item.quantity, 0),
     [items]
   );
+
+  // Loading Skeleton UI
+  if (isHydrating) {
+    return (
+      <div className="bg-white min-h-screen">
+        <div className="container mx-auto px-4 py-12">
+          {/* Header Skeleton */}
+          <div className="mb-10">
+            <div className="h-9 w-1/3 bg-slate-200 rounded-lg animate-pulse"></div>
+            <div className="h-7 w-1/4 bg-slate-200 rounded-lg mt-2 animate-pulse"></div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-12">
+            {/* Cart Items Skeleton */}
+            <div className="lg:col-span-2 space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-4 p-3 bg-white rounded-xl shadow-md border border-slate-200/80"
+                >
+                  <div className="w-20 h-20 bg-slate-200 rounded-lg animate-pulse"></div>
+                  <div className="flex-grow space-y-2">
+                    <div className="h-5 w-3/4 bg-slate-200 rounded-md animate-pulse"></div>
+                  </div>
+                  <div className="h-8 w-24 bg-slate-200 rounded-md animate-pulse"></div>
+                  <div className="h-6 w-24 bg-slate-200 rounded-md animate-pulse"></div>
+                  <div className="h-8 w-8 bg-slate-200 rounded-full animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+
+            {/* Order Summary Skeleton */}
+            <div className="lg:col-span-1 mt-8 lg:mt-0">
+              <div className="bg-white p-6 rounded-xl shadow-md border border-slate-200/80">
+                <div className="h-8 w-3/4 bg-slate-200 rounded-md animate-pulse"></div>
+                <div className="space-y-4 mt-6">
+                  <div className="flex justify-between">
+                    <div className="h-5 w-1/4 bg-slate-200 rounded-md animate-pulse"></div>
+                    <div className="h-5 w-1/3 bg-slate-200 rounded-md animate-pulse"></div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="h-5 w-1/3 bg-slate-200 rounded-md animate-pulse"></div>
+                    <div className="h-5 w-1/2 bg-slate-200 rounded-md animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="border-t border-slate-200 mt-6 pt-6">
+                  <div className="h-12 w-full bg-slate-300 rounded-md animate-pulse"></div>
+                  <div className="h-6 w-1/2 mx-auto bg-slate-200 rounded-md animate-pulse mt-4"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -43,7 +109,7 @@ const CartPage = () => {
   }
 
   return (
-    <div className="bg-white ">
+    <div className="bg-white">
       <div className="container mx-auto px-4 py-12">
         <div className="mb-10 ltr:text-left rtl:text-right">
           <h1 className="text-3xl font-bold text-slate-800">{t("title")}</h1>
@@ -136,6 +202,7 @@ const CartPage = () => {
                 <ButtonPrimary
                   disabled={items.length === 0}
                   className="w-full text-lg py-3"
+                  onClick={() => router.push("/checkout")}
                 >
                   {t("completePurchase")}
                 </ButtonPrimary>

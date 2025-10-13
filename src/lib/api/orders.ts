@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { OrderFilters } from "@/store/useOrderStore";
+import { OrderData } from "@/types/order";
 
 // Types for API responses
 interface ApiResponse<T = any> {
@@ -201,7 +202,7 @@ export const deleteOrder = async (id: string) => {
 /**
  * Create a new order
  */
-export const createOrder = async (orderData: any) => {
+export const createOrder = async (orderData: OrderData) => {
   try {
     const response = await fetch("/api/orders", {
       method: "POST",

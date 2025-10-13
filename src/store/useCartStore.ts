@@ -16,7 +16,7 @@ interface CartState {
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   toggleItemSelected: (productId: string) => void;
-  clearCart: () => void;
+  clearCart: () => void; // Add this
   getSelectedItems: () => CartItem[];
 }
 

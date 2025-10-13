@@ -2,6 +2,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import * as ordersApi from "@/lib/api/orders";
+import { OrderData } from "@/types/order";
 
 // Types
 export interface Order {
@@ -55,7 +56,7 @@ interface OrderStore {
   fetchOrderById: (id: string) => Promise<void>;
   updateOrderStatus: (id: string, status: Order["status"]) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;
-  createOrder: (orderData: any) => Promise<void>;
+  createOrder: (orderData: OrderData) => Promise<void>;
   setFilters: (filters: Partial<OrderFilters>) => void;
   resetFilters: () => void;
   setPage: (page: number) => void;
@@ -208,7 +209,7 @@ export const useOrderStore = create<OrderStore>()(
       },
 
       // Create order
-      createOrder: async (orderData: any) => {
+      createOrder: async (orderData: OrderData) => {
         set({ loading: true, error: null });
 
         try {
