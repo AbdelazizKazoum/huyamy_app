@@ -4,6 +4,7 @@ import { Product } from "@/types"; // Assuming you have a Product type
 
 // Define the structure for an item in the cart
 export interface CartItem {
+  cartItemId: string; // Unique identifier for each cart item
   product: Product;
   quantity: number;
   selected: boolean;
@@ -30,6 +31,7 @@ export const useCartStore = create<CartState>()(
 
       // Action to add an item to the cart with a specific quantity
       addItem: (product, quantity) => {
+        const cartItemId = `${product.id}-${Date.now()}-${Math.random()}`; // Generate a unique ID for the cart item
         const { items } = get();
         const existingItem = items.find(
           (item) => item.product.id === product.id
@@ -45,11 +47,14 @@ export const useCartStore = create<CartState>()(
           set({ items: updatedItems });
         } else {
           // If item is new, add it to the cart with the specified quantity
+          const newItem = {
+            cartItemId, // Add this unique identifier
+            product,
+            quantity,
+            selected: true, // Default to selected
+          };
           set({
-            items: [
-              ...items,
-              { product, quantity, selected: true }, // Default to selected
-            ],
+            items: [...items, newItem],
           });
         }
       },
@@ -111,7 +116,7 @@ export const useCartStore = create<CartState>()(
       },
     }),
     {
-      name: "cart-storage", // Unique name for local storage
+      name: "huyamy-cart-storage", // Make it unique to your app
     }
   )
 );

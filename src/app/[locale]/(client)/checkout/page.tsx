@@ -5,7 +5,7 @@ import { useOrderStore } from "@/store/useOrderStore";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -51,6 +51,12 @@ const CheckoutPage = () => {
   const locale = params.locale as Language;
 
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isHydrating, setIsHydrating] = useState(true); // Add this state
+
+  // Add useEffect to handle hydration
+  useEffect(() => {
+    setIsHydrating(false);
+  }, []);
 
   // 1. Get all items, but derive selected items for this page
   const allItems = useCartStore((state) => state.items);
@@ -105,10 +111,112 @@ const CheckoutPage = () => {
     }
   };
 
+  // Loading Skeleton UI
+  if (isHydrating) {
+    return (
+      <div className="bg-white">
+        <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Header Skeleton */}
+          <div className="mb-12 ltr:text-left rtl:text-right">
+            <div className="h-10 w-1/3 bg-slate-200 rounded-lg animate-pulse mb-3"></div>
+            <div className="h-6 w-1/2 bg-slate-200 rounded-lg animate-pulse"></div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-12 lg:items-start">
+            {/* Form Skeleton (Left Column) */}
+            <div className="lg:col-span-7 bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80">
+              {/* Form Title Skeleton */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-6 w-6 bg-slate-200 rounded animate-pulse"></div>
+                <div className="h-8 w-48 bg-slate-200 rounded-lg animate-pulse"></div>
+              </div>
+
+              {/* Form Fields Skeleton */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-6">
+                {/* Full Name */}
+                <div className="space-y-2">
+                  <div className="h-4 w-24 bg-slate-200 rounded animate-pulse"></div>
+                  <div className="h-12 w-full bg-slate-200 rounded-lg animate-pulse"></div>
+                </div>
+                {/* Phone */}
+                <div className="space-y-2">
+                  <div className="h-4 w-20 bg-slate-200 rounded animate-pulse"></div>
+                  <div className="h-12 w-full bg-slate-200 rounded-lg animate-pulse"></div>
+                </div>
+                {/* City */}
+                <div className="space-y-2">
+                  <div className="h-4 w-16 bg-slate-200 rounded animate-pulse"></div>
+                  <div className="h-12 w-full bg-slate-200 rounded-lg animate-pulse"></div>
+                </div>
+                {/* Address */}
+                <div className="space-y-2">
+                  <div className="h-4 w-20 bg-slate-200 rounded animate-pulse"></div>
+                  <div className="h-12 w-full bg-slate-200 rounded-lg animate-pulse"></div>
+                </div>
+                {/* Email */}
+                <div className="sm:col-span-2 space-y-2">
+                  <div className="h-4 w-32 bg-slate-200 rounded animate-pulse"></div>
+                  <div className="h-12 w-full bg-slate-200 rounded-lg animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Summary Skeleton (Right Column) */}
+            <div className="lg:col-span-5 mt-10 lg:mt-0">
+              <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80">
+                {/* Summary Title Skeleton */}
+                <div className="flex items-center gap-3 border-b border-slate-200 pb-4 mb-4">
+                  <div className="h-6 w-6 bg-slate-200 rounded animate-pulse"></div>
+                  <div className="h-8 w-40 bg-slate-200 rounded-lg animate-pulse"></div>
+                </div>
+
+                {/* Items Skeleton */}
+                <div className="space-y-4 mb-4">
+                  {[1, 2, 3].map((item) => (
+                    <div
+                      key={item}
+                      className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200"
+                    >
+                      <div className="h-16 w-16 bg-slate-200 rounded-lg animate-pulse flex-shrink-0"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 w-3/4 bg-slate-200 rounded animate-pulse"></div>
+                        <div className="h-3 w-1/2 bg-slate-200 rounded animate-pulse"></div>
+                      </div>
+                      <div className="h-4 w-16 bg-slate-200 rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Summary Details Skeleton */}
+                <div className="space-y-3 border-t border-slate-200 pt-4">
+                  <div className="flex justify-between">
+                    <div className="h-4 w-16 bg-slate-200 rounded animate-pulse"></div>
+                    <div className="h-4 w-20 bg-slate-200 rounded animate-pulse"></div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="h-4 w-20 bg-slate-200 rounded animate-pulse"></div>
+                    <div className="h-4 w-16 bg-slate-200 rounded animate-pulse"></div>
+                  </div>
+                  <div className="flex justify-between border-t border-slate-200 pt-3">
+                    <div className="h-5 w-12 bg-slate-200 rounded animate-pulse"></div>
+                    <div className="h-5 w-24 bg-slate-200 rounded animate-pulse"></div>
+                  </div>
+                </div>
+
+                {/* Button Skeleton */}
+                <div className="h-12 w-full bg-slate-200 rounded-lg animate-pulse mt-6"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // 3. Show an empty cart message if there are no items and the modal isn't open
   if (items.length === 0 && !isSuccessModalOpen) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
         <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-slate-100">
           <ShoppingBag size={48} className="text-slate-400" strokeWidth={1.5} />
         </div>
@@ -129,7 +237,7 @@ const CheckoutPage = () => {
   return (
     <>
       <div className="bg-white">
-        <div className="container mx-auto px-4 py-12">
+        <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="mb-12 ltr:text-left rtl:text-right">
             <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
               {t("title")}
@@ -140,16 +248,16 @@ const CheckoutPage = () => {
           {/* Added lg:items-start to prevent columns from stretching */}
           <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-12 lg:items-start">
             {/* Shipping Information Form (Left Column) */}
-            <form
-              id="shipping-form"
-              onSubmit={handleSubmit(onSubmit)}
-              className="lg:col-span-7 bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80"
-            >
+            <div className="lg:col-span-7 bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80 sticky top-24">
               <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
                 <Contact className="h-6 w-6 text-primary-800" />
                 {t("shippingTitle")}
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-6">
+              <form
+                id="shipping-form"
+                onSubmit={handleSubmit(onSubmit)}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-y-5 gap-x-6"
+              >
                 <div>
                   <Input
                     label={`${t("fullName")} *`}
@@ -191,8 +299,8 @@ const CheckoutPage = () => {
                     error={errors.email?.message}
                   />
                 </div>
-              </div>
-            </form>
+              </form>
+            </div>
 
             {/* Order Summary (Right Column) */}
             <div className="lg:col-span-5 mt-10 lg:mt-0">
@@ -201,11 +309,11 @@ const CheckoutPage = () => {
                   <ShoppingCart className="h-6 w-6 text-primary-800" />
                   {t("summaryTitle")}
                 </h2>
-                <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
-                  {items.map((item) => (
+                <div className="space-y-4">
+                  {items.map((item, index) => (
                     <div
-                      key={item.product.id}
-                      className="flex items-start gap-4"
+                      key={`checkout-item-${item.product.id}-${index}`} // Use combination of product ID and index
+                      className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200"
                     >
                       <Image
                         src={item.product.image}
@@ -256,9 +364,11 @@ const CheckoutPage = () => {
                     </dd>
                   </div>
                 </dl>
+
+                {/* Keep the button in the summary */}
                 <ButtonPrimary
                   type="submit"
-                  form="shipping-form"
+                  form="shipping-form" // This connects to the form by ID
                   disabled={isCreatingOrder || items.length === 0}
                   className="w-full text-lg py-3 mt-6"
                 >

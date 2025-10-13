@@ -57,7 +57,7 @@ const CartPage = () => {
   if (isHydrating) {
     return (
       <div className="bg-white">
-        <div className="container mx-auto px-4 py-12">
+        <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Header Skeleton */}
           <div className="mb-10">
             <div className="h-9 w-1/3 bg-slate-200 rounded-lg animate-pulse"></div>
@@ -111,7 +111,7 @@ const CartPage = () => {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
         <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-slate-100">
           <ShoppingCart
             size={48}
@@ -135,101 +135,117 @@ const CartPage = () => {
 
   return (
     <div className="bg-white">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-10 ltr:text-left rtl:text-right">
           <h1 className="text-3xl font-bold text-slate-800">{t("title")}</h1>
           <p className="mt-1 text-lg text-slate-500">{t("pageSubtitle")}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-12">
-          {/* Cart Items List */}
+          {/* Cart Items List - Shrink this section */}
           <div className="lg:col-span-2">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
-              <div className="flex items-center gap-3">
-                <Checkbox
-                  id="select-all"
-                  checked={isAllSelected}
-                  onCheckedChange={(checked: boolean | "indeterminate") =>
-                    toggleSelectAll(!!checked)
-                  }
-                />
-                <label
-                  htmlFor="select-all"
-                  className="font-medium text-slate-700"
-                >
-                  {isAllSelected ? t("deselectAll") : t("selectAll")} (
-                  {items.length})
-                </label>
-              </div>
-            </div>
-            <div className="space-y-4">
-              {items.map((item) => (
-                <div
-                  key={item.product.id}
-                  className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-md border border-slate-200/80"
-                >
+            <div className="container max-w-3xl mx-auto">
+              {" "}
+              {/* Changed from max-w-4xl to max-w-3xl */}
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
+                <div className="flex items-center gap-3">
                   <Checkbox
-                    className="mt-1 flex-shrink-0"
-                    checked={item.selected}
-                    onCheckedChange={() => toggleItemSelected(item.product.id)}
-                    aria-label={`Select ${item.product.name[locale]}`}
+                    id="select-all"
+                    checked={isAllSelected}
+                    onCheckedChange={(checked: boolean | "indeterminate") =>
+                      toggleSelectAll(!!checked)
+                    }
                   />
-                  <Image
-                    src={item.product.image}
-                    alt={item.product.name[locale]}
-                    width={80}
-                    height={80}
-                    className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                  />
-                  <div className="flex-grow flex flex-col">
-                    {/* Top row: Name and Remove button */}
-                    <div className="flex justify-between items-start gap-2">
-                      <h3 className="font-semibold text-base text-slate-800">
-                        {item.product.name[locale]}
-                      </h3>
-                      <button
-                        onClick={() => removeItem(item.product.id)}
-                        className="p-1 text-slate-400 hover:text-red-600 flex-shrink-0"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-                    {/* Bottom row: Quantity and Price */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2">
-                      <div className="flex items-center border border-slate-200 rounded-md self-start sm:self-center">
+                  <label
+                    htmlFor="select-all"
+                    className="font-medium text-slate-700"
+                  >
+                    {isAllSelected ? t("deselectAll") : t("selectAll")} (
+                    {items.length})
+                  </label>
+                </div>
+              </div>
+              <div className="space-y-4">
+                {items.map((item, index) => (
+                  <div
+                    key={`cart-item-${item.product.id}-${index}`} // Use combination of product ID and index
+                    className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-md border border-slate-200/80"
+                  >
+                    <Checkbox
+                      className="mt-1 flex-shrink-0"
+                      checked={item.selected}
+                      onCheckedChange={() =>
+                        toggleItemSelected(item.product.id)
+                      }
+                      aria-label={`Select ${
+                        item.product.name[locale] ||
+                        item.product.name.ar ||
+                        "product"
+                      }`}
+                    />
+                    <Image
+                      src={item.product.image}
+                      alt={
+                        item.product.name[locale] ||
+                        item.product.name.ar ||
+                        "Product image"
+                      }
+                      width={80}
+                      height={80}
+                      className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                    />
+                    <div className="flex-grow flex flex-col">
+                      {/* Top row: Name and Remove button */}
+                      <div className="flex justify-between items-start gap-2">
+                        <h3 className="font-semibold text-base text-slate-800">
+                          {item.product.name[locale] ||
+                            item.product.name.ar ||
+                            "Product"}
+                        </h3>
                         <button
-                          onClick={() =>
-                            updateQuantity(item.product.id, item.quantity - 1)
-                          }
-                          disabled={item.quantity <= 1}
-                          className="p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+                          onClick={() => removeItem(item.product.id)}
+                          className="p-1 text-slate-400 hover:text-red-600 flex-shrink-0"
                         >
-                          <Minus size={14} />
-                        </button>
-                        <span className="px-3 font-bold text-slate-800 text-sm">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() =>
-                            updateQuantity(item.product.id, item.quantity + 1)
-                          }
-                          className="p-1.5 text-slate-500 hover:bg-slate-100"
-                        >
-                          <Plus size={14} />
+                          <X size={18} />
                         </button>
                       </div>
-                      <p className="mt-2 sm:mt-0 font-bold text-slate-800 text-base">
-                        {(item.product.price * item.quantity).toFixed(2)}{" "}
-                        {t("currency")}
-                      </p>
+                      {/* Bottom row: Quantity and Price */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2">
+                        <div className="flex items-center border border-slate-200 rounded-md self-start sm:self-center">
+                          <button
+                            onClick={() =>
+                              updateQuantity(item.product.id, item.quantity - 1)
+                            }
+                            disabled={item.quantity <= 1}
+                            className="p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="px-3 font-bold text-slate-800 text-sm">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() =>
+                              updateQuantity(item.product.id, item.quantity + 1)
+                            }
+                            className="p-1.5 text-slate-500 hover:bg-slate-100"
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                        <p className="mt-2 sm:mt-0 font-bold text-slate-800 text-base">
+                          {(item.product.price * item.quantity).toFixed(2)}{" "}
+                          {t("currency")}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Order Summary */}
+          {/* Order Summary - Keep original width */}
           <div className="lg:col-span-1 mt-8 lg:mt-0">
             <div className="bg-white p-6 rounded-xl shadow-md border-slate-200/80 sticky top-24">
               <h2 className="text-xl font-bold text-slate-800 border-b border-slate-200 pb-4 mb-4 flex items-center gap-3">
@@ -256,13 +272,10 @@ const CartPage = () => {
               </dl>
               <div className="border-t border-slate-200 mt-4 pt-4">
                 <div className="flex items-center justify-between text-lg font-bold">
-                  <dt className="flex items-center gap-2 text-slate-900">
-                    <Wallet className="h-5 w-5 text-slate-800" />
-                    {t("total")}
-                  </dt>
-                  <dd className="text-slate-900">
+                  <span className="text-slate-800">{t("total")}</span>
+                  <span className="text-green-600">
                     {subtotal.toFixed(2)} {t("currency")}
-                  </dd>
+                  </span>
                 </div>
               </div>
               <div className="mt-6 space-y-4">
