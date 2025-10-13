@@ -34,13 +34,13 @@ const menuItems: MenuItem[] = [
       fr: "Produits",
     },
   },
-  {
-    href: "/offers",
-    label: {
-      ar: "عروض",
-      fr: "Offres",
-    },
-  },
+  // {
+  //   href: "/offers",
+  //   label: {
+  //     ar: "عروض",
+  //     fr: "Offres",
+  //   },
+  // },
   {
     href: "/contact",
     label: {

@@ -9,16 +9,14 @@ const Footer: React.FC = () => {
     <footer className="bg-neutral-50 text-neutral-800 border-t border-neutral-200">
       <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div
-          className={`grid grid-cols-1 md:grid-cols-3 gap-8 ${
-            locale === "ar" ? "text-right" : "text-left"
+          className={`grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left ${
+            locale === "ar" ? "md:text-right" : "md:text-left"
           }`}
         >
           <div className="md:col-span-1">
             <a
               href="#"
-              className={`flex items-center mb-4 ${
-                locale === "ar" ? "justify-start" : "justify-start"
-              }`}
+              className="flex items-center mb-4 justify-center md:justify-start"
             >
               <Image
                 src="/images/huyami_logo.jpeg"

@@ -57,7 +57,7 @@ const getCachedProductBySlug = unstable_cache(
     revalidate: CACHE_CONFIG.PRODUCT_DETAIL.revalidate,
     // Tags are now added dynamically inside the function if needed,
     // but for this use case, slug-specific tags are better handled
-    // by revalidating via revalidateTag.
+    // by revalidateTag.
     // The slug-specific tag is added below for clarity.
     tags: CACHE_CONFIG.PRODUCT_DETAIL.tags,
   }
@@ -487,19 +487,24 @@ export default async function ProductDetailsPage({ params }: Props) {
                 <AddToCartForm product={product} lang={locale} />
 
                 {/* Features/Benefits Section */}
-                <div className="mt-10 pt-8 border-t border-border-light">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-10">
+                <div className="mt-10 pt-8 border-t border-gray-200">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">
+                    {locale === "ar" ? "مميزات المتجر" : "Avantages du magasin"}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                     {features.map((feature, index) => (
                       <div
                         key={index}
-                        className="flex items-start text-center sm:text-inherit"
+                        className="flex flex-col items-center text-center p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
                       >
-                        <div className="flex-shrink-0">{feature.icon}</div>
-                        <div className="mx-4">
-                          <h3 className="font-semibold text-text-primary">
+                        <div className="flex-shrink-0 mb-3 text-primary-800">
+                          {feature.icon}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900 mb-2">
                             {feature.title[locale]}
                           </h3>
-                          <p className="text-sm text-text-secondary mt-1">
+                          <p className="text-sm text-gray-600 leading-relaxed">
                             {feature.description[locale]}
                           </p>
                         </div>
