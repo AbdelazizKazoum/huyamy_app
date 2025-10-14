@@ -79,9 +79,9 @@ const getCachedCategories = unstable_cache(
 export default async function CategoryPage({
   params,
 }: {
-  params: { slug: string; locale: Locale };
+  params: Promise<{ slug: string; locale: Locale }>;
 }) {
-  const { slug, locale } = params;
+  const { slug, locale } = await params;
 
   try {
     // Fetch data in parallel
@@ -167,9 +167,9 @@ export default async function CategoryPage({
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string; locale: Locale };
+  params: Promise<{ slug: string; locale: Locale }>;
 }) {
-  const { slug, locale } = params;
+  const { slug, locale } = await params;
 
   try {
     // You will need to create this service function
