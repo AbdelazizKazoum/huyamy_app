@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { Fragment } from "react";
 import { getTranslations } from "next-intl/server";
 import { unstable_cache } from "next/cache";
@@ -13,9 +14,15 @@ import { getLandingPageSectionsWithProducts } from "@/lib/services/sectionServic
 import { CACHE_CONFIG } from "@/lib/cache/tags";
 import { Locale } from "@/types/common";
 import { Language } from "firebase/ai";
+import { Category, Product } from "@/types";
 
 // ISR Configuration - Revalidate every week (604800 seconds = 7 days)
 export const revalidate = 604800;
+
+// Helper function to serialize non-plain objects
+const serializeObject = (obj: any) => {
+  return JSON.parse(JSON.stringify(obj));
+};
 
 // Generate static params for supported locales
 export async function generateStaticParams() {
@@ -186,12 +193,16 @@ export default async function EcommerceLandingPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "home" });
 
-  const categories = await getCachedCategories();
-  const landingPageSections = await getCachedLandingPageSections();
+  const categoriesData = await getCachedCategories();
+  const landingPageSectionsData = await getCachedLandingPageSections();
+
+  // Serialize the data to convert Timestamps and other non-plain objects
+  const categories = serializeObject(categoriesData);
+  const landingPageSections = serializeObject(landingPageSectionsData);
 
   // Extract products from landing page sections only
   const landingPageProducts = landingPageSections.flatMap(
-    (section) => section.products || []
+    (section: any) => section.products || []
   );
 
   // Generate structured data for SEO
@@ -241,7 +252,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
       numberOfItems: landingPageProducts.length,
       itemListElement: landingPageProducts
         .slice(0, 10)
-        .map((product, index) => ({
+        .map((product: Product, index: number) => ({
           "@type": "ListItem",
           position: index + 1,
           item: {
@@ -351,7 +362,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
                   ? "مجموعات المنتجات المميزة"
                   : "Collections de produits en vedette"}
               </h2>
-              {landingPageSections.map((section, index) => {
+              {landingPageSections.map((section: any, index: number) => {
                 // Only render ProductSection if the section has products
                 if (!section.products || section.products.length === 0) {
                   return null;
@@ -472,7 +483,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
               ? `متجر هيوامي يوفر ${landingPageProducts.length} منتج طبيعي مغربي مميز عبر ${categories.length} فئة مختلفة. نحن متخصصون في المنتجات العضوية التقليدية المغربية.`
               : `La boutique Huyamy propose ${landingPageProducts.length} produits naturels marocains en vedette dans ${categories.length} catégories différentes. Nous sommes spécialisés dans les produits bio traditionnels marocains.`}
           </p>
-          {categories.map((category, index) => (
+          {categories.map((category: Category, index: number) => (
             <span key={category.id}>
               {category.name?.[locale as "ar" | "fr"]}
               {index < categories.length - 1 ? ", " : ""}
