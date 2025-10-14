@@ -5,6 +5,7 @@ import {
   deleteProduct,
   getProductById,
 } from "@/lib/services/productService";
+import { revalidatePath } from "next/cache"; // Import revalidatePath
 
 import { generateSlug } from "@/lib/utils";
 import { Product } from "@/types";
@@ -80,6 +81,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // 5. Update product in Firestore
     await updateProduct(id, updateData);
 
+    // 6. Revalidate the paths for the updated product and the main products page
+    if (updateData.slug) {
+      revalidatePath(`/fr/products/${updateData.slug}`);
+      revalidatePath(`/ar/products/${updateData.slug}`);
+    }
+    revalidatePath("/fr/products");
+    revalidatePath("/ar/products");
+
     return NextResponse.json({
       message: "Product updated successfully",
       productId: id,
@@ -119,6 +128,14 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     await deleteProduct(id);
+
+    // Revalidate the paths for the deleted product and the main products page
+    if (productToDelete?.slug) {
+      revalidatePath(`/fr/products/${productToDelete.slug}`);
+      revalidatePath(`/ar/products/${productToDelete.slug}`);
+    }
+    revalidatePath("/fr/products");
+    revalidatePath("/ar/products");
 
     return NextResponse.json(
       { message: `Product ${id} deleted successfully` },

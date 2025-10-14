@@ -7,6 +7,8 @@ import {
 } from "@/lib/services/sectionService";
 import { Section } from "@/types";
 import { deleteImageFromR2, uploadImageToR2 } from "@/lib/services/R2Service";
+import { revalidateTag } from "next/cache";
+import { MASTER_CACHE_TAGS } from "@/lib/cache/tags";
 
 interface RouteParams {
   // The params object is now a Promise in recent Next.js versions
@@ -67,6 +69,9 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     await updateSection(id, updateData);
 
+    // Revalidate the landing page cache
+    revalidateTag(MASTER_CACHE_TAGS.LANDING_PAGE);
+
     return NextResponse.json({ message: "Section updated successfully" });
   } catch (error) {
     console.error(`Failed to update section ${id!}:`, error); // Use the resolved id
@@ -92,6 +97,9 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     }
 
     await deleteSection(id);
+
+    // Revalidate the landing page cache
+    revalidateTag(MASTER_CACHE_TAGS.LANDING_PAGE);
 
     return NextResponse.json({ message: "Section deleted successfully" });
   } catch (error) {
