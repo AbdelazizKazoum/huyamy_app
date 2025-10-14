@@ -167,11 +167,12 @@ export default function ProductsClient({
           isOpen={isFilterSidebarOpen}
           onClose={() => setIsFilterSidebarOpen(false)}
           filterProps={filterProps}
+          isCategoryPage={isCategoryPage}
         />
 
         {/* Desktop Sidebar */}
         <div className="hidden lg:block lg:col-span-1 bg-white p-6 rounded-xl shadow-sm border border-neutral-200/80 h-fit sticky top-24">
-          <FilterSidebar {...filterProps} />
+          <FilterSidebar {...filterProps} isCategoryPage={isCategoryPage} />
         </div>
 
         {/* Main Content */}

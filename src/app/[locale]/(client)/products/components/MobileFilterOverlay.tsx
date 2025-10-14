@@ -16,11 +16,13 @@ interface FilterProps {
   setPriceRange: (range: [number, number]) => void;
   maxPrice: number;
   locale: Locale;
+  isCategoryPage: boolean;
 }
 
 interface MobileFilterOverlayProps {
   isOpen: boolean;
   onClose: () => void;
+  isCategoryPage: boolean;
   filterProps: FilterProps;
 }
 
@@ -28,6 +30,7 @@ export default function MobileFilterOverlay({
   isOpen,
   onClose,
   filterProps,
+  isCategoryPage,
 }: MobileFilterOverlayProps) {
   const t = useTranslations("products");
 
@@ -91,7 +94,7 @@ export default function MobileFilterOverlay({
 
           {/* Filter Content */}
           <div className="flex-1 overflow-y-auto px-6">
-            <FilterSidebar {...filterProps} />
+            <FilterSidebar {...filterProps} isCategoryPage={isCategoryPage} />
           </div>
 
           {/* Footer */}
