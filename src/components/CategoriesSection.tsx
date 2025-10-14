@@ -24,9 +24,7 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-8">
           {categories.map((category) => (
             <Link
-              href={`/products?category=${category.name.fr
-                .toLowerCase()
-                .replace(/\s+/g, "-")}`}
+              href={`/category/${category.slug}`}
               key={category.id}
               className="group text-center transition-transform duration-300 hover:-translate-y-2"
             >

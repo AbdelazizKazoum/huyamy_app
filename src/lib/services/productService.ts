@@ -92,6 +92,27 @@ export async function getProductsByCategoryId(
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Product));
 }
 
+export async function getProductsByCategorySlug(
+  slug: string
+): Promise<Product[]> {
+  // First, find the category by its slug to get the ID
+  const categoryQuery = adminDb
+    .collection("categories")
+    .where("slug", "==", slug)
+    .limit(1);
+  const categorySnap = await categoryQuery.get();
+
+  if (categorySnap.empty) {
+    // If no category is found for the slug, return no products
+    return [];
+  }
+
+  const categoryId = categorySnap.docs[0].id;
+
+  // Then, use the categoryId to fetch the products
+  return getProductsByCategoryId(categoryId);
+}
+
 export async function getCategories(): Promise<Category[]> {
   const snap = await adminDb.collection("categories").orderBy("name").get();
   return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Category));
@@ -102,6 +123,23 @@ export async function getCategoryById(
 ): Promise<Category | null> {
   const doc = await adminDb.collection("categories").doc(categoryId).get();
   if (!doc.exists) return null;
+  return { id: doc.id, ...doc.data() } as Category;
+}
+
+export async function getCategoryBySlug(
+  slug: string
+): Promise<Category | null> {
+  const query = adminDb
+    .collection("categories")
+    .where("slug", "==", slug)
+    .limit(1);
+  const snap = await query.get();
+
+  if (snap.empty) {
+    return null;
+  }
+
+  const doc = snap.docs[0];
   return { id: doc.id, ...doc.data() } as Category;
 }
 

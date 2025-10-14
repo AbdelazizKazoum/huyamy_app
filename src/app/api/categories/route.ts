@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     const newCategoryData: Omit<Category, "id"> = {
       name: { ar: nameAr, fr: nameFr },
       description: { ar: descriptionAr, fr: descriptionFr },
-      slug: generateSlug(nameAr), // Generate slug from Arabic name
+      slug: generateSlug(nameFr), // Generate slug from French name
       image: imageUrl,
     };
 

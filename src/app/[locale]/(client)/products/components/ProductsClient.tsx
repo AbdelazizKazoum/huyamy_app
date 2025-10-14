@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Product, Category, Locale } from "@/types";
-import ProductCard from "@/components/ProductCard";
 import { AlertCircle } from "lucide-react";
 import FilterSidebar from "./FilterSidebar";
 import ProductsHeader from "./ProductsHeader";
 import ProductsPagination from "./ProductsPagination";
 import MobileFilterOverlay from "./MobileFilterOverlay";
+import ProductCard from "@/components/ProductCard";
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -28,15 +28,23 @@ export default function ProductsClient({
   const t = useTranslations("products");
   const { products, categories, maxPrice } = initialData;
 
+  // Determine if the view is for a single category page
+  const isCategoryPage = categories.length === 1;
+
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    isCategoryPage ? [categories[0].id] : []
+  );
   const [priceRange, setPriceRange] = useState<[number, number]>([0, maxPrice]);
   const [sortOption, setSortOption] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
   const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
 
   const handleCategoryChange = (categoryId: string) => {
+    // Disable category changing on a category-specific page
+    if (isCategoryPage) return;
+
     setSelectedCategories((prev) =>
       prev.includes(categoryId)
         ? prev.filter((id) => id !== categoryId)
@@ -48,7 +56,9 @@ export default function ProductsClient({
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...products];
 
-    if (selectedCategories.length > 0) {
+    // On a category page, products are already pre-filtered by category on the server.
+    // On the main products page, we filter by the selected categories.
+    if (!isCategoryPage && selectedCategories.length > 0) {
       filtered = filtered.filter((p) =>
         selectedCategories.includes(p.categoryId)
       );
@@ -122,6 +132,8 @@ export default function ProductsClient({
     setPriceRange,
     maxPrice,
     locale,
+    // Pass the flag to the filter components
+    isCategoryPage,
   };
 
   return (

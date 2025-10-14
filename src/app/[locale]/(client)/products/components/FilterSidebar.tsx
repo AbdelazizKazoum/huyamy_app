@@ -14,6 +14,7 @@ interface FilterSidebarProps {
   setPriceRange: (range: [number, number]) => void;
   maxPrice: number;
   locale: Locale;
+  isCategoryPage: boolean;
 }
 
 const FilterSection: React.FC<{
@@ -36,12 +37,17 @@ export default function FilterSidebar({
   setPriceRange,
   maxPrice,
   locale,
+  isCategoryPage,
 }: FilterSidebarProps) {
   const t = useTranslations("products");
 
   return (
-    <aside className="flex flex-col">
-      <FilterSection title={t("search")}>
+    <div className="space-y-8">
+      {/* Search */}
+      <div>
+        <h3 className="text-lg font-semibold mb-3 text-neutral-800">
+          {t("search")}
+        </h3>
         <div className="relative">
           <input
             type="text"
@@ -52,28 +58,40 @@ export default function FilterSidebar({
           />
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
         </div>
-      </FilterSection>
+      </div>
 
-      <FilterSection title={t("categories")}>
-        {categories.map((cat) => (
-          <label
-            key={cat.id}
-            className="flex items-center space-x-3 cursor-pointer group"
-          >
-            <input
-              type="checkbox"
-              checked={selectedCategories.includes(cat.id)}
-              onChange={() => handleCategoryChange(cat.id)}
-              className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-            />
-            <span className="text-sm text-neutral-700 group-hover:text-primary-600">
-              {cat.name[locale]}
-            </span>
-          </label>
-        ))}
-      </FilterSection>
+      {/* Categories Filter */}
+      {!isCategoryPage && categories.length > 0 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-3 text-neutral-800">
+            {t("categories")}
+          </h3>
+          <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+            {categories.map((category) => (
+              <label
+                key={category.id}
+                className="flex items-center space-x-3 cursor-pointer group"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedCategories.includes(category.id)}
+                  onChange={() => handleCategoryChange(category.id)}
+                  className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                />
+                <span className="text-sm text-neutral-700 group-hover:text-primary-600">
+                  {category.name[locale]}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
-      <FilterSection title={t("priceRange")}>
+      {/* Price Range Filter */}
+      <div>
+        <h3 className="text-lg font-semibold mb-3 text-neutral-800">
+          {t("priceRange")}
+        </h3>
         <div className="flex items-center justify-between gap-2">
           <div className="relative w-full">
             <span className="absolute inset-y-0 left-3 flex items-center text-sm text-neutral-500">
@@ -107,7 +125,7 @@ export default function FilterSidebar({
             />
           </div>
         </div>
-      </FilterSection>
-    </aside>
+      </div>
+    </div>
   );
 }

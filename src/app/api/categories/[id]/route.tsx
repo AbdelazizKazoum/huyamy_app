@@ -26,7 +26,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const updateData: Partial<Category> = {
       name: { ar: nameAr, fr: nameFr },
       description: { ar: descriptionAr, fr: descriptionFr },
-      slug: generateSlug(nameAr),
+      slug: generateSlug(nameFr),
     };
 
     if (imageFile) {
