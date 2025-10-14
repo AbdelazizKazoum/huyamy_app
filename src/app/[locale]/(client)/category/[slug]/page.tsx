@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { unstable_cache } from "next/cache";
-import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Product, Category, Locale } from "@/types";
