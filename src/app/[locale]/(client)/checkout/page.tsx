@@ -44,7 +44,6 @@ type ShippingFormData = z.infer<ReturnType<typeof createShippingSchema>>;
 
 const CheckoutPage = () => {
   const t = useTranslations("checkout");
-  const tCart = useTranslations("cart");
   const tValidation = useTranslations("checkout.validation");
   const router = useRouter();
   const params = useParams();

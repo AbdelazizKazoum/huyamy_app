@@ -7,7 +7,7 @@ import { currencies } from "@/data";
 import { unstable_cache } from "next/cache";
 import { features } from "@/data/features";
 import { getProductBySlug } from "@/lib/services/productService";
-import { CACHE_CONFIG, getProductDetailTag } from "@/lib/cache/tags";
+import { CACHE_CONFIG } from "@/lib/cache/tags";
 import ProductImageGallery from "@/components/ProductImageGallery";
 import CountdownTimer from "@/components/CountdownTimer";
 import CheckoutForm from "@/components/forms/CheckoutForm";
