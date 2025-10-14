@@ -19,9 +19,18 @@ import { Category, Product } from "@/types";
 // ISR Configuration - Revalidate every week (604800 seconds = 7 days)
 export const revalidate = 604800;
 
-// Helper function to serialize non-plain objects
-const serializeObject = (obj: any) => {
-  return JSON.parse(JSON.stringify(obj));
+// More efficient helper to serialize only Timestamp fields in products
+const serializeProductTimestamps = (products: any[]) => {
+  return products.map((product) => {
+    const newProduct = { ...product };
+    if (product.createdAt && typeof product.createdAt.toDate === "function") {
+      newProduct.createdAt = product.createdAt.toDate().toISOString();
+    }
+    if (product.updatedAt && typeof product.updatedAt.toDate === "function") {
+      newProduct.updatedAt = product.updatedAt.toDate().toISOString();
+    }
+    return newProduct;
+  });
 };
 
 // Generate static params for supported locales
@@ -196,9 +205,16 @@ export default async function EcommerceLandingPage({ params }: Props) {
   const categoriesData = await getCachedCategories();
   const landingPageSectionsData = await getCachedLandingPageSections();
 
-  // Serialize the data to convert Timestamps and other non-plain objects
-  const categories = serializeObject(categoriesData);
-  const landingPageSections = serializeObject(landingPageSectionsData);
+  // Use the more efficient serialization function
+  const landingPageSections = landingPageSectionsData.map((section: any) => ({
+    ...section,
+    products: section.products
+      ? serializeProductTimestamps(section.products)
+      : [],
+  }));
+
+  // Categories likely don't have timestamps, but if they do, you can serialize them too
+  const categories = categoriesData;
 
   // Extract products from landing page sections only
   const landingPageProducts = landingPageSections.flatMap(
