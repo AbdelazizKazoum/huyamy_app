@@ -16,4 +16,6 @@ export type Product = {
   keywords: string[];
   createdAt?: string | null; // ISO string or null
   updatedAt?: string | null; // ISO string or null
+  allowDirectPurchase?: boolean;
+  allowAddToCart?: boolean;
 };

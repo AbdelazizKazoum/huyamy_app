@@ -8,7 +8,7 @@ import {
   // ... other imports
 } from "react";
 import { Category, Language, Product } from "@/types";
-import { Loader2, PlusCircle, UploadCloud, X } from "lucide-react";
+import { PlusCircle, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
 import FormInput from "../ui/FormInput";
 import FormTextarea from "../ui/FormTextarea";
@@ -54,6 +54,9 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   // New state to track URLs of existing images to be deleted
   const [deletedSubImageUrls, setDeletedSubImageUrls] = useState<string[]>([]);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  // New state for purchase options
+  const [allowDirectPurchase, setAllowDirectPurchase] = useState(true);
+  const [allowAddToCart, setAllowAddToCart] = useState(true);
 
   useEffect(() => {
     if (product) {
@@ -76,6 +79,9 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setSubImagePreviews(product.subImages || []);
       // Reset the deleted images list
       setDeletedSubImageUrls([]);
+      // Set purchase options from existing product, defaulting to true
+      setAllowDirectPurchase(product.allowDirectPurchase ?? true);
+      setAllowAddToCart(product.allowAddToCart ?? true);
     } else {
       // Reset form for new product
       setNameAr("");
@@ -93,6 +99,9 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setSubImages([]);
       setSubImagePreviews([]);
       setDeletedSubImageUrls([]);
+      // Default purchase options for new products
+      setAllowDirectPurchase(true);
+      setAllowAddToCart(true);
     }
     // Clear errors when modal opens or product changes
     setErrors({});
@@ -176,6 +185,11 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       newErrors.mainImage = "الصورة الرئيسية مطلوبة لمنتج جديد.";
     }
 
+    // Ensure at least one purchase option is enabled
+    if (!allowDirectPurchase && !allowAddToCart) {
+      newErrors.purchaseOptions = "يجب تفعيل خيار شراء واحد على الأقل.";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -202,6 +216,9 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       category: selectedCategory,
       isNew,
       keywords,
+      // Add purchase options to the data
+      allowDirectPurchase,
+      allowAddToCart,
     };
 
     const formData = new FormData();
@@ -331,6 +348,29 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   checked={isNew}
                   onChange={(e) => setIsNew(e.target.checked)}
                 />
+                {/* Purchase Options Section */}
+                <div className="pt-4 mt-4 border-t border-gray-200">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    خيارات الشراء المتاحة
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormToggle
+                      label="الطلب المباشر"
+                      checked={allowDirectPurchase}
+                      onChange={(e) => setAllowDirectPurchase(e.target.checked)}
+                    />
+                    <FormToggle
+                      label="الإضافة للسلة"
+                      checked={allowAddToCart}
+                      onChange={(e) => setAllowAddToCart(e.target.checked)}
+                    />
+                  </div>
+                  {errors.purchaseOptions && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.purchaseOptions}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Right Column */}

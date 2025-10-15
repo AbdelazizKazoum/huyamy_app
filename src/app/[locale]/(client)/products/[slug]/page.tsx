@@ -347,6 +347,7 @@ export default async function ProductDetailsPage({ params }: Props) {
 
   // Get cached product data
   const product = await getCachedProductBySlug(slug);
+  console.log("🚀 ~ ProductDetailsPage ~ product:", product);
 
   // Handle product not found
   if (!product) {
@@ -443,11 +444,18 @@ export default async function ProductDetailsPage({ params }: Props) {
                   </p>
                 </div>
 
-                {/* Checkout Form */}
-                <CheckoutForm lang={locale} product={product} />
+                {/* Conditional Rendering for Purchase Forms */}
+                <div className="space-y-4">
+                  {/* Direct Checkout Form */}
+                  {(product.allowDirectPurchase ?? true) && (
+                    <CheckoutForm lang={locale} product={product} />
+                  )}
 
-                {/* Add to Cart Form */}
-                <AddToCartForm product={product} lang={locale} />
+                  {/* Add to Cart Form */}
+                  {(product.allowAddToCart ?? true) && (
+                    <AddToCartForm product={product} lang={locale} />
+                  )}
+                </div>
 
                 {/* Features/Benefits Section */}
                 <div className="mt-10 pt-8 border-t border-gray-200">
