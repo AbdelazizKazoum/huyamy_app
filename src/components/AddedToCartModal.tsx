@@ -29,7 +29,14 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog
+        as="div"
+        className="relative z-50"
+        onClose={() => {
+          // This empty function prevents the dialog from closing on outside clicks.
+          // The buttons inside the modal will still use the `onClose` prop to close it.
+        }}
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
