@@ -18,4 +18,5 @@ export type Product = {
   updatedAt?: string | null; // ISO string or null
   allowDirectPurchase?: boolean;
   allowAddToCart?: boolean;
+  certificationImages?: string[];
 };

@@ -57,6 +57,13 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   // New state for purchase options
   const [allowDirectPurchase, setAllowDirectPurchase] = useState(true);
   const [allowAddToCart, setAllowAddToCart] = useState(true);
+  // New state for certification images
+  const [certificationImages, setCertificationImages] = useState<File[]>([]);
+  const [certificationImagePreviews, setCertificationImagePreviews] = useState<
+    string[]
+  >([]);
+  const [deletedCertificationImageUrls, setDeletedCertificationImageUrls] =
+    useState<string[]>([]);
 
   useEffect(() => {
     if (product) {
@@ -79,6 +86,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setSubImagePreviews(product.subImages || []);
       // Reset the deleted images list
       setDeletedSubImageUrls([]);
+      // Set certification images
+      setCertificationImages([]);
+      setCertificationImagePreviews(product.certificationImages || []);
+      setDeletedCertificationImageUrls([]);
       // Set purchase options from existing product, defaulting to true
       setAllowDirectPurchase(product.allowDirectPurchase ?? true);
       setAllowAddToCart(product.allowAddToCart ?? true);
@@ -99,6 +110,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setSubImages([]);
       setSubImagePreviews([]);
       setDeletedSubImageUrls([]);
+      // Reset certification images
+      setCertificationImages([]);
+      setCertificationImagePreviews([]);
+      setDeletedCertificationImageUrls([]);
       // Default purchase options for new products
       setAllowDirectPurchase(true);
       setAllowAddToCart(true);
@@ -125,6 +140,18 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     }
   };
 
+  const handleCertificationImagesChange = (
+    e: ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setCertificationImages((prev) => [...prev, ...newFiles]);
+
+      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+      setCertificationImagePreviews((prev) => [...prev, ...newPreviews]);
+    }
+  };
+
   const removeSubImage = (index: number, previewUrl: string) => {
     // Check if the preview URL is a blob URL (a new file) or an existing http URL
     if (previewUrl.startsWith("blob:")) {
@@ -145,6 +172,24 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
     // In both cases, remove the preview from the UI.
     setSubImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeCertificationImage = (index: number, previewUrl: string) => {
+    if (previewUrl.startsWith("blob:")) {
+      const fileIndexToRemove = certificationImagePreviews
+        .slice(certificationImagePreviews.length - certificationImages.length)
+        .findIndex((p) => p === previewUrl);
+
+      if (fileIndexToRemove !== -1) {
+        setCertificationImages((prev) =>
+          prev.filter((_, i) => i !== fileIndexToRemove)
+        );
+      }
+    } else {
+      setDeletedCertificationImageUrls((prev) => [...prev, previewUrl]);
+    }
+
+    setCertificationImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleKeywordsChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -231,6 +276,12 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         JSON.stringify(deletedSubImageUrls)
       );
     }
+    if (deletedCertificationImageUrls.length > 0) {
+      formData.append(
+        "deletedCertificationImageUrls",
+        JSON.stringify(deletedCertificationImageUrls)
+      );
+    }
 
     // Append product ID separately for updates, as it's crucial for backend routing/logic.
     if (product) {
@@ -243,6 +294,9 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     }
     subImages.forEach((file) => {
       formData.append("subImages", file);
+    });
+    certificationImages.forEach((file) => {
+      formData.append("certificationImages", file);
     });
 
     // --- For Debugging ---
@@ -259,6 +313,11 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     subImages.forEach((file, index) => {
       console.log(
         `subImages[${index}]: File { name: "${file.name}", size: ${file.size} }`
+      );
+    });
+    certificationImages.forEach((file, index) => {
+      console.log(
+        `certificationImages[${index}]: File { name: "${file.name}", size: ${file.size} }`
       );
     });
     console.log("--------------------------");
@@ -426,78 +485,124 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
               </div>
             </div>
 
-            {/* Image Uploads (Can also be refactored into their own components) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
-              {/* Main Image Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  الصورة الرئيسية
-                </label>
-                <div
-                  className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md ${
-                    errors.mainImage ? "border-red-500" : "border-gray-300"
-                  }`}
-                >
-                  <div className="space-y-1 text-center">
-                    {mainImagePreview ? (
-                      <Image
-                        src={mainImagePreview}
-                        alt="Preview"
-                        width={200}
-                        height={200}
-                        className="mx-auto h-32 w-32 object-cover rounded-md"
-                      />
-                    ) : (
-                      <UploadCloud
-                        className="mx-auto h-12 w-12 text-gray-400"
-                        strokeWidth={1}
-                      />
-                    )}
-                    <div className="flex text-sm text-gray-600 justify-center">
-                      <label
-                        htmlFor="main-image-upload"
-                        className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none"
-                      >
-                        <span>{product ? "تغيير الصورة" : "تحميل صورة"}</span>
-                        <input
-                          id="main-image-upload"
-                          name="main-image-upload"
-                          type="file"
-                          className="sr-only"
-                          onChange={handleMainImageChange}
-                          accept="image/*"
+            {/* --- Image Uploads Section --- */}
+            <div className="space-y-8 pt-6 border-t border-gray-200">
+              {/* Row 1: Main and Sub Images */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Main Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    الصورة الرئيسية
+                  </label>
+                  <div
+                    className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md ${
+                      errors.mainImage ? "border-red-500" : "border-gray-300"
+                    }`}
+                  >
+                    <div className="space-y-1 text-center">
+                      {mainImagePreview ? (
+                        <Image
+                          src={mainImagePreview}
+                          alt="Preview"
+                          width={200}
+                          height={200}
+                          className="mx-auto h-32 w-32 object-cover rounded-md"
                         />
-                      </label>
+                      ) : (
+                        <UploadCloud
+                          className="mx-auto h-12 w-12 text-gray-400"
+                          strokeWidth={1}
+                        />
+                      )}
+                      <div className="flex text-sm text-gray-600 justify-center">
+                        <label
+                          htmlFor="main-image-upload"
+                          className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none"
+                        >
+                          <span>{product ? "تغيير الصورة" : "تحميل صورة"}</span>
+                          <input
+                            id="main-image-upload"
+                            name="main-image-upload"
+                            type="file"
+                            className="sr-only"
+                            onChange={handleMainImageChange}
+                            accept="image/*"
+                          />
+                        </label>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        PNG, JPG, GIF up to 10MB
+                      </p>
                     </div>
-                    <p className="text-xs text-gray-500">
-                      PNG, JPG, GIF up to 10MB
+                  </div>
+                  {errors.mainImage && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.mainImage}
                     </p>
+                  )}
+                </div>
+
+                {/* Sub Images Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    الصور الفرعية
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {subImagePreviews.map((src, index) => (
+                      <div key={index} className="relative">
+                        <Image
+                          src={src}
+                          alt={`sub-image ${index}`}
+                          width={100}
+                          height={100}
+                          className="h-24 w-full object-cover rounded-md"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeSubImage(index, src)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                    <label
+                      htmlFor="sub-images-upload"
+                      className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:bg-gray-50"
+                    >
+                      <PlusCircle size={24} className="text-gray-400" />
+                      <span className="text-xs text-gray-500 mt-1">إضافة</span>
+                      <input
+                        id="sub-images-upload"
+                        type="file"
+                        multiple
+                        className="sr-only"
+                        onChange={handleSubImagesChange}
+                        accept="image/*"
+                      />
+                    </label>
                   </div>
                 </div>
-                {errors.mainImage && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.mainImage}
-                  </p>
-                )}
               </div>
-              {/* Sub Images Upload */}
+
+              {/* Row 2: Certification Images */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  الصور الفرعية
+                  صور الشهادات (اختياري)
                 </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {subImagePreviews.map((src, index) => (
+                <div className="flex flex-wrap gap-2">
+                  {certificationImagePreviews.map((src, index) => (
                     <div key={index} className="relative">
                       <Image
                         src={src}
-                        alt={`sub-image ${index}`}
+                        alt={`certification-image ${index}`}
                         width={100}
                         height={100}
-                        className="h-24 w-full object-cover rounded-md"
+                        className="h-24 w-24 object-cover rounded-md"
                       />
                       <button
                         type="button"
-                        onClick={() => removeSubImage(index, src)}
+                        onClick={() => removeCertificationImage(index, src)}
                         className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5"
                       >
                         <X size={12} />
@@ -505,17 +610,17 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     </div>
                   ))}
                   <label
-                    htmlFor="sub-images-upload"
+                    htmlFor="certification-images-upload"
                     className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:bg-gray-50"
                   >
                     <PlusCircle size={24} className="text-gray-400" />
                     <span className="text-xs text-gray-500 mt-1">إضافة</span>
                     <input
-                      id="sub-images-upload"
+                      id="certification-images-upload"
                       type="file"
                       multiple
                       className="sr-only"
-                      onChange={handleSubImagesChange}
+                      onChange={handleCertificationImagesChange}
                       accept="image/*"
                     />
                   </label>
