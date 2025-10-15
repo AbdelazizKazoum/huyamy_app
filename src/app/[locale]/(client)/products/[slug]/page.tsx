@@ -12,6 +12,7 @@ import CountdownTimer from "@/components/CountdownTimer";
 import CheckoutForm from "@/components/forms/CheckoutForm";
 import AddToCartForm from "@/components/AddToCartForm";
 import { siteConfig } from "@/config/site";
+import CertificationGallery from "@/components/CertificationGallery";
 
 type Props = {
   params: Promise<{ locale: Language; slug: string }>;
@@ -457,6 +458,13 @@ export default async function ProductDetailsPage({ params }: Props) {
                   )}
                 </div>
 
+                {/* Certification Images Section */}
+                <CertificationGallery
+                  images={product.certificationImages || []}
+                  productName={product.name[locale]}
+                  locale={locale}
+                />
+
                 {/* Features/Benefits Section */}
                 <div className="mt-10 pt-8 border-t border-gray-200">
                   <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">
@@ -491,5 +499,5 @@ export default async function ProductDetailsPage({ params }: Props) {
     </>
   );
 }
-// Enable ISR for this page// Enable ISR for this page
-// export const revalidate = CACHE_CONFIG.PRODUCT_DETAIL.revalidate; // 7 days
+// Enable ISR for this page// Enable ISR for this pagepage// Enable ISR for this page
+// export const revalidate = CACHE_CONFIG.PRODUCT_DETAIL.revalidate; // 7 dayss

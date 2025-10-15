@@ -28,12 +28,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const productDataString = formData.get("productData") as string;
     const mainImageFile = formData.get("mainImage") as File | null;
     const newSubImageFiles = formData.getAll("subImages") as File[];
+    const newCertificationImageFiles = formData.getAll(
+      "certificationImages"
+    ) as File[];
     const deletedUrlsString = formData.get("deletedSubImageUrls") as
       | string
       | null;
+    const deletedCertUrlsString = formData.get(
+      "deletedCertificationImageUrls"
+    ) as string | null;
 
     const deletedSubImageUrls: string[] = deletedUrlsString
       ? JSON.parse(deletedUrlsString)
+      : [];
+    const deletedCertificationImageUrls: string[] = deletedCertUrlsString
+      ? JSON.parse(deletedCertUrlsString)
       : [];
 
     if (!productDataString) {
@@ -64,19 +73,36 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (deletedSubImageUrls.length > 0) {
       await deleteImagesFromR2(deletedSubImageUrls).catch(console.error);
     }
+    if (deletedCertificationImageUrls.length > 0) {
+      await deleteImagesFromR2(deletedCertificationImageUrls).catch(
+        console.error
+      );
+    }
 
     const newSubImageUrls =
       newSubImageFiles.length > 0
         ? await uploadImagesToR2(newSubImageFiles)
         : [];
+    const newCertificationImageUrls =
+      newCertificationImageFiles.length > 0
+        ? await uploadImagesToR2(newCertificationImageFiles)
+        : [];
 
-    // 4. Construct the final subImages array of strings
+    // 4. Construct the final image arrays
     const remainingSubImages =
       oldProduct.subImages?.filter(
         (url) => !deletedSubImageUrls.includes(url)
       ) || [];
-
     updateData.subImages = [...remainingSubImages, ...newSubImageUrls];
+
+    const remainingCertificationImages =
+      oldProduct.certificationImages?.filter(
+        (url) => !deletedCertificationImageUrls.includes(url)
+      ) || [];
+    updateData.certificationImages = [
+      ...remainingCertificationImages,
+      ...newCertificationImageUrls,
+    ];
 
     // 5. Update product in Firestore
     await updateProduct(id, updateData);
@@ -123,6 +149,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       // Handle subImages as a direct array of strings
       if (productToDelete.subImages && productToDelete.subImages.length > 0) {
         imagesToDelete.push(...productToDelete.subImages);
+      }
+      if (
+        productToDelete.certificationImages &&
+        productToDelete.certificationImages.length > 0
+      ) {
+        imagesToDelete.push(...productToDelete.certificationImages);
       }
       await deleteImagesFromR2(imagesToDelete);
     }

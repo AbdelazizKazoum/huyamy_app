@@ -40,6 +40,9 @@ export async function POST(request: Request) {
     const productDataString = formData.get("productData") as string;
     const mainImageFile = formData.get("mainImage") as File | null;
     const subImageFiles = formData.getAll("subImages") as File[];
+    const certificationImageFiles = formData.getAll(
+      "certificationImages"
+    ) as File[];
 
     if (!productDataString || !mainImageFile) {
       return NextResponse.json(
@@ -54,6 +57,10 @@ export async function POST(request: Request) {
     const mainImageUrl = await uploadImageToR2(mainImageFile);
     const subImageUrls =
       subImageFiles.length > 0 ? await uploadImagesToR2(subImageFiles) : [];
+    const certificationImageUrls =
+      certificationImageFiles.length > 0
+        ? await uploadImagesToR2(certificationImageFiles)
+        : [];
 
     // 2. Prepare the final product object for the database
     const finalProduct: Omit<Product, "id"> = {
@@ -62,6 +69,7 @@ export async function POST(request: Request) {
       image: mainImageUrl,
       // Save subImages as a direct array of strings
       subImages: subImageUrls,
+      certificationImages: certificationImageUrls,
       createdAt: new Date(), // Placeholder, will be replaced by server timestamp
       updatedAt: new Date(), // Placeholder, will be replaced by server timestamp
     };
