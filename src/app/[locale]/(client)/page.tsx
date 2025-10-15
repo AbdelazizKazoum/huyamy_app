@@ -15,6 +15,7 @@ import { CACHE_CONFIG } from "@/lib/cache/tags";
 import { Locale } from "@/types/common";
 import { Language } from "firebase/ai";
 import { Category, Product } from "@/types";
+import { siteConfig } from "@/config/site";
 
 // ISR Configuration - Revalidate every week (604800 seconds = 7 days)
 export const revalidate = 604800;
@@ -59,7 +60,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .slice(0, 5)
     .map(
       (p) =>
-        p.name?.[typedLocale] || p.name?.ar || p.name?.fr || "Huyamy Product"
+        p.name?.[typedLocale] ||
+        p.name?.ar ||
+        p.name?.fr ||
+        `${siteConfig.brandName} Product`
     );
 
   const categoryNames = categories
@@ -69,47 +73,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     );
   const seoContent = {
     ar: {
-      title: `متجر هيوامي - ${featuredProductNames
+      title: `${siteConfig.name} - ${featuredProductNames
         .slice(0, 3)
-        .join(" | ")} | منتجات مغربية طبيعية وعضوية`,
-      description: `اكتشف أفضل المنتجات المغربية الطبيعية في هيوامي. ${featuredProductNames.join(
+        .join(" | ")} | ${siteConfig.niche.ar}`,
+      description: `${siteConfig.description.ar} ${featuredProductNames.join(
         ", "
-      )}. نوفر ${categoryNames.join(
-        ", "
-      )} عالية الجودة. توصيل مجاني للطلبات فوق 500 درهم.`,
+      )}. ${categoryNames.join(", ")}.`,
       keywords: [
-        "هيوامي",
-        "منتجات مغربية",
-        "زيت الأرغان",
-        "عسل طبيعي",
-        "أملو",
-        "منتجات عضوية",
-        "جمال طبيعي",
-        "العناية بالبشرة",
-        "منتجات تقليدية",
+        ...siteConfig.keywords.ar,
         ...featuredProductNames,
         ...categoryNames,
       ],
     },
     fr: {
-      title: `Boutique Huyamy - ${featuredProductNames
+      title: `${siteConfig.name} - ${featuredProductNames
         .slice(0, 3)
-        .join(" | ")} | Produits Marocains Bio`,
-      description: `Découvrez les meilleurs produits marocains naturels chez Huyamy. ${featuredProductNames.join(
+        .join(" | ")} | ${siteConfig.niche.fr}`,
+      description: `${siteConfig.description.fr} ${featuredProductNames.join(
         ", "
-      )}. Nous proposons ${categoryNames.join(
-        ", "
-      )} de haute qualité. Livraison gratuite pour les commandes supérieures à 500 DH.`,
+      )}. ${categoryNames.join(", ")}.`,
       keywords: [
-        "huyamy",
-        "produits marocains",
-        "huile argan",
-        "miel naturel",
-        "amlou",
-        "produits bio",
-        "beauté naturelle",
-        "soins peau",
-        "produits traditionnels",
+        ...siteConfig.keywords.fr,
         ...featuredProductNames,
         ...categoryNames,
       ],
@@ -126,23 +110,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "website",
       locale: isArabic ? "ar_MA" : "fr_MA",
       alternateLocale: isArabic ? "fr_MA" : "ar_MA",
-      url: `https://huyamy.com/${typedLocale}`,
-      siteName: "Huyamy",
+      url: `${siteConfig.url}/${typedLocale}`,
+      siteName: siteConfig.name,
       title: content.title,
       description: content.description,
       images: [
         {
-          url: "/images/huyami_logo.jpeg",
+          url: siteConfig.ogImage,
           width: 1200,
           height: 630,
           alt: content.title,
         },
         // Add featured product images
         ...landingPageProducts.slice(0, 3).map((product) => ({
-          url: product.image || "/images/huyami_logo.jpeg",
+          url: product.image || siteConfig.ogImage,
           width: 800,
           height: 600,
-          alt: product.name?.[typedLocale] || "Huyamy Product",
+          alt: product.name?.[typedLocale] || `${siteConfig.brandName} Product`,
         })),
       ],
     },
@@ -150,13 +134,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: content.title,
       description: content.description,
-      images: [landingPageProducts[0]?.image || "/images/huyami_logo.jpeg"],
+      images: [landingPageProducts[0]?.image || siteConfig.ogImage],
     },
     alternates: {
-      canonical: `https://huyamy.com/${typedLocale}`,
+      canonical: `${siteConfig.url}/${typedLocale}`,
       languages: {
-        "ar-MA": "https://huyamy.com/ar",
-        "fr-MA": "https://huyamy.com/fr",
+        "ar-MA": `${siteConfig.url}/ar`,
+        "fr-MA": `${siteConfig.url}/fr`,
       },
     },
     other: {
@@ -225,41 +209,38 @@ export default async function EcommerceLandingPage({ params }: Props) {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: locale === "ar" ? "هيوامي" : "Huyamy",
-    url: `https://huyamy.com/${locale}`,
-    description:
-      locale === "ar"
-        ? "متجر المنتجات المغربية الطبيعية والعضوية - زيت الأرغان، العسل الطبيعي، الأملو ومنتجات الجمال التقليدية"
-        : "Boutique de produits marocains naturels et bio - Huile d'argan, miel naturel, amlou et produits de beauté traditionnels",
+    name: siteConfig.name,
+    url: `${siteConfig.url}/${locale}`,
+    description: siteConfig.description[locale as "ar" | "fr"],
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `https://huyamy.com/${locale}/products?search={search_term_string}`,
+        urlTemplate: `${siteConfig.url}/${locale}/products?search={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },
     publisher: {
       "@type": "Organization",
-      "@id": "https://huyamy.com/#organization",
-      name: "Huyamy",
-      url: "https://huyamy.com",
+      "@id": `${siteConfig.url}/#organization`,
+      name: siteConfig.name,
+      url: siteConfig.url,
       logo: {
         "@type": "ImageObject",
-        url: "https://huyamy.com/images/huyami_logo.jpeg",
+        url: `${siteConfig.url}${siteConfig.logo}`,
         width: 400,
         height: 400,
       },
       contactPoint: {
         "@type": "ContactPoint",
-        telephone: "+212636739071",
+        telephone: siteConfig.contact.whatsapp,
         contactType: "customer service",
-        availableLanguage: ["ar", "fr"],
+        availableLanguage: siteConfig.i18n.locales,
       },
       sameAs: [
-        "https://facebook.com/huyamy",
-        "https://instagram.com/huyamy",
-        "https://twitter.com/huyamy",
+        siteConfig.socialLinks.facebook,
+        siteConfig.socialLinks.instagram,
+        siteConfig.socialLinks.twitter,
       ],
     },
     mainEntity: {
@@ -273,7 +254,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
           position: index + 1,
           item: {
             "@type": "Product",
-            "@id": `https://huyamy.com/${locale}/products/${product.id}`,
+            "@id": `${siteConfig.url}/${locale}/products/${product.id}`,
             name:
               product.name?.[locale as "ar" | "fr"] ||
               product.name?.ar ||
@@ -282,11 +263,10 @@ export default async function EcommerceLandingPage({ params }: Props) {
               product.description?.[locale as "ar" | "fr"] ||
               product.description?.ar ||
               product.description?.fr,
-            image:
-              product.image || "https://huyamy.com/images/huyami_logo.jpeg",
+            image: product.image || `${siteConfig.url}${siteConfig.ogImage}`,
             brand: {
               "@type": "Brand",
-              name: "Huyamy",
+              name: siteConfig.brandName,
             },
             offers: {
               "@type": "Offer",
@@ -295,7 +275,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
               availability: "https://schema.org/InStock",
               seller: {
                 "@type": "Organization",
-                name: "Huyamy",
+                name: siteConfig.name,
               },
             },
           },
@@ -311,7 +291,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
         "@type": "ListItem",
         position: 1,
         name: locale === "ar" ? "الرئيسية" : "Accueil",
-        item: `https://huyamy.com/${locale}`,
+        item: `${siteConfig.url}/${locale}`,
       },
     ],
   };
@@ -482,7 +462,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
           className="whatsapp-contact"
         >
           <WhatsAppFloatingButton
-            phoneNumber="212636739071" // Replace with your actual phone number
+            phoneNumber={siteConfig.contact.whatsapp}
             message={t("whatsappMessage")}
           />
         </div>
@@ -496,8 +476,8 @@ export default async function EcommerceLandingPage({ params }: Props) {
           </h2>
           <p>
             {locale === "ar"
-              ? `متجر هيوامي يوفر ${landingPageProducts.length} منتج طبيعي مغربي مميز عبر ${categories.length} فئة مختلفة. نحن متخصصون في المنتجات العضوية التقليدية المغربية.`
-              : `La boutique Huyamy propose ${landingPageProducts.length} produits naturels marocains en vedette dans ${categories.length} catégories différentes. Nous sommes spécialisés dans les produits bio traditionnels marocains.`}
+              ? `متجر ${siteConfig.name} يوفر ${landingPageProducts.length} منتج طبيعي مغربي مميز عبر ${categories.length} فئة مختلفة. نحن متخصصون في ${siteConfig.niche.ar}.`
+              : `La boutique ${siteConfig.name} propose ${landingPageProducts.length} produits naturels marocains en vedette dans ${categories.length} catégories différentes. Nous sommes spécialisés dans les ${siteConfig.niche.fr}.`}
           </p>
           {categories.map((category: Category, index: number) => (
             <span key={category.id}>

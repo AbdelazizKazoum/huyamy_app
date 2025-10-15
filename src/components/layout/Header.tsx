@@ -1,6 +1,5 @@
 "use client";
 
-import { currencies } from "@/data";
 import { Locale, LocalizedString } from "@/types";
 import { Menu, Search, ShoppingCart, X } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
@@ -10,6 +9,7 @@ import { useLocale } from "next-intl";
 import CartSidebar from "../CartSidebar";
 import { LanguageSelector } from "../ui";
 import { useCartStore } from "@/store/useCartStore"; // 1. Import the cart store
+import { siteConfig } from "@/config/site";
 
 type HeaderProps = Record<string, never>;
 
@@ -67,7 +67,7 @@ const Header: React.FC<HeaderProps> = () => {
   const router = useRouter();
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const currency = currencies[currentLocale];
+  const currency = siteConfig.currencies[currentLocale];
 
   // Locale-aware text
   const searchText = {

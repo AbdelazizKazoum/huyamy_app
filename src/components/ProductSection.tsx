@@ -3,7 +3,7 @@ import SectionTitle from "./SectionTitle";
 import ProductCard from "./ProductCard";
 import { ButtonSecondary } from "./ui";
 import { useLocale, useTranslations } from "next-intl";
-import { currencies } from "@/data";
+import { siteConfig } from "@/config/site";
 
 interface ProductSectionProps {
   title: string;
@@ -22,7 +22,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({
 }) => {
   const t = useTranslations("products");
   const currentLocale = useLocale() as Locale;
-  const currency = currencies[currentLocale];
+  const currency = siteConfig.currencies[currentLocale];
 
   return (
     <section

@@ -7,6 +7,7 @@ import { routing } from "@/i18n/config";
 import { Geist, Geist_Mono, Noto_Sans_Arabic, Inter } from "next/font/google";
 import "../globals.css";
 import ToasterProvider from "@/providers/ToasterProvider";
+import { siteConfig } from "@/config/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,59 +42,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const isArabic = typedLocale === "ar";
 
-  const titles = {
-    ar: "هيوامي - زيت الأرغان العضوي والعسل الطبيعي ومنتجات الجمال المغربية",
-    fr: "Huyamy - Huile d'Argan Bio, Miel Naturel et Produits de Beauté Marocains",
-  };
-
-  const descriptions = {
-    ar: "اكتشف منتجات الجمال المغربية الأصيلة في هيوامي. زيت الأرغان الممتاز، عسل طبيعي، زيت الأملا ومستحضرات عضوية. منتجات العناية بالبشرة التقليدية المغربية.",
-    fr: "Découvrez les produits de beauté marocains authentiques chez Huyamy. Huile d'argan premium, miel naturel, huile d'amla et cosmétiques biologiques. Soins traditionnels marocains pour la peau.",
-  };
-
-  const keywords = {
-    ar: [
-      "زيت الأرغان",
-      "عسل طبيعي",
-      "زيت الأملا",
-      "منتجات بيولوجية",
-      "مستحضرات طبيعية",
-      "جمال مغربي",
-      "العناية الطبيعية بالبشرة",
-      "الجمال التقليدي",
-      "هيوامي",
-      "أملو",
-      "منتجات طبيعية",
-      "منتجات مغربية بيو",
-      "تقليدي مغربي",
-    ],
-    fr: [
-      "huile d'argan",
-      "miel naturel",
-      "huile d'amla",
-      "produits bio",
-      "cosmétiques naturels",
-      "beauté marocaine",
-      "soins biologiques",
-      "beauté traditionnelle",
-      "huyamy",
-      "amlou",
-      "produits bio marocains",
-      "traditionnel marocain",
-    ],
-  };
-
   return {
-    metadataBase: new URL("https://huyamy.com"),
+    metadataBase: new URL(siteConfig.url),
     title: {
-      template: "%s | Huyamy - Argan Oil, Amlou & Moroccan Bio Products",
-      default: titles[typedLocale],
+      template: siteConfig.titleTemplate,
+      default: siteConfig.title[typedLocale],
     },
-    description: descriptions[typedLocale],
-    keywords: keywords[typedLocale],
-    authors: [{ name: "Huyamy" }],
-    creator: "Huyamy",
-    publisher: "Huyamy",
+    description: siteConfig.description[typedLocale],
+    keywords: siteConfig.keywords[typedLocale],
+    authors: siteConfig.authors,
+    creator: siteConfig.creator,
+    publisher: siteConfig.publisher,
     robots: {
       index: true,
       follow: true,
@@ -109,37 +68,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "website",
       locale: isArabic ? "ar_MA" : "fr_MA",
       alternateLocale: isArabic ? "fr_MA" : "ar_MA",
-      url: `https://huyamy.com/${typedLocale}`,
-      siteName: "Huyamy",
-      title: titles[typedLocale],
-      description: descriptions[typedLocale],
+      url: `${siteConfig.url}/${typedLocale}`,
+      siteName: siteConfig.name,
+      title: siteConfig.title[typedLocale],
+      description: siteConfig.description[typedLocale],
       images: [
         {
-          url: "/images/huyami_logo.jpeg",
+          url: siteConfig.ogImage,
           width: 1200,
           height: 630,
-          alt: "Huyamy - Organic Moroccan Beauty Products",
+          alt: `${siteConfig.name} - ${siteConfig.description[typedLocale]}`,
         },
       ],
     },
     twitter: {
       card: "summary_large_image",
-      title: titles[typedLocale],
-      description: descriptions[typedLocale],
-      images: ["/images/huyami_logo.jpeg"],
-      creator: "@huyamy",
+      title: siteConfig.title[typedLocale],
+      description: siteConfig.description[typedLocale],
+      images: [siteConfig.ogImage],
+      creator: siteConfig.social.twitter,
     },
     alternates: {
-      canonical: `https://huyamy.com/${typedLocale}`,
+      canonical: `${siteConfig.url}/${typedLocale}`,
       languages: {
-        "ar-MA": "https://huyamy.com/ar",
-        "fr-MA": "https://huyamy.com/fr",
+        "ar-MA": `${siteConfig.url}/ar`,
+        "fr-MA": `${siteConfig.url}/fr`,
       },
     },
     verification: {
-      google: "your-google-verification-code",
+      google: siteConfig.verification.google,
     },
-    category: "e-commerce",
+    category: siteConfig.category,
   };
 }
 

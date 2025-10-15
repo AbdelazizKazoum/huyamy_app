@@ -9,6 +9,7 @@ import { useCartStore } from "@/store/useCartStore";
 import { ShoppingCart } from "lucide-react";
 import toast from "react-hot-toast";
 import AddedToCartToast from "./AddedToCartToast";
+import { siteConfig } from "@/config/site";
 
 interface ProductCardProps {
   product: Product;
@@ -19,10 +20,11 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
   lang = "ar",
-  currency = "د.م.",
+  currency,
 }) => {
   const t = useTranslations("products");
   const { addItem } = useCartStore();
+  const finalCurrency = currency || siteConfig.currencies[lang];
   const originalPriceNum = product.originalPrice || 0;
   let discountPercentage = 0;
 
@@ -39,16 +41,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
   const seoAltText = `${product.name[lang || "ar"]} - ${product.price.toFixed(
     2
-  )} ${currency}${
+  )} ${finalCurrency}${
     product.originalPrice
       ? ` (${lang === "ar" ? "كان" : "était"} ${product.originalPrice.toFixed(
           2
-        )} ${currency})`
+        )} ${finalCurrency})`
       : ""
   } - ${
     lang === "ar"
-      ? "منتج مغربي طبيعي من هيوامي"
-      : "Produit marocain naturel de Huyamy"
+      ? `منتج طبيعي من ${siteConfig.brandName}`
+      : `Produit naturel de ${siteConfig.brandName}`
   }`;
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -69,12 +71,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
         role="article"
         aria-label={`${product.name[lang || "ar"]} - ${product.price.toFixed(
           2
-        )} ${currency}`}
+        )} ${finalCurrency}`}
       >
         {/* Product URL for SEO */}
         <meta
           itemProp="url"
-          content={`https://huyamy.com/products/${productSlug}`}
+          content={`${siteConfig.url}/products/${productSlug}`}
         />
         <meta itemProp="productID" content={product.id} />
 
@@ -171,7 +173,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             itemType="https://schema.org/Brand"
             className="sr-only"
           >
-            <meta itemProp="name" content="Huyamy" />
+            <meta itemProp="name" content={siteConfig.brandName} />
           </div>
 
           {/* Price Information with Schema */}
