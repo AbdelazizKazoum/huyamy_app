@@ -104,25 +104,25 @@ export const useOrderStore = create<OrderStore>()(
           const { filters, pagination } = get();
           const currentPage = reset ? 1 : pagination.page;
 
+          // Don't pass lastDocId when resetting or changing pages
+          // Let the backend handle offset-based pagination using the page number
           const result = await ordersApi.fetchOrders(
             currentPage,
             pagination.limit,
             filters,
-            reset ? undefined : pagination.lastDocId
+            undefined // Remove lastDocId - use page-based pagination instead
           );
 
           const transformedOrders = result.orders.map(transformOrder);
 
           set((state) => ({
-            orders: reset
-              ? transformedOrders
-              : [...state.orders, ...transformedOrders],
+            orders: transformedOrders,
             pagination: {
               ...state.pagination,
               page: currentPage,
               total: result.total,
               hasMore: result.hasMore,
-              lastDocId: result.lastDoc?.id,
+              lastDocId: result.lastDoc?.id, // Keep for reference but don't use for pagination
             },
             loading: false,
           }));

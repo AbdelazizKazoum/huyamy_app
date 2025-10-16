@@ -14,7 +14,6 @@ export async function GET(request: NextRequest) {
 
     // Pagination parameters
     const limit = parseInt(searchParams.get("limit") || "10");
-    const lastDocId = searchParams.get("lastDocId") || undefined;
     const page = parseInt(searchParams.get("page") || "1");
 
     // Filter parameters
@@ -28,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     const pagination: PaginationOptions = {
       limit,
-      lastDocId,
+      page, // Pass page number instead of lastDocId
     };
 
     const result = await getOrdersWithPagination(pagination, filters);

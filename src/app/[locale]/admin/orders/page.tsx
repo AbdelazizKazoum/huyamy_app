@@ -261,9 +261,9 @@ const OrdersPage: React.FC = () => {
 
   // Handle page change
   const handlePageChange = useCallback(
-    (page: number) => {
+    async (page: number) => {
       setPage(page);
-      fetchOrders(false); // Don't reset, just load more
+      await fetchOrders(false); // Don't reset, just load the new page
     },
     [setPage, fetchOrders]
   );
@@ -643,7 +643,7 @@ const OrdersPage: React.FC = () => {
           currentPage={pagination.page}
           totalPages={totalPages}
           onPageChange={handlePageChange}
-          hasMore={pagination.hasMore}
+          // hasMore={pagination.hasMore}
           loading={loading}
         />
       )}
