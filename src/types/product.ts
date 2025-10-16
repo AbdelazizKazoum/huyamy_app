@@ -3,11 +3,10 @@ import { Category } from "./category";
 
 /**
  * Defines a type of option for a product.
- * Example: { name: "Size", values: ["S", "M", "L"] }
- * Example: { name: "Weight", values: ["1kg", "2kg"] }
+ * Example: { name: { ar: "الحجم", fr: "Taille" }, values: ["S", "M", "L"] }
  */
 export type VariantOption = {
-  name: string; // The name of the option (e.g., "Size", "اللون", "Weight")
+  name: LocalizedString; // The name of the option in multiple languages
   values: string[]; // The available choices for this option
 };
 

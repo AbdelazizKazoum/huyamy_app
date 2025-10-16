@@ -5,10 +5,16 @@ import React, {
   FormEvent,
   useEffect,
   useState,
-  // ... other imports
+  useCallback,
 } from "react";
-import { Category, Language, Product } from "@/types";
-import { PlusCircle, UploadCloud, X } from "lucide-react";
+import {
+  Category,
+  Language,
+  Product,
+  VariantOption,
+  ProductVariant,
+} from "@/types";
+import { PlusCircle, Trash2, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
 import FormInput from "../ui/FormInput";
 import FormTextarea from "../ui/FormTextarea";
@@ -17,6 +23,39 @@ import FormToggle from "../ui/FormToggle";
 import SubmitButton from "../ui/SubmitButton";
 import CancelButton from "../ui/CancelButton";
 
+// --- Predefined list of common variant options with placeholders ---
+const PREDEFINED_OPTIONS = [
+  { ar: "الحجم", fr: "Taille", placeholder: "مثال: S, M, L, XL" },
+  { ar: "اللون", fr: "Couleur", placeholder: "مثال: أحمر, أزرق, أخضر" },
+  { ar: "الوزن", fr: "Poids", placeholder: "مثال: 1kg, 500g, 250g" },
+  { ar: "المادة", fr: "Matériau", placeholder: "مثال: قطن, جلد, معدن" },
+  { ar: "السعة", fr: "Capacité", placeholder: "مثال: 1L, 500ml, 2L" },
+];
+
+// --- Helper function to generate variant combinations ---
+const generateCombinations = (
+  options: VariantOption[]
+): { [key: string]: string }[] => {
+  if (options.length === 0 || options.some((o) => o.values.length === 0)) {
+    return [];
+  }
+
+  let combinations: { [key: string]: string }[] = [{}];
+
+  for (const option of options) {
+    const newCombinations: { [key: string]: string }[] = [];
+    for (const combination of combinations) {
+      for (const value of option.values) {
+        // Use the French name as the key for consistency
+        newCombinations.push({ ...combination, [option.name.fr]: value });
+      }
+    }
+    combinations = newCombinations;
+  }
+
+  return combinations;
+};
+
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -24,7 +63,7 @@ interface ProductFormModalProps {
   product: Product | null;
   categories: Category[];
   lang: Language;
-  isSubmitting?: boolean; // Add this prop
+  isSubmitting?: boolean;
 }
 
 const ProductFormModal: React.FC<ProductFormModalProps> = ({
@@ -34,15 +73,15 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   product,
   categories,
   lang,
-  isSubmitting = false, // Use the prop
+  isSubmitting = false,
 }) => {
+  // --- Existing State ---
   const [nameAr, setNameAr] = useState("");
   const [nameFr, setNameFr] = useState("");
   const [descriptionAr, setDescriptionAr] = useState("");
   const [descriptionFr, setDescriptionFr] = useState("");
   const [price, setPrice] = useState<number | string>("");
   const [originalPrice, setOriginalPrice] = useState<number | string>("");
-  // This state will now hold the stringified category object
   const [selectedCategoryJSON, setSelectedCategoryJSON] = useState("");
   const [isNew, setIsNew] = useState(true);
   const [keywords, setKeywords] = useState<string[]>([]);
@@ -51,13 +90,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
   const [subImages, setSubImages] = useState<File[]>([]);
   const [subImagePreviews, setSubImagePreviews] = useState<string[]>([]);
-  // New state to track URLs of existing images to be deleted
   const [deletedSubImageUrls, setDeletedSubImageUrls] = useState<string[]>([]);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
-  // New state for purchase options
   const [allowDirectPurchase, setAllowDirectPurchase] = useState(true);
   const [allowAddToCart, setAllowAddToCart] = useState(true);
-  // New state for certification images
   const [certificationImages, setCertificationImages] = useState<File[]>([]);
   const [certificationImagePreviews, setCertificationImagePreviews] = useState<
     string[]
@@ -65,15 +101,28 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [deletedCertificationImageUrls, setDeletedCertificationImageUrls] =
     useState<string[]>([]);
 
+  // --- New Variant State ---
+  const [hasVariants, setHasVariants] = useState(false);
+  const [variantOptions, setVariantOptions] = useState<VariantOption[]>([]);
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
+  const [optionValueInputs, setOptionValueInputs] = useState<{
+    [key: number]: string;
+  }>({});
+  // New state to track which options are custom
+  const [customOptionFlags, setCustomOptionFlags] = useState<{
+    [key: number]: boolean;
+  }>({});
+
+  // --- State Initialization Effect ---
   useEffect(() => {
     if (product) {
+      // ... existing state population
       setNameAr(product.name.ar);
       setNameFr(product.name.fr);
       setDescriptionAr(product.description.ar);
       setDescriptionFr(product.description.fr);
       setPrice(product.price);
       setOriginalPrice(product.originalPrice || "");
-      // When editing, stringify the existing category object to set the select's value
       setSelectedCategoryJSON(
         product.category ? JSON.stringify(product.category) : ""
       );
@@ -82,26 +131,41 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setMainImage(null);
       setMainImagePreview(product.image);
       setSubImages([]);
-      // Set previews directly from the string array of URLs
       setSubImagePreviews(product.subImages || []);
-      // Reset the deleted images list
       setDeletedSubImageUrls([]);
-      // Set certification images
       setCertificationImages([]);
       setCertificationImagePreviews(product.certificationImages || []);
       setDeletedCertificationImageUrls([]);
-      // Set purchase options from existing product, defaulting to true
       setAllowDirectPurchase(product.allowDirectPurchase ?? true);
       setAllowAddToCart(product.allowAddToCart ?? true);
+
+      // Populate variant state
+      const productHasVariants =
+        !!product.variantOptions && product.variantOptions.length > 0;
+      setHasVariants(productHasVariants);
+      setVariantOptions(product.variantOptions || []);
+      setVariants(product.variants || []);
+      // Initialize custom flags for existing product
+      const initialCustomFlags: { [key: number]: boolean } = {};
+      (product.variantOptions || []).forEach((opt, index) => {
+        const isPredefined = PREDEFINED_OPTIONS.some(
+          (p) => p.fr === opt.name.fr && p.ar === opt.name.ar
+        );
+        if (!isPredefined) {
+          initialCustomFlags[index] = true;
+        }
+      });
+      setCustomOptionFlags(initialCustomFlags);
     } else {
       // Reset form for new product
+      // ... existing state reset
       setNameAr("");
       setNameFr("");
       setDescriptionAr("");
       setDescriptionFr("");
       setPrice("");
       setOriginalPrice("");
-      setSelectedCategoryJSON(""); // Reset category selection
+      setSelectedCategoryJSON("");
       setIsNew(true);
       setKeywords([]);
       setKeywordsInput("");
@@ -110,18 +174,125 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setSubImages([]);
       setSubImagePreviews([]);
       setDeletedSubImageUrls([]);
-      // Reset certification images
       setCertificationImages([]);
       setCertificationImagePreviews([]);
       setDeletedCertificationImageUrls([]);
-      // Default purchase options for new products
       setAllowDirectPurchase(true);
       setAllowAddToCart(true);
+
+      // Reset variant state
+      setHasVariants(false);
+      setVariantOptions([]);
+      setVariants([]);
+      setCustomOptionFlags({});
     }
-    // Clear errors when modal opens or product changes
     setErrors({});
   }, [product, isOpen]);
 
+  // --- Variant Generation Effect ---
+  useEffect(() => {
+    if (!hasVariants) return;
+
+    const newCombinations = generateCombinations(variantOptions);
+    const newVariants = newCombinations.map((combo) => {
+      const comboId = Object.values(combo).join("-");
+      // Try to find an existing variant to preserve its price/image
+      const existingVariant = variants.find(
+        (v) =>
+          Object.entries(v.options).every(
+            ([key, value]) => combo[key] === value
+          ) && Object.keys(v.options).length === Object.keys(combo).length
+      );
+      return {
+        id: existingVariant?.id || comboId,
+        price: existingVariant?.price || 0,
+        originalPrice: existingVariant?.originalPrice,
+        image: existingVariant?.image,
+        options: combo,
+      };
+    });
+    setVariants(newVariants);
+  }, [variantOptions, hasVariants]);
+
+  // --- Variant UI Handlers ---
+  const addVariantOption = () => {
+    setVariantOptions([
+      ...variantOptions,
+      { name: { ar: "", fr: "" }, values: [] },
+    ]);
+  };
+
+  const removeVariantOption = (index: number) => {
+    setVariantOptions(variantOptions.filter((_, i) => i !== index));
+    // Also clean up the custom flag state
+    const newFlags = { ...customOptionFlags };
+    delete newFlags[index];
+    setCustomOptionFlags(newFlags);
+  };
+
+  const handleOptionNameChange = (index: number, value: string) => {
+    const newOptions = [...variantOptions];
+    if (value === "custom") {
+      setCustomOptionFlags({ ...customOptionFlags, [index]: true });
+      // Clear the name when switching to custom
+      newOptions[index].name = { ar: "", fr: "" };
+    } else {
+      setCustomOptionFlags({ ...customOptionFlags, [index]: false });
+      const selectedOption = PREDEFINED_OPTIONS.find((p) => p.fr === value);
+      if (selectedOption) {
+        newOptions[index].name = {
+          ar: selectedOption.ar,
+          fr: selectedOption.fr,
+        };
+      }
+    }
+    setVariantOptions(newOptions);
+  };
+
+  const updateCustomOptionName = (
+    index: number,
+    lang: "ar" | "fr",
+    name: string
+  ) => {
+    const newOptions = [...variantOptions];
+    newOptions[index].name[lang] = name;
+    setVariantOptions(newOptions);
+  };
+
+  const addOptionValue = (optionIndex: number) => {
+    const value = optionValueInputs[optionIndex]?.trim();
+    if (!value) return;
+
+    const newOptions = [...variantOptions];
+    if (!newOptions[optionIndex].values.includes(value)) {
+      newOptions[optionIndex].values.push(value);
+      setVariantOptions(newOptions);
+    }
+    setOptionValueInputs({ ...optionValueInputs, [optionIndex]: "" });
+  };
+
+  const removeOptionValue = (optionIndex: number, valueToRemove: string) => {
+    const newOptions = [...variantOptions];
+    newOptions[optionIndex].values = newOptions[optionIndex].values.filter(
+      (v) => v !== valueToRemove
+    );
+    setVariantOptions(newOptions);
+  };
+
+  const updateVariantPrice = (
+    variantId: string,
+    field: "price" | "originalPrice",
+    value: number | string
+  ) => {
+    setVariants(
+      variants.map((v) =>
+        v.id === variantId ? { ...v, [field]: Number(value) || 0 } : v
+      )
+    );
+  };
+
+  // --- Existing Handlers (handleMainImageChange, etc.) ---
+  // ... all existing handlers remain here ...
   const handleMainImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -212,6 +383,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   };
 
   const validate = (): boolean => {
+    // ... existing validation logic ...
     const newErrors: Partial<Record<string, string>> = {};
 
     if (!nameAr.trim()) newErrors.nameAr = "اسم المنتج بالعربية مطلوب.";
@@ -234,6 +406,18 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     if (!allowDirectPurchase && !allowAddToCart) {
       newErrors.purchaseOptions = "يجب تفعيل خيار شراء واحد على الأقل.";
     }
+    // --- New Variant Validation ---
+    if (hasVariants) {
+      if (variantOptions.some((o) => !o.name.ar.trim() || !o.name.fr.trim())) {
+        newErrors.variants = "يجب تسمية جميع خيارات المنتج باللغتين.";
+      }
+      if (variantOptions.some((o) => o.values.length === 0)) {
+        newErrors.variants = "يجب أن يحتوي كل خيار على قيمة واحدة على الأقل.";
+      }
+      if (variants.some((v) => v.price <= 0)) {
+        newErrors.variants = "يجب أن يكون سعر كل متغير أكبر من صفر.";
+      }
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -245,30 +429,28 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       return;
     }
 
-    // Parse the selected category JSON string back into an object
     const selectedCategory = selectedCategoryJSON
       ? (JSON.parse(selectedCategoryJSON) as Category)
       : null;
 
-    // 1. Consolidate all non-file data into a single object.
     const productData = {
       name: { ar: nameAr, fr: nameFr },
       description: { ar: descriptionAr, fr: descriptionFr },
       price: Number(price),
       originalPrice: originalPrice ? Number(originalPrice) : null,
-      // Include both the ID and the full object
       categoryId: selectedCategory?.id || "",
       category: selectedCategory,
       isNew,
       keywords,
-      // Add purchase options to the data
       allowDirectPurchase,
       allowAddToCart,
+      // --- Add Variant Data ---
+      variantOptions: hasVariants ? variantOptions : [],
+      variants: hasVariants ? variants : [],
     };
 
     const formData = new FormData();
     formData.append("productData", JSON.stringify(productData));
-
     // Append deleted image URLs for the backend to process
     if (deletedSubImageUrls.length > 0) {
       formData.append(
@@ -333,12 +515,12 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     <div className="fixed inset-0 bg-gray-900/50 z-50 flex justify-center items-center p-4">
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"
+        className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col"
       >
         <div className="flex justify-between items-center p-4 border-b border-neutral-200">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
           <button
-            type="button" // Change to type="button" to prevent form submission
+            type="button"
             onClick={onClose}
             disabled={isSubmitting}
             className="p-2 rounded-full text-gray-500 hover:bg-gray-100 disabled:opacity-50"
@@ -348,6 +530,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         </div>
         <div className="overflow-y-auto p-6 space-y-6">
           <fieldset disabled={isSubmitting} className="space-y-6">
+            {/* --- Existing Form Fields --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-6">
@@ -370,13 +553,14 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <FormInput
-                    label="السعر (د.م.)"
+                    label="السعر الأساسي (د.م.)"
                     id="price"
                     type="number"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
                     error={errors.price}
                     required
+                    disabled={hasVariants}
                   />
                   <FormInput
                     label="السعر الأصلي (اختياري)"
@@ -384,6 +568,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     type="number"
                     value={originalPrice}
                     onChange={(e) => setOriginalPrice(e.target.value)}
+                    disabled={hasVariants}
                   />
                 </div>
                 <FormSelect
@@ -407,7 +592,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   checked={isNew}
                   onChange={(e) => setIsNew(e.target.checked)}
                 />
-                {/* Purchase Options Section */}
                 <div className="pt-4 mt-4 border-t border-gray-200">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     خيارات الشراء المتاحة
@@ -455,7 +639,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     الكلمات المفتاحية (افصل بينها بفاصلة ,)
                   </label>
-                  {/* Keywords input can also be refactored, but is left here for simplicity */}
                   <div className="flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md focus-within:ring-1 focus-within:ring-green-700">
                     {keywords.map((kw, index) => (
                       <div
@@ -483,6 +666,214 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* --- Variants Section --- */}
+            <div className="space-y-4 pt-6 border-t border-gray-200">
+              <FormToggle
+                label="هذا المنتج له متغيرات (مثل الحجم، الوزن، اللون)"
+                checked={hasVariants}
+                onChange={(e) => setHasVariants(e.target.checked)}
+              />
+              {hasVariants && (
+                <div className="p-5 border border-slate-200 rounded-lg bg-slate-50 space-y-8">
+                  {/* 1. Variant Options Definition */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      خيارات المنتج
+                    </h3>
+                    {variantOptions.map((option, index) => {
+                      const predefined = PREDEFINED_OPTIONS.find(
+                        (p) => p.fr === option.name.fr
+                      );
+                      const placeholderText =
+                        predefined?.placeholder || "أضف قيمة واضغط Enter";
+
+                      return (
+                        <div
+                          key={index}
+                          className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm transition-all hover:border-green-300"
+                        >
+                          <div className="flex items-start gap-3 mb-3">
+                            <div className="flex-grow space-y-4">
+                              <FormSelect
+                                label={`اختر الخيار ${index + 1}`}
+                                value={
+                                  customOptionFlags[index]
+                                    ? "custom"
+                                    : option.name.fr || ""
+                                }
+                                onChange={(e) =>
+                                  handleOptionNameChange(index, e.target.value)
+                                }
+                              >
+                                <option value="" disabled>
+                                  -- اختر --
+                                </option>
+                                {PREDEFINED_OPTIONS.map((opt) => (
+                                  <option key={opt.fr} value={opt.fr}>
+                                    {opt.ar} / {opt.fr}
+                                  </option>
+                                ))}
+                                <option value="custom">
+                                  خيار مخصص / Autre...
+                                </option>
+                              </FormSelect>
+
+                              {customOptionFlags[index] && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-green-50/50 rounded-md border border-green-200">
+                                  <FormInput
+                                    label="الاسم المخصص (AR)"
+                                    value={option.name.ar}
+                                    onChange={(e) =>
+                                      updateCustomOptionName(
+                                        index,
+                                        "ar",
+                                        e.target.value
+                                      )
+                                    }
+                                    placeholder="مثال: الضمان"
+                                  />
+                                  <FormInput
+                                    label="Nom Personnalisé (FR)"
+                                    value={option.name.fr}
+                                    onChange={(e) =>
+                                      updateCustomOptionName(
+                                        index,
+                                        "fr",
+                                        e.target.value
+                                      )
+                                    }
+                                    placeholder="Ex: Garantie"
+                                  />
+                                </div>
+                              )}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => removeVariantOption(index)}
+                              className="mt-7 p-2 text-gray-400 hover:bg-red-100 hover:text-red-600 rounded-full transition-colors"
+                              aria-label="Remove option"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            قيم الخيار (اضغط Enter للإضافة)
+                          </label>
+                          <div className="flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md bg-white focus-within:ring-1 focus-within:ring-green-600 focus-within:border-green-600">
+                            {option.values.map((val, vIndex) => (
+                              <div
+                                key={vIndex}
+                                className="flex items-center gap-1.5 bg-sky-100 text-sky-800 text-sm font-medium px-2.5 py-1 rounded-full"
+                              >
+                                {val}
+                                <button
+                                  type="button"
+                                  onClick={() => removeOptionValue(index, val)}
+                                  className="text-sky-600 hover:text-sky-900"
+                                  aria-label={`Remove ${val}`}
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                            <input
+                              type="text"
+                              value={optionValueInputs[index] || ""}
+                              onChange={(e) =>
+                                setOptionValueInputs({
+                                  ...optionValueInputs,
+                                  [index]: e.target.value,
+                                })
+                              }
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  addOptionValue(index);
+                                }
+                              }}
+                              className="flex-grow bg-transparent focus:outline-none min-w-[120px]"
+                              placeholder={placeholderText}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <button
+                      type="button"
+                      onClick={addVariantOption}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-green-300 rounded-lg text-sm font-semibold text-green-600 hover:bg-green-50 hover:border-green-400 transition-all"
+                    >
+                      <PlusCircle size={18} />
+                      إضافة خيار جديد
+                    </button>
+                  </div>
+
+                  {/* 2. Generated Variants Table */}
+                  {variants.length > 0 && (
+                    <div className="pt-8 border-t border-slate-200">
+                      <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                        قائمة المتغيرات
+                      </h3>
+                      <div className="flow-root">
+                        <div className="-mx-1 -my-2 overflow-x-auto">
+                          <div className="inline-block min-w-full py-2 align-middle">
+                            <div className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white overflow-hidden shadow-sm">
+                              {variants.map((variant, index) => (
+                                <div
+                                  key={variant.id}
+                                  className={`grid grid-cols-2 md:grid-cols-3 gap-4 items-center p-3 ${
+                                    index % 2 !== 0 ? "bg-slate-50" : ""
+                                  }`}
+                                >
+                                  <div className="font-medium text-slate-800 col-span-2 md:col-span-1">
+                                    {Object.values(variant.options).join(" / ")}
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-3">
+                                    <FormInput
+                                      label="السعر"
+                                      type="number"
+                                      value={variant.price}
+                                      onChange={(e) =>
+                                        updateVariantPrice(
+                                          variant.id,
+                                          "price",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="0.00"
+                                    />
+                                    <FormInput
+                                      label="السعر الأصلي"
+                                      type="number"
+                                      value={variant.originalPrice || ""}
+                                      onChange={(e) =>
+                                        updateVariantPrice(
+                                          variant.id,
+                                          "originalPrice",
+                                          e.target.value
+                                        )
+                                      }
+                                      placeholder="0.00"
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {errors.variants && (
+                    <p className="text-red-500 text-sm mt-2">
+                      {errors.variants}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* --- Image Uploads Section --- */}
@@ -611,7 +1002,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   ))}
                   <label
                     htmlFor="certification-images-upload"
-                    className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:bg-gray-50"
+                    className="flex flex-col items-center justify-center w-24 h-24 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:bg-gray-50"
                   >
                     <PlusCircle size={24} className="text-gray-400" />
                     <span className="text-xs text-gray-500 mt-1">إضافة</span>
