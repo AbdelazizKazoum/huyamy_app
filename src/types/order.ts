@@ -1,7 +1,9 @@
+import { LocalizedString } from "./common";
+
 export interface OrderData {
   products: Array<{
     id: string;
-    name: Record<string, string>;
+    name: LocalizedString;
     price: number;
     quantity: number;
     image: string;
