@@ -1,18 +1,12 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import React from "react";
-import { Star } from "lucide-react";
 import { Language, Product } from "@/types";
 import { unstable_cache } from "next/cache";
-import { features } from "@/data/features";
 import { getProductBySlug } from "@/lib/services/productService";
 import { CACHE_CONFIG } from "@/lib/cache/tags";
-import ProductImageGallery from "@/components/ProductImageGallery";
-import CountdownTimer from "@/components/CountdownTimer";
-import CheckoutForm from "@/components/forms/CheckoutForm";
-import AddToCartForm from "@/components/AddToCartForm";
 import { siteConfig } from "@/config/site";
-import CertificationGallery from "@/components/CertificationGallery";
+import ProductDisplay from "@/components/ProductDisplay"; // <-- Import the new display component
 
 type Props = {
   params: Promise<{ locale: Language; slug: string }>;
@@ -348,7 +342,6 @@ export default async function ProductDetailsPage({ params }: Props) {
 
   // Get cached product data
   const product = await getCachedProductBySlug(slug);
-  console.log("🚀 ~ ProductDetailsPage ~ product:", product);
 
   // Handle product not found
   if (!product) {
@@ -365,139 +358,10 @@ export default async function ProductDetailsPage({ params }: Props) {
       />
       <BreadcrumbStructuredData product={product} locale={locale} />
 
-      <div dir={locale === "ar" ? "rtl" : "ltr"} className="bg-white">
-        <main className="py-12">
-          <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Dynamic Breadcrumb Navigation */}
-            {/* <Breadcrumb lang={locale} product={product} />
-             */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Product Gallery */}
-              <div>
-                <ProductImageGallery product={product} lang={locale} />
-              </div>
-
-              {/* Product Details & Form */}
-              <div className="space-y-6">
-                {/* Product Badge */}
-                {product.isNew && (
-                  <span className="inline-block bg-primary-100 text-primary-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-                    {locale === "ar" ? "جديد" : "Nouveau"}
-                  </span>
-                )}
-
-                {/* Product Title */}
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {product.name[locale]}
-                </h1>
-
-                {/* Price */}
-                <div className="flex items-center space-x-4">
-                  <p className="text-3xl font-bold text-primary-800">
-                    {product.price.toFixed(2)} {currency}
-                  </p>
-                  {product.originalPrice && (
-                    <p className="text-xl text-gray-400 line-through">
-                      {product.originalPrice.toFixed(2)} {currency}
-                    </p>
-                  )}
-                  {product.originalPrice && (
-                    <span className="bg-secondary-100 text-amber-500 text-sm font-medium px-2.5 py-0.5 rounded">
-                      -
-                      {Math.round(
-                        ((product.originalPrice - product.price) /
-                          product.originalPrice) *
-                          100
-                      )}
-                      %
-                    </span>
-                  )}
-                </div>
-
-                {/* Rating */}
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="w-5 h-5 text-amber-400 fill-current"
-                      />
-                    ))}
-                  </div>
-                  {/* <span className="text-gray-600 text-sm">
-                    (4.8/5 - 127 {locale === "ar" ? "تقييم" : "avis"})
-                  </span> */}
-                </div>
-
-                {/* Countdown Timer */}
-                {product.originalPrice &&
-                  product.originalPrice > product.price && (
-                    <CountdownTimer lang={locale} />
-                  )}
-
-                {/* Product Description */}
-                <div className="prose max-w-none">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-3">
-                    {locale === "ar" ? "وصف المنتج" : "Description du produit"}
-                  </h2>
-                  <p className="text-gray-700 leading-relaxed">
-                    {product.description[locale]}
-                  </p>
-                </div>
-
-                {/* Conditional Rendering for Purchase Forms */}
-                <div className="space-y-4">
-                  {/* Direct Checkout Form */}
-                  {(product.allowDirectPurchase ?? true) && (
-                    <CheckoutForm lang={locale} product={product} />
-                  )}
-
-                  {/* Add to Cart Form */}
-                  {(product.allowAddToCart ?? true) && (
-                    <AddToCartForm product={product} lang={locale} />
-                  )}
-                </div>
-
-                {/* Certification Images Section */}
-                <CertificationGallery
-                  images={product.certificationImages || []}
-                  productName={product.name[locale]}
-                  locale={locale}
-                />
-
-                {/* Features/Benefits Section */}
-                <div className="mt-10 pt-8 border-t border-gray-200">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">
-                    {locale === "ar" ? "مميزات المتجر" : "Avantages du magasin"}
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    {features.map((feature, index) => (
-                      <div
-                        key={index}
-                        className="flex flex-col items-center text-center p-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors duration-200"
-                      >
-                        <div className="flex-shrink-0 mb-3 text-primary-800">
-                          {feature.icon}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-2">
-                            {feature.title[locale]}
-                          </h3>
-                          <p className="text-sm text-gray-600 leading-relaxed">
-                            {feature.description[locale]}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
+      {/* Render the client component with the fetched data */}
+      <ProductDisplay product={product} locale={locale} />
     </>
   );
 }
-// Enable ISR for this page// Enable ISR for this pagepage// Enable ISR for this page
-// export const revalidate = CACHE_CONFIG.PRODUCT_DETAIL.revalidate; // 7 dayss
+// Enable ISR for this page
+// export const revalidate = CACHE_CONFIG.PRODUCT_DETAIL.revalidate;

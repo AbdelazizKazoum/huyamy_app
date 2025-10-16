@@ -67,12 +67,17 @@ export async function POST(request: Request) {
       ...productData,
       slug: generateSlug(productData.name.fr),
       image: mainImageUrl,
-      // Save subImages as a direct array of strings
       subImages: subImageUrls,
       certificationImages: certificationImageUrls,
       createdAt: new Date(), // Placeholder, will be replaced by server timestamp
       updatedAt: new Date(), // Placeholder, will be replaced by server timestamp
     };
+
+    // If variants exist, ensure the base price is set to the lowest variant price
+    if (finalProduct.variants && finalProduct.variants.length > 0) {
+      const prices = finalProduct.variants.map((v) => v.price);
+      finalProduct.price = Math.min(...prices);
+    }
 
     // 3. Create product in Firestore
     const newProduct = await createProduct(finalProduct);

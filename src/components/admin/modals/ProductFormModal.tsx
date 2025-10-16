@@ -18,7 +18,7 @@ import { PlusCircle, Trash2, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
 import FormInput from "../ui/FormInput";
 import FormTextarea from "../ui/FormTextarea";
-import FormSelect from "../ui/FormSelect";
+import CustomSelect from "../ui/CustomSelect"; // <-- IMPORT THE NEW COMPONENT
 import FormToggle from "../ui/FormToggle";
 import SubmitButton from "../ui/SubmitButton";
 import CancelButton from "../ui/CancelButton";
@@ -571,11 +571,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     disabled={hasVariants}
                   />
                 </div>
-                <FormSelect
+                <CustomSelect
                   label="الفئة"
-                  id="category"
                   value={selectedCategoryJSON}
-                  onChange={(e) => setSelectedCategoryJSON(e.target.value)}
+                  onChange={(value) => setSelectedCategoryJSON(value)}
                   error={errors.categoryId}
                 >
                   <option value="" disabled>
@@ -586,7 +585,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       {cat.name[lang]}
                     </option>
                   ))}
-                </FormSelect>
+                </CustomSelect>
                 <FormToggle
                   label="منتج جديد؟"
                   checked={isNew}
@@ -696,15 +695,15 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         >
                           <div className="flex items-start gap-3 mb-3">
                             <div className="flex-grow space-y-4">
-                              <FormSelect
+                              <CustomSelect
                                 label={`اختر الخيار ${index + 1}`}
                                 value={
                                   customOptionFlags[index]
                                     ? "custom"
                                     : option.name.fr || ""
                                 }
-                                onChange={(e) =>
-                                  handleOptionNameChange(index, e.target.value)
+                                onChange={(value) =>
+                                  handleOptionNameChange(index, value)
                                 }
                               >
                                 <option value="" disabled>
@@ -718,7 +717,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                 <option value="custom">
                                   خيار مخصص / Autre...
                                 </option>
-                              </FormSelect>
+                              </CustomSelect>
 
                               {customOptionFlags[index] && (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-green-50/50 rounded-md border border-green-200">
@@ -804,7 +803,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     <button
                       type="button"
                       onClick={addVariantOption}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-green-300 rounded-lg text-sm font-semibold text-green-600 hover:bg-green-50 hover:border-green-400 transition-all"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-sky-300 rounded-lg text-sm font-semibold text-sky-600 hover:bg-sky-50 hover:border-sky-400 transition-all"
                     >
                       <PlusCircle size={18} />
                       إضافة خيار جديد
