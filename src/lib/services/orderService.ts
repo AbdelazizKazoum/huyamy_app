@@ -17,6 +17,7 @@ export interface PaginationOptions {
   limit: number;
   lastDocId?: string;
   startAfter?: any;
+  page?: number;
 }
 
 // Type for paginated response
@@ -106,109 +107,84 @@ export async function updateOrderStatus(
  * @param {PaginationOptions} pagination - Pagination options
  * @param {OrderFilters} filters - Filter options
  */
-export async function getOrdersWithPagination(
+export const getOrdersWithPagination = async (
   pagination: PaginationOptions,
-  filters: OrderFilters = {}
-): Promise<PaginatedOrdersResponse> {
+  filters: OrderFilters
+) => {
   try {
-    let query = adminDb.collection("orders").orderBy("createdAt", "desc");
+    let query: any = adminDb.collection("orders");
 
     // Apply filters
     if (filters.status && filters.status !== "all") {
       query = query.where("status", "==", filters.status);
     }
 
-    // Date filters
     if (filters.dateFrom) {
-      const fromDate = admin.firestore.Timestamp.fromDate(
-        new Date(filters.dateFrom)
+      const fromDate = new Date(filters.dateFrom);
+      fromDate.setHours(0, 0, 0, 0);
+      query = query.where(
+        "createdAt",
+        ">=",
+        admin.firestore.Timestamp.fromDate(fromDate)
       );
-      query = query.where("createdAt", ">=", fromDate);
     }
 
     if (filters.dateTo) {
-      const toDate = admin.firestore.Timestamp.fromDate(
-        new Date(new Date(filters.dateTo).setHours(23, 59, 59, 999))
+      const toDate = new Date(filters.dateTo);
+      toDate.setHours(23, 59, 59, 999);
+      query = query.where(
+        "createdAt",
+        "<=",
+        admin.firestore.Timestamp.fromDate(toDate)
       );
-      query = query.where("createdAt", "<=", toDate);
     }
 
-    // Pagination
-    if (pagination.startAfter) {
-      query = query.startAfter(pagination.startAfter);
+    // Search by customer name or order ID
+    if (filters.searchTerm) {
+      // For searching, you might need to fetch all and filter in memory
+      // Or implement a proper search solution like Algolia
+      query = query
+        .where("shippingInfo.fullName", ">=", filters.searchTerm)
+        .where("shippingInfo.fullName", "<=", filters.searchTerm + "\uf8ff");
     }
 
-    query = query.limit(pagination.limit);
+    // Get total count for pagination
+    const countSnapshot = await query.get();
+    const total = countSnapshot.size;
 
+    // Order by createdAt descending
+    query = query.orderBy("createdAt", "desc");
+
+    // **USE OFFSET-BASED PAGINATION INSTEAD OF CURSOR**
+    // Calculate offset from page number
+    const page = parseInt(pagination.page?.toString() || "1");
+    const offset = (page - 1) * pagination.limit;
+
+    query = query.offset(offset).limit(pagination.limit);
+
+    // Execute query
     const snapshot = await query.get();
 
-    // Get total count for the filtered query (without pagination)
-    let countQuery = adminDb.collection("orders");
-
-    if (filters.status && filters.status !== "all") {
-      //@ts-ignore
-      countQuery = countQuery.where("status", "==", filters.status);
-    }
-
-    if (filters.dateFrom) {
-      const fromDate = admin.firestore.Timestamp.fromDate(
-        new Date(filters.dateFrom)
-      );
-      //@ts-ignore
-      countQuery = countQuery.where("createdAt", ">=", fromDate);
-    }
-
-    if (filters.dateTo) {
-      const toDate = admin.firestore.Timestamp.fromDate(
-        new Date(new Date(filters.dateTo).setHours(23, 59, 59, 999))
-      );
-      //@ts-ignore
-      countQuery = countQuery.where("createdAt", "<=", toDate);
-    }
-
-    const countSnapshot = await countQuery.count().get();
-    const total = countSnapshot.data().count;
-
-    const orders = snapshot.docs.map((doc) => ({
+    const orders = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate?.() || null,
-      updatedAt: doc.data().updatedAt?.toDate?.() || null,
+      createdAt: doc.data().createdAt?.toDate().toISOString() || null,
+      updatedAt: doc.data().updatedAt?.toDate().toISOString() || null,
     }));
 
-    // Filter by search term (client-side for flexibility with name search)
-    let filteredOrders = orders;
-    if (filters.searchTerm) {
-      const searchLower = filters.searchTerm.toLowerCase();
-      filteredOrders = orders.filter((order) => {
-        //@ts-ignore
-        const customerName = order.shippingInfo?.fullName?.toLowerCase() || "";
-        const orderId = order.id.toLowerCase();
-        //@ts-ignore
-        const phone = order.shippingInfo?.phone || "";
-
-        return (
-          customerName.includes(searchLower) ||
-          orderId.includes(searchLower) ||
-          phone.includes(searchLower)
-        );
-      });
-    }
-
-    const lastDoc = snapshot.docs[snapshot.docs.length - 1] || null;
-    const hasMore = snapshot.docs.length === pagination.limit;
+    const hasMore = offset + orders.length < total;
 
     return {
-      orders: filteredOrders,
-      lastDoc,
-      hasMore,
+      orders,
       total,
+      hasMore,
+      lastDoc: snapshot.docs[snapshot.docs.length - 1] || null,
     };
   } catch (error) {
     console.error("Error fetching orders:", error);
     throw error;
   }
-}
+};
 
 /**
  * Gets a single order by ID

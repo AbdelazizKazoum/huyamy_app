@@ -261,9 +261,9 @@ const OrdersPage: React.FC = () => {
 
   // Handle page change
   const handlePageChange = useCallback(
-    (page: number) => {
+    async (page: number) => {
       setPage(page);
-      fetchOrders(false); // Don't reset, just load more
+      await fetchOrders(false); // Don't reset, just load the new page
     },
     [setPage, fetchOrders]
   );
