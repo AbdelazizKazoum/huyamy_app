@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/config";
 
@@ -6,7 +6,7 @@ import { routing } from "./i18n/config";
 const intlMiddleware = createMiddleware(routing);
 
 export async function middleware(request: NextRequest) {
-  // 3. Apply i18n middleware for all other cases
+  // Just handle i18n routing, let client-side guards handle auth
   return intlMiddleware(request);
 }
 
