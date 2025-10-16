@@ -643,7 +643,7 @@ const OrdersPage: React.FC = () => {
           currentPage={pagination.page}
           totalPages={totalPages}
           onPageChange={handlePageChange}
-          hasMore={pagination.hasMore}
+          // hasMore={pagination.hasMore}
           loading={loading}
         />
       )}
