@@ -1,21 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Product, Locale } from "@/types";
+import { Product, Language, ProductVariant } from "@/types";
 import { useCartStore } from "@/store/useCartStore";
 import { useTranslations } from "next-intl";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
-import AddedToCartModal from "./AddedToCartModal"; // Import the new modal
+import AddedToCartModal from "./AddedToCartModal";
 
 interface AddToCartFormProps {
   product: Product;
-  lang: Locale;
+  lang: Language;
+  selectedVariant: ProductVariant | null;
 }
 
-const AddToCartForm: React.FC<AddToCartFormProps> = ({ product, lang }) => {
+const AddToCartForm: React.FC<AddToCartFormProps> = ({
+  product,
+  lang,
+  selectedVariant,
+}) => {
   const [quantity, setQuantity] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for the modal
-  const [isSubmitting, setIsSubmitting] = useState(false); // State for processing
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { addItem } = useCartStore();
   const t = useTranslations();
 
@@ -24,17 +29,33 @@ const AddToCartForm: React.FC<AddToCartFormProps> = ({ product, lang }) => {
   };
 
   const handleAddToCart = () => {
-    if (isSubmitting) return; // Prevent multiple clicks
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
-    addItem(product, quantity);
-    setIsModalOpen(true); // Open the modal
+    // Pass the selected variant to the addItem function
+    addItem(product, quantity, selectedVariant);
+    setIsModalOpen(true);
 
-    // Re-enable the button after a short delay to prevent spamming
-    // and allow the user to add more if they close the modal quickly.
     setTimeout(() => {
       setIsSubmitting(false);
     }, 1000);
+  };
+
+  // Determine the correct product details for the modal
+  const modalProductDetails = {
+    ...product,
+    name: selectedVariant
+      ? {
+          ar: `${product.name.ar} - ${Object.values(
+            selectedVariant.options
+          ).join(" / ")}`,
+          fr: `${product.name.fr} - ${Object.values(
+            selectedVariant.options
+          ).join(" / ")}`,
+        }
+      : product.name,
+    price: selectedVariant?.price ?? product.price,
+    image: selectedVariant?.image ?? product.image,
   };
 
   return (
@@ -202,7 +223,7 @@ const AddToCartForm: React.FC<AddToCartFormProps> = ({ product, lang }) => {
       <AddedToCartModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        product={product}
+        product={modalProductDetails}
         quantity={quantity}
         lang={lang}
       />

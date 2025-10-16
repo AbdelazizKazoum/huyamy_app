@@ -1,7 +1,7 @@
 "use client";
 
 import { useCartStore } from "@/store/useCartStore";
-import { useTranslations, useLocale } from "next-intl"; // Import useLocale
+import { useTranslations, useLocale } from "next-intl";
 import Image from "next/image";
 import { Link } from "@/i18n/config";
 import {
@@ -16,12 +16,12 @@ import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { ButtonPrimary } from "@/components/ui";
-import { Locale } from "@/types"; // Import Locale type
+import { Locale } from "@/types";
 
 const CartPage = () => {
   const t = useTranslations("cart");
   const router = useRouter();
-  const locale = useLocale() as Locale; // Get the current locale
+  const locale = useLocale() as Locale;
   const {
     items,
     updateQuantity,
@@ -42,10 +42,10 @@ const CartPage = () => {
 
   const subtotal = useMemo(
     () =>
-      selectedItems.reduce(
-        (acc, item) => acc + item.product.price * item.quantity,
-        0
-      ),
+      selectedItems.reduce((acc, item) => {
+        const price = item.selectedVariant?.price ?? item.product.price;
+        return acc + price * item.quantity;
+      }, 0),
     [selectedItems]
   );
 
@@ -141,11 +141,8 @@ const CartPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-12">
-          {/* Cart Items List - Shrink this section */}
           <div className="lg:col-span-2">
             <div className="container max-w-3xl mx-auto">
-              {" "}
-              {/* Changed from max-w-4xl to max-w-3xl */}
               <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
                 <div className="flex items-center gap-3">
                   <Checkbox
@@ -165,86 +162,133 @@ const CartPage = () => {
                 </div>
               </div>
               <div className="space-y-4">
-                {items.map((item, index) => (
-                  <div
-                    key={`cart-item-${item.product.id}-${index}`} // Use combination of product ID and index
-                    className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-md border border-slate-200/80"
-                  >
-                    <Checkbox
-                      className="mt-1 flex-shrink-0"
-                      checked={item.selected}
-                      onCheckedChange={() =>
-                        toggleItemSelected(item.product.id)
-                      }
-                      aria-label={`Select ${
-                        item.product.name[locale] ||
-                        item.product.name.ar ||
-                        "product"
-                      }`}
-                    />
-                    <Image
-                      src={item.product.image}
-                      alt={
-                        item.product.name[locale] ||
-                        item.product.name.ar ||
-                        "Product image"
-                      }
-                      width={80}
-                      height={80}
-                      className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                    />
-                    <div className="flex-grow flex flex-col">
-                      {/* Top row: Name and Remove button */}
-                      <div className="flex justify-between items-start gap-2">
-                        <h3 className="font-semibold text-base text-slate-800">
-                          {item.product.name[locale] ||
-                            item.product.name.ar ||
-                            "Product"}
-                        </h3>
-                        <button
-                          onClick={() => removeItem(item.product.id)}
-                          className="p-1 text-slate-400 hover:text-red-600 flex-shrink-0"
-                        >
-                          <X size={18} />
-                        </button>
-                      </div>
-                      {/* Bottom row: Quantity and Price */}
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2">
-                        <div className="flex items-center border border-slate-200 rounded-md self-start sm:self-center">
+                {items.map((item) => {
+                  const itemPrice =
+                    item.selectedVariant?.price ?? item.product.price;
+                  const itemImage =
+                    item.selectedVariant?.image ?? item.product.image;
+
+                  return (
+                    <div
+                      key={item.cartItemId}
+                      className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-md border border-slate-200/80"
+                    >
+                      <Checkbox
+                        className="mt-1 flex-shrink-0"
+                        checked={item.selected}
+                        onCheckedChange={() =>
+                          toggleItemSelected(item.cartItemId)
+                        }
+                        aria-label={`Select ${
+                          item.product.name[locale] ||
+                          item.product.name.ar ||
+                          "product"
+                        }`}
+                      />
+                      <Image
+                        src={itemImage}
+                        alt={
+                          item.product.name[locale] ||
+                          item.product.name.ar ||
+                          "Product image"
+                        }
+                        width={80}
+                        height={80}
+                        className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                      />
+                      <div className="flex-grow flex flex-col">
+                        <div className="flex justify-between items-start gap-2">
+                          <h3 className="font-semibold text-base text-slate-800">
+                            {item.product.name[locale] ||
+                              item.product.name.ar ||
+                              "Product"}
+                          </h3>
                           <button
-                            onClick={() =>
-                              updateQuantity(item.product.id, item.quantity - 1)
-                            }
-                            disabled={item.quantity <= 1}
-                            className="p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+                            onClick={() => removeItem(item.cartItemId)}
+                            className="p-1 text-slate-400 hover:text-red-600 flex-shrink-0"
                           >
-                            <Minus size={14} />
-                          </button>
-                          <span className="px-3 font-bold text-slate-800 text-sm">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() =>
-                              updateQuantity(item.product.id, item.quantity + 1)
-                            }
-                            className="p-1.5 text-slate-500 hover:bg-slate-100"
-                          >
-                            <Plus size={14} />
+                            <X size={18} />
                           </button>
                         </div>
-                        <p className="mt-2 sm:mt-0 font-bold text-slate-800 text-base">
-                          {(item.product.price * item.quantity).toFixed(2)}{" "}
-                          {t("currency")}
-                        </p>
+
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2">
+                          {/* --- Variant & Quantity Group --- */}
+                          <div className="flex items-center gap-4">
+                            {/* Variant Display */}
+                            {item.selectedVariant && (
+                              <div className="flex flex-wrap gap-x-3 gap-y-1">
+                                {Object.entries(
+                                  item.selectedVariant.options
+                                ).map(([optionKey, optionValue]) => {
+                                  const variantOption =
+                                    item.product.variantOptions?.find(
+                                      (opt) => opt.name.fr === optionKey
+                                    );
+                                  const displayName = variantOption
+                                    ? variantOption.name[locale]
+                                    : optionKey;
+
+                                  return (
+                                    <span
+                                      key={optionKey}
+                                      className="text-sm text-slate-500"
+                                    >
+                                      {displayName}:{" "}
+                                      <span className="font-medium text-slate-600">
+                                        {optionValue}
+                                      </span>
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            {/* Quantity Selector */}
+                            <div className="flex items-center border border-slate-200 rounded-md">
+                              <button
+                                onClick={() =>
+                                  updateQuantity(
+                                    item.cartItemId,
+                                    item.quantity - 1
+                                  )
+                                }
+                                disabled={item.quantity <= 1}
+                                className="p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+                              >
+                                <Minus size={14} />
+                              </button>
+                              <span className="px-3 font-bold text-slate-800 text-sm">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  updateQuantity(
+                                    item.cartItemId,
+                                    item.quantity + 1
+                                  )
+                                }
+                                className="p-1.5 text-slate-500 hover:bg-slate-100"
+                              >
+                                <Plus size={14} />
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Item Total Price */}
+                          <p className="mt-2 sm:mt-0 font-bold text-slate-800 text-base text-right">
+                            {(itemPrice * item.quantity).toFixed(2)}{" "}
+                            {t("currency")}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          {/* Order Summary - Keep original width */}
+          {/* Order Summary */}
           <div className="lg:col-span-1 mt-8 lg:mt-0">
             <div className="bg-white p-6 rounded-xl shadow-md border-slate-200/80 sticky top-24">
               <h2 className="text-xl font-bold text-slate-800 border-b border-slate-200 pb-4 mb-4 flex items-center gap-3">
