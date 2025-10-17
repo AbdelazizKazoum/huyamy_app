@@ -186,5 +186,25 @@
   },
   "general": {
     "categories": "الفئات"
+  },
+  "auth": {
+    "invalid-credential": "بيانات الدخول غير صحيحة.",
+    "user-not-found": "المستخدم غير موجود.",
+    "wrong-password": "كلمة المرور غير صحيحة.",
+    "too-many-requests": "تم حظر المحاولة مؤقتًا. حاول لاحقًا.",
+    "network-request-failed": "خطأ في الاتصال بالإنترنت.",
+    "generic": "حدث خطأ أثناء تسجيل الدخول. حاول مرة أخرى.",
+    "signinTitle": "تسجيل الدخول",
+    "signinSubtitle": "أدخل بياناتك للمتابعة إلى لوحة التحكم",
+    "noAccount": "ليس لديك حساب؟ سجل الآن",
+    "emailLabel": "البريد الإلكتروني",
+    "emailPlaceholder": "example@email.com",
+    "passwordLabel": "كلمة المرور",
+    "passwordPlaceholder": "••••••••",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور",
+    "signingIn": "جاري تسجيل الدخول...",
+    "signinBtn": "تسجيل الدخول"
   }
 }

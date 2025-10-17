@@ -2,17 +2,23 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, SignInFormData } from "@/lib/schemas/authSchema";
-import toast from "react-hot-toast";
+import { Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function SignInForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const t = useTranslations();
 
   const {
     register,
@@ -24,61 +30,138 @@ export default function SignInForm() {
 
   const onSubmit = async (data: SignInFormData) => {
     setIsLoading(true);
+    setAuthError(null);
     try {
-      await signIn(data.email, data.password);
-      toast.success("تم تسجيل الدخول بنجاح");
-      router.push("/");
+      const errorCode = await signIn(data.email, data.password);
+      if (errorCode) {
+        // Remove "auth/" prefix for translation key
+        const key = errorCode.replace("auth/", "");
+        setAuthError(t(`auth.${key}`));
+        return;
+      }
+
+      const redirect = searchParams.get("redirect");
+      if (redirect) {
+        router.replace(redirect);
+      } else {
+        router.replace("/");
+      }
     } catch (error: any) {
-      toast.error(error.message || "فشل في تسجيل الدخول");
+      setAuthError(t("auth.generic"));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6"
+      autoComplete="off"
+    >
+      {authError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-2 text-sm text-center">
+          {authError}
+        </div>
+      )}
+
       <div>
         <label
           htmlFor="email"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 mb-1"
         >
-          البريد الإلكتروني
+          {t("auth.emailLabel")}
         </label>
         <input
           {...register("email")}
           type="email"
           id="email"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+          autoComplete="username"
+          className={`block w-full rounded-lg border ${
+            errors.email ? "border-red-400" : "border-gray-300"
+          } px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition`}
+          placeholder={t("auth.emailPlaceholder")}
         />
         {errors.email && (
-          <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+          <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
         )}
       </div>
 
       <div>
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 mb-1"
         >
-          كلمة المرور
+          {t("auth.passwordLabel")}
         </label>
-        <input
-          {...register("password")}
-          type="password"
-          id="password"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
-        />
+        <div className="relative">
+          <input
+            {...register("password")}
+            type={showPassword ? "text" : "password"}
+            id="password"
+            autoComplete="current-password"
+            className={`block w-full rounded-lg border ${
+              errors.password ? "border-red-400" : "border-gray-300"
+            } px-4 py-2 bg-gray-50 pr-10 focus:outline-none focus:ring-2 focus:ring-primary-500 transition`}
+            placeholder={t("auth.passwordPlaceholder")}
+          />
+          <button
+            type="button"
+            tabIndex={-1}
+            className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-primary-600"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={
+              showPassword ? t("auth.hidePassword") : t("auth.showPassword")
+            }
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
         {errors.password && (
-          <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+          <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
         )}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <Link
+          href="/forgot-password"
+          className="text-xs text-primary-600 hover:underline"
+        >
+          {t("auth.forgotPassword")}
+        </Link>
       </div>
 
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+        className="w-full flex justify-center items-center gap-2 py-2 px-4 rounded-lg text-white bg-primary-800 hover:bg-primary-700 font-semibold text-base transition disabled:opacity-50 shadow"
       >
-        {isLoading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
+        {isLoading ? (
+          <span className="flex items-center gap-2">
+            <svg
+              className="animate-spin h-5 w-5 text-white"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v8z"
+              />
+            </svg>
+            {t("auth.signingIn")}
+          </span>
+        ) : (
+          t("auth.signinBtn")
+        )}
       </button>
     </form>
   );

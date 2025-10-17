@@ -9,6 +9,7 @@ import {
   User as FirebaseUser,
 } from "firebase/auth";
 import { auth } from "@/lib/firebaseClient";
+import { useTranslations } from "next-intl";
 
 interface AuthUser {
   uid: string;
@@ -36,6 +37,32 @@ interface AuthState {
   initializeAuth: () => () => void;
 }
 
+const firebaseErrorMap: Record<string, string> = {
+  "auth/invalid-credential": "بيانات الدخول غير صحيحة.",
+  "auth/user-not-found": "المستخدم غير موجود.",
+  "auth/wrong-password": "كلمة المرور غير صحيحة.",
+  "auth/too-many-requests": "تم حظر المحاولة مؤقتًا. حاول لاحقًا.",
+  "auth/network-request-failed": "خطأ في الاتصال بالإنترنت.",
+  // Add more mappings as needed
+};
+
+function getAuthErrorMessage(code: string, t: any): string {
+  switch (code) {
+    case "auth/user-not-found":
+      return t("auth.userNotFound");
+    case "auth/wrong-password":
+      return t("auth.wrongPassword");
+    case "auth/invalid-email":
+      return t("auth.invalidEmail");
+    case "auth/invalid-credential":
+      return t("auth.invalidCredential");
+    case "auth/too-many-requests":
+      return t("auth.tooManyRequests");
+    default:
+      return t("auth.generic");
+  }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -54,14 +81,12 @@ export const useAuthStore = create<AuthState>()(
           );
           const idToken = await userCredential.user.getIdToken();
 
-          // Create session on server
           await fetch("/api/auth/session", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ idToken }),
           });
 
-          // Verify and get user data
           const response = await fetch("/api/auth/verify-token", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -69,19 +94,25 @@ export const useAuthStore = create<AuthState>()(
           });
 
           if (!response.ok) {
-            throw new Error("فشل في التحقق من المستخدم");
+            const data = await response.json();
+            throw new Error(data.error || "auth/generic");
           }
 
           const data = await response.json();
-          set({ user: data.user, loading: false, initialized: true });
+          set({ user: data.user, loading: false, error: null });
+          return null; // No error
         } catch (error: any) {
-          console.error("Sign in error:", error);
-          set({
-            error: error.message || "فشل في تسجيل الدخول",
-            loading: false,
-            initialized: true,
-          });
-          throw error;
+          let code = "auth/generic";
+          if (error.code) {
+            code = error.code;
+          } else if (error.message && error.message.includes("auth/")) {
+            const codeMatch = error.message.match(/auth\/[a-zA-Z0-9\-]+/);
+            if (codeMatch) {
+              code = codeMatch[0];
+            }
+          }
+          set({ error: code, loading: false });
+          return code;
         }
       },
 

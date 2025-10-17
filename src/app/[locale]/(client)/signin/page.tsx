@@ -1,25 +1,29 @@
 import SignInForm from "@/components/auth/SignInForm";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function SignInPage() {
+  const t = useTranslations();
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            تسجيل الدخول
+    <main className="min-h-screen pt-[8px] flex items-center justify-center bg-gradient-to-br from-primary-50 to-gray-100 py-12 px-4">
+      <section className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-8">
+        <header className="text-center space-y-2">
+          <h2 className="text-3xl font-bold text-gray-900">
+            {t("auth.signinTitle")}
           </h2>
-        </div>
+          <p className="text-sm text-gray-500">{t("auth.signinSubtitle")}</p>
+        </header>
         <SignInForm />
-        <div className="text-center">
+        <footer className="text-center pt-4 border-t border-gray-100">
           <Link
             href="/signup"
-            className="text-primary-600 hover:text-primary-500"
+            className="text-primary-600 hover:text-primary-700 font-medium transition"
           >
-            ليس لديك حساب؟ سجل الآن
+            {t("auth.noAccount")}
           </Link>
-        </div>
-      </div>
-    </div>
+        </footer>
+      </section>
+    </main>
   );
 }

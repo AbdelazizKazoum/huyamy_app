@@ -187,5 +187,25 @@
   },
   "general": {
     "categories": "Catégories"
+  },
+  "auth": {
+    "invalid-credential": "Les informations d'identification sont incorrectes.",
+    "user-not-found": "Utilisateur introuvable.",
+    "wrong-password": "Mot de passe incorrect.",
+    "too-many-requests": "Trop de tentatives. Veuillez réessayer plus tard.",
+    "network-request-failed": "Erreur de connexion Internet.",
+    "generic": "Une erreur s'est produite lors de la connexion. Veuillez réessayer.",
+    "signinTitle": "Connexion",
+    "signinSubtitle": "Entrez vos informations pour accéder au tableau de bord",
+    "noAccount": "Vous n'avez pas de compte ? Inscrivez-vous",
+    "emailLabel": "Adresse e-mail",
+    "emailPlaceholder": "exemple@email.com",
+    "passwordLabel": "Mot de passe",
+    "passwordPlaceholder": "••••••••",
+    "forgotPassword": "Mot de passe oublié ?",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "signingIn": "Connexion en cours...",
+    "signinBtn": "Se connecter"
   }
 }
