@@ -103,61 +103,22 @@ export const useAuthStore = create<AuthState>()(
       signUp: async (data: SignUpData) => {
         set({ loading: true, error: null });
         try {
-          // 1. Create user in Firebase Auth
-          const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            data.email,
-            data.password
-          );
-          await updateProfile(userCredential.user, {
-            displayName: data.displayName,
-          });
-
-          // 2. Get Firebase ID token
-          const idToken = await userCredential.user.getIdToken();
-
-          // 3. Send all profile fields to your API
           const response = await fetch("/api/auth/signup", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              idToken,
-              email: data.email,
-              password: data.password,
-              displayName: data.displayName,
-              address: data.address,
-              city: data.city,
-              phone: data.phone,
-            }),
+            body: JSON.stringify(data),
           });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            set({ error: errorData.error || "auth/generic", loading: false });
-            return errorData.error || "auth/generic";
-          }
-
-          // Optionally, update local user state with returned user data
           const result = await response.json();
+          if (!response.ok) {
+            set({ error: result.error || "auth/generic", loading: false });
+            // Throw so the form can catch and display it
+            throw { code: result.error || "auth/generic" };
+          }
           set({ user: result.user, loading: false, error: null });
-
           return null;
         } catch (error: any) {
-          let code = "auth/generic";
-          if (error.code) {
-            code = error.code;
-          } else if (error.message && error.message.includes("auth/")) {
-            const codeMatch = error.message.match(/auth\/[a-zA-Z0-9\-]+/);
-            if (codeMatch) {
-              code = codeMatch[0];
-            }
-          }
-          set({
-            error: code,
-            loading: false,
-            initialized: true,
-          });
-          return code;
+          set({ error: error.code || "auth/generic", loading: false });
+          throw error; // <-- Throw so the form can catch it
         }
       },
 

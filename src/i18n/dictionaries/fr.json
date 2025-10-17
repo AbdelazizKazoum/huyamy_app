@@ -239,6 +239,8 @@
     "email-already-in-use": "Cette adresse e-mail est déjà utilisée.",
     "weak-password": "Le mot de passe est trop faible.",
     "operation-not-allowed": "Inscription non autorisée.",
-    "invalid-email": "Adresse e-mail invalide."
+    "invalid-email": "Adresse e-mail invalide.",
+    "invalidEmail": "Adresse e-mail invalide",
+    "passwordTooShort": "Le mot de passe est trop court"
   }
 }

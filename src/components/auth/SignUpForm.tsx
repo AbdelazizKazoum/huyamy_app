@@ -27,7 +27,7 @@ export default function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [authError, setAuthError] = useState<string | null>(null);
-  const t = useTranslations();
+  const t = useTranslations("auth");
 
   const {
     register,
@@ -37,6 +37,7 @@ export default function SignUpForm() {
     formState: { errors },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
+    mode: "onChange", // <-- Add this line for real-time validation
   });
 
   // Step 1: Personal Info
@@ -44,13 +45,9 @@ export default function SignUpForm() {
     <>
       <div className="mb-4">
         <Input
-          label={t("auth.nameLabel")}
-          placeholder={t("auth.namePlaceholder")}
-          error={
-            errors.displayName?.message
-              ? t(errors.displayName.message)
-              : undefined
-          }
+          label={t("nameLabel")}
+          placeholder={t("namePlaceholder")}
+          error={errors.displayName?.type ? t("nameRequired") : undefined}
           icon={<User size={18} className="text-slate-400" />}
           {...register("displayName")}
           id="displayName"
@@ -59,9 +56,9 @@ export default function SignUpForm() {
       </div>
       <div className="mb-4">
         <Input
-          label={t("auth.emailLabel")}
-          placeholder={t("auth.emailPlaceholder")}
-          error={errors.email?.message ? t(errors.email.message) : undefined}
+          label={t("emailLabel")}
+          placeholder={t("emailPlaceholder")}
+          error={errors.email?.type ? t("emailRequired") : undefined}
           icon={<Mail size={18} className="text-slate-400" />}
           {...register("email")}
           id="email"
@@ -71,10 +68,14 @@ export default function SignUpForm() {
       </div>
       <div className="mb-4">
         <Input
-          label={t("auth.passwordLabel")}
-          placeholder={t("auth.passwordPlaceholder")}
+          label={t("passwordLabel")}
+          placeholder={t("passwordPlaceholder")}
           error={
-            errors.password?.message ? t(errors.password.message) : undefined
+            errors.password?.type === "min"
+              ? t("passwordTooShort")
+              : errors.password?.type
+              ? t("passwordRequired")
+              : undefined
           }
           icon={<Lock size={18} className="text-slate-400" />}
           {...register("password")}
@@ -85,11 +86,13 @@ export default function SignUpForm() {
       </div>
       <div className="mb-4">
         <Input
-          label={t("auth.confirmPasswordLabel")}
-          placeholder={t("auth.confirmPasswordPlaceholder")}
+          label={t("confirmPasswordLabel")}
+          placeholder={t("confirmPasswordPlaceholder")}
           error={
-            errors.confirmPassword?.message
-              ? t(errors.confirmPassword.message)
+            errors.confirmPassword?.type === "validate"
+              ? t("passwordsDontMatch")
+              : errors.confirmPassword?.type
+              ? t("confirmPasswordRequired")
               : undefined
           }
           icon={<ShieldCheck size={18} className="text-slate-400" />}
@@ -107,11 +110,9 @@ export default function SignUpForm() {
     <>
       <div className="mb-4">
         <Input
-          label={t("auth.addressLabel")}
-          placeholder={t("auth.addressPlaceholder")}
-          error={
-            errors.address?.message ? t(errors.address.message) : undefined
-          }
+          label={t("addressLabel")}
+          placeholder={t("addressPlaceholder")}
+          error={errors.address?.type ? t("addressRequired") : undefined}
           icon={<MapPin size={18} className="text-slate-400" />}
           {...register("address")}
           id="address"
@@ -120,9 +121,9 @@ export default function SignUpForm() {
       </div>
       <div className="mb-4">
         <Input
-          label={t("auth.cityLabel")}
-          placeholder={t("auth.cityPlaceholder")}
-          error={errors.city?.message ? t(errors.city.message) : undefined}
+          label={t("cityLabel")}
+          placeholder={t("cityPlaceholder")}
+          error={errors.city?.type ? t("cityRequired") : undefined}
           icon={<Building2 size={18} className="text-slate-400" />}
           {...register("city")}
           id="city"
@@ -131,9 +132,9 @@ export default function SignUpForm() {
       </div>
       <div className="mb-4">
         <Input
-          label={t("auth.phoneLabel")}
-          placeholder={t("auth.phonePlaceholder")}
-          error={errors.phone?.message ? t(errors.phone.message) : undefined}
+          label={t("phoneLabel")}
+          placeholder={t("phonePlaceholder")}
+          error={errors.phone?.type ? t("phoneRequired") : undefined}
           icon={<Phone size={18} className="text-slate-400" />}
           {...register("phone")}
           id="phone"
@@ -169,19 +170,13 @@ export default function SignUpForm() {
     setIsLoading(true);
     setAuthError(null);
     try {
-      await signUp({
-        email: data.email,
-        password: data.password,
-        displayName: data.displayName,
-        address: data.address,
-        city: data.city,
-        phone: data.phone,
-      });
-
-      toast.success(t("auth.signupSuccess") || "تم إنشاء الحساب بنجاح");
+      // signUp returns void, so don't test its return value — rely on exceptions for errors
+      await signUp(data);
       router.push("/");
-    } catch {
-      setAuthError(t("auth.generic"));
+    } catch (err) {
+      const code = (err as any)?.code;
+      const errorKey = code.replace(/^auth\//, "");
+      setAuthError(t(errorKey));
     } finally {
       setIsLoading(false);
     }
@@ -211,7 +206,7 @@ export default function SignUpForm() {
             className="flex items-center gap-1 px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition font-medium"
           >
             <ArrowLeft size={16} className="text-slate-400" />
-            {t("auth.backStep") || "رجوع"}
+            {t("backStep")}
           </button>
         )}
         <button
@@ -220,10 +215,10 @@ export default function SignUpForm() {
           className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
         >
           {step === 1
-            ? t("auth.nextStep")
+            ? t("nextStep")
             : isLoading
-            ? t("auth.signingUp")
-            : t("auth.submitBtn")}
+            ? t("signingUp")
+            : t("submitBtn")}
         </button>
       </div>
     </form>

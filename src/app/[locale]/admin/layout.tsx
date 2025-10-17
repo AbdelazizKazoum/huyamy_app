@@ -19,7 +19,7 @@ export default function RootLayout({
       className="bg-gray-100 text-gray-900 min-h-screen"
       style={{ fontFamily: "'Cairo', sans-serif" }}
     >
-      <AuthGuard requireAdmin redirectTo="/signin">
+      <AuthGuard requireAdmin>
         <div className="flex h-screen">
           <Sidebar isCollapsed={isSidebarCollapsed} />
           <MobileSidebar

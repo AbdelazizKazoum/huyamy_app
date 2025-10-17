@@ -5,11 +5,12 @@ export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
   error?: string;
-  icon?: React.ReactNode; // Add icon prop
+  icon?: React.ReactNode; // Left icon
+  rightIcon?: React.ReactNode; // Right icon
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, label, error, icon, ...props }, ref) => {
+  ({ className, type, label, error, icon, rightIcon, ...props }, ref) => {
     return (
       <div className="w-full">
         <label
@@ -24,11 +25,17 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
               {icon}
             </div>
           )}
+          {rightIcon && (
+            <div className="absolute inset-y-0 flex items-center ltr:right-0 ltr:pr-3 rtl:left-0 rtl:pl-3">
+              {rightIcon}
+            </div>
+          )}
           <input
             type={type}
             className={cn(
               "flex h-10 w-full shadow rounded-md border border-slate-200 bg-white py-2 text-sm transition-all file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:border-primary-800 focus-visible:shadow-md focus-visible:shadow-primary-800/30 disabled:cursor-not-allowed disabled:opacity-50",
-              icon ? "ltr:pl-10 rtl:pr-10" : "px-3", // Add padding if icon exists
+              icon ? "ltr:pl-10 rtl:pr-10" : "px-3",
+              rightIcon ? "ltr:pr-10 rtl:pl-10" : "",
               error &&
                 "border-red-500 focus-visible:border-red-500 focus-visible:shadow-red-500/30",
               className

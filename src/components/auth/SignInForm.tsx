@@ -7,9 +7,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signInSchema, SignInFormData } from "@/lib/schemas/authSchema";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Input } from "@/components/ui/Input";
 
 export default function SignInForm() {
   const router = useRouter();
@@ -34,7 +35,6 @@ export default function SignInForm() {
     try {
       const errorCode = await signIn(data.email, data.password);
       if (errorCode) {
-        // Remove "auth/" prefix for translation key
         const key = errorCode.replace("auth/", "");
         setAuthError(t(`auth.${key}`));
         return;
@@ -66,60 +66,50 @@ export default function SignInForm() {
       )}
 
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          {t("auth.emailLabel")}
-        </label>
-        <input
-          {...register("email")}
-          type="email"
-          id="email"
-          autoComplete="username"
-          className={`block w-full rounded-lg border ${
-            errors.email ? "border-red-400" : "border-gray-300"
-          } px-4 py-2 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 transition`}
+        <Input
+          label={t("auth.emailLabel")}
           placeholder={t("auth.emailPlaceholder")}
+          error={
+            errors.email?.message
+              ? t(`auth.${errors.email.message}`)
+              : undefined
+          }
+          icon={<Mail size={18} className="text-slate-400" />}
+          {...register("email")}
+          id="email"
+          type="email"
+          autoComplete="username"
         />
-        {errors.email && (
-          <p className="mt-1 text-xs text-red-600">{errors.email.message}</p>
-        )}
       </div>
 
       <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium text-gray-700 mb-1"
-        >
-          {t("auth.passwordLabel")}
-        </label>
-        <div className="relative">
-          <input
-            {...register("password")}
-            type={showPassword ? "text" : "password"}
-            id="password"
-            autoComplete="current-password"
-            className={`block w-full rounded-lg border ${
-              errors.password ? "border-red-400" : "border-gray-300"
-            } px-4 py-2 bg-gray-50 pr-10 focus:outline-none focus:ring-2 focus:ring-primary-500 transition`}
-            placeholder={t("auth.passwordPlaceholder")}
-          />
-          <button
-            type="button"
-            tabIndex={-1}
-            className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-primary-600"
-            onClick={() => setShowPassword((v) => !v)}
-            aria-label={
-              showPassword ? t("auth.hidePassword") : t("auth.showPassword")
-            }
-          >
-            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
-        </div>
-        {errors.password && (
-          <p className="mt-1 text-xs text-red-600">{errors.password.message}</p>
-        )}
+        <Input
+          label={t("auth.passwordLabel")}
+          placeholder={t("auth.passwordPlaceholder")}
+          error={
+            errors.password?.message
+              ? t(`auth.${errors.password.message}`)
+              : undefined
+          }
+          icon={<Lock size={18} className="text-slate-400" />}
+          {...register("password")}
+          id="password"
+          type={showPassword ? "text" : "password"}
+          autoComplete="current-password"
+          rightIcon={
+            <button
+              type="button"
+              tabIndex={-1}
+              className="flex items-center text-gray-400 hover:text-primary-600"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={
+                showPassword ? t("auth.hidePassword") : t("auth.showPassword")
+              }
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          }
+        />
       </div>
 
       <div className="flex items-center justify-between">

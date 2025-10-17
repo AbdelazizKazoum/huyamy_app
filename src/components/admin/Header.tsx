@@ -115,7 +115,10 @@ const Header: React.FC<{
 
           {/* Dropdown Menu */}
           {isUserMenuOpen && (
-            <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div
+              className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+              // If you use Tailwind RTL plugin, use: ltr:right-0 rtl:left-0
+            >
               {/* User Info Section */}
               <div className="px-4 py-4 bg-gradient-to-br from-gray-50 to-white border-b border-gray-200">
                 <div className="flex items-center gap-3">
@@ -132,7 +135,6 @@ const Header: React.FC<{
                   </div>
                 </div>
               </div>
-
               {/* Menu Items */}
               <div className="py-2">
                 <button

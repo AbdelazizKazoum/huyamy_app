@@ -238,6 +238,8 @@
     "email-already-in-use": "البريد الإلكتروني مستخدم بالفعل.",
     "weak-password": "كلمة المرور ضعيفة جداً.",
     "operation-not-allowed": "التسجيل غير مسموح.",
-    "invalid-email": "البريد الإلكتروني غير صالح."
+    "invalid-email": "البريد الإلكتروني غير صالح.",
+    "invalidEmail": "البريد الإلكتروني غير صالح",
+    "passwordTooShort": "كلمة المرور قصيرة جدًا"
   }
 }

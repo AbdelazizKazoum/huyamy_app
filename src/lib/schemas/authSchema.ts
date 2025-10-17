@@ -20,18 +20,18 @@ export const signUpSchema = z
 
 // API schema without confirmPassword
 export const signUpApiSchema = z.object({
-  idToken: z.string(),
-  displayName: z.string().min(2, { message: "auth.nameRequired" }),
-  email: z.string().email({ message: "auth.emailRequired" }),
-  password: z.string().min(6, { message: "auth.passwordRequired" }),
-  address: z.string().min(2, { message: "auth.addressRequired" }),
-  city: z.string().min(2, { message: "auth.cityRequired" }),
-  phone: z.string().min(6, { message: "auth.phoneRequired" }),
+  email: z.string().email(),
+  password: z.string().min(6),
+  displayName: z.string(),
+  address: z.string(),
+  city: z.string(),
+  phone: z.string(),
+  // Remove idToken and confirmPassword
 });
 
 export const signInSchema = z.object({
-  email: z.string().email("البريد الإلكتروني غير صالح"),
-  password: z.string().min(1, "كلمة المرور مطلوبة"),
+  email: z.string().email({ message: "invalidEmail" }),
+  password: z.string().min(6, { message: "passwordTooShort" }),
 });
 
 export const resetPasswordSchema = z.object({
