@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { OrderFilters } from "@/store/useOrderStore";
 import { OrderData } from "@/types/order";
+import { fetchWithAuth } from "@/lib/api/fetchWithAuth";
 
 // Types for API responses
 interface ApiResponse<T = any> {
@@ -57,7 +58,7 @@ const buildOrdersQuery = (
 };
 
 /**
- * Fetch orders with pagination and filters
+ * Fetch orders with pagination and filters (admin only)
  */
 export const fetchOrders = async (
   page: number,
@@ -67,7 +68,7 @@ export const fetchOrders = async (
 ): Promise<OrdersResponse> => {
   try {
     const query = buildOrdersQuery(page, limit, filters, lastDocId);
-    const response = await fetch(`/api/orders?${query}`, {
+    const response = await fetchWithAuth(`/api/orders?${query}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -128,14 +129,14 @@ export const fetchOrderById = async (id: string) => {
 };
 
 /**
- * Update order status
+ * Update order status (admin only)
  */
 export const updateOrderStatus = async (
   id: string,
   status: "pending" | "shipped" | "delivered" | "cancelled"
 ) => {
   try {
-    const response = await fetch(`/api/orders/${id}`, {
+    const response = await fetchWithAuth(`/api/orders/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -166,11 +167,11 @@ export const updateOrderStatus = async (
 };
 
 /**
- * Delete an order
+ * Delete an order (admin only)
  */
 export const deleteOrder = async (id: string) => {
   try {
-    const response = await fetch(`/api/orders/${id}`, {
+    const response = await fetchWithAuth(`/api/orders/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

@@ -1,4 +1,5 @@
 import { Section, SectionWithProducts } from "@/types";
+import { fetchWithAuth } from "@/lib/api/fetchWithAuth"; // <-- Import the helper
 
 /**
  * Fetches all sections with their products from the API.
@@ -18,7 +19,7 @@ export const fetchAllSectionsAPI = async (): Promise<SectionWithProducts[]> => {
 export const createSectionAPI = async (
   formData: FormData
 ): Promise<Section> => {
-  const response = await fetch("/api/sections", {
+  const response = await fetchWithAuth("/api/sections", {
     method: "POST",
     body: formData,
   });
@@ -38,7 +39,7 @@ export const updateSectionAPI = async (
   sectionId: string,
   formData: FormData
 ): Promise<{ message: string }> => {
-  const response = await fetch(`/api/sections/${sectionId}`, {
+  const response = await fetchWithAuth(`/api/sections/${sectionId}`, {
     method: "PUT",
     body: formData,
   });
@@ -56,7 +57,7 @@ export const updateSectionAPI = async (
 export const deleteSectionAPI = async (
   sectionId: string
 ): Promise<{ message: string }> => {
-  const response = await fetch(`/api/sections/${sectionId}`, {
+  const response = await fetchWithAuth(`/api/sections/${sectionId}`, {
     method: "DELETE",
   });
   if (!response.ok) {

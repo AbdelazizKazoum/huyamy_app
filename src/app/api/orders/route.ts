@@ -10,6 +10,7 @@ import { requireAdmin } from "@/lib/utils/requireAdmin";
 
 // GET /api/admin/orders - Fetch orders with pagination and filters
 export async function GET(request: NextRequest) {
+  // Admin guard
   const adminCheck = await requireAdmin(request);
   if ("error" in adminCheck) {
     return NextResponse.json(
@@ -17,7 +18,6 @@ export async function GET(request: NextRequest) {
       { status: adminCheck.status }
     );
   }
-
   try {
     const { searchParams } = new URL(request.url);
 
