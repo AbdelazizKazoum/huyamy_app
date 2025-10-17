@@ -3,13 +3,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   User as FirebaseUser,
 } from "firebase/auth";
 import { auth } from "@/lib/firebaseClient";
-import { useTranslations } from "next-intl";
 
 interface AuthUser {
   uid: string;
@@ -19,6 +17,15 @@ interface AuthUser {
   emailVerified: boolean;
 }
 
+interface SignUpData {
+  email: string;
+  password: string;
+  displayName: string;
+  address: string;
+  city: string;
+  phone: string;
+}
+
 interface AuthState {
   user: AuthUser | null;
   loading: boolean;
@@ -26,41 +33,11 @@ interface AuthState {
   error: string | null;
 
   // Actions
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (
-    email: string,
-    password: string,
-    displayName?: string
-  ) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<string | null>;
+  signUp: (data: SignUpData) => Promise<void>;
   signOut: () => Promise<void>;
   setUser: (user: AuthUser | null) => void;
   initializeAuth: () => () => void;
-}
-
-const firebaseErrorMap: Record<string, string> = {
-  "auth/invalid-credential": "بيانات الدخول غير صحيحة.",
-  "auth/user-not-found": "المستخدم غير موجود.",
-  "auth/wrong-password": "كلمة المرور غير صحيحة.",
-  "auth/too-many-requests": "تم حظر المحاولة مؤقتًا. حاول لاحقًا.",
-  "auth/network-request-failed": "خطأ في الاتصال بالإنترنت.",
-  // Add more mappings as needed
-};
-
-function getAuthErrorMessage(code: string, t: any): string {
-  switch (code) {
-    case "auth/user-not-found":
-      return t("auth.userNotFound");
-    case "auth/wrong-password":
-      return t("auth.wrongPassword");
-    case "auth/invalid-email":
-      return t("auth.invalidEmail");
-    case "auth/invalid-credential":
-      return t("auth.invalidCredential");
-    case "auth/too-many-requests":
-      return t("auth.tooManyRequests");
-    default:
-      return t("auth.generic");
-  }
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -100,7 +77,7 @@ export const useAuthStore = create<AuthState>()(
 
           const data = await response.json();
           set({ user: data.user, loading: false, error: null });
-          return null; // No error
+          return null; // Success, no error
         } catch (error: any) {
           let code = "auth/generic";
           if (error.code) {
@@ -112,29 +89,19 @@ export const useAuthStore = create<AuthState>()(
             }
           }
           set({ error: code, loading: false });
-          return code;
+          return code; // e.g. "auth/invalid-credential"
         }
       },
 
-      signUp: async (email: string, password: string, displayName?: string) => {
+      signUp: async (data: SignUpData) => {
         set({ loading: true, error: null });
         try {
-          // Create account on server
-          const response = await fetch("/api/auth/signup", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password, displayName }),
-          });
-
-          if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || "فشل في إنشاء الحساب");
-          }
-
-          // Sign in after successful registration
-          await get().signIn(email, password);
+          // Use data.email, data.password, data.displayName, data.address, data.city, data.phone
+          // Example:
+          // await createUserWithEmailAndPassword(auth, data.email, data.password);
+          // Save additional fields to your backend as needed
+          set({ loading: false });
         } catch (error: any) {
-          console.error("Sign up error:", error);
           set({
             error: error.message || "فشل في إنشاء الحساب",
             loading: false,

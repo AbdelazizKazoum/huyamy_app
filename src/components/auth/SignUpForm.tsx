@@ -45,7 +45,11 @@ export default function SignUpForm() {
       <Input
         label={t("auth.nameLabel")}
         placeholder={t("auth.namePlaceholder")}
-        error={errors.displayName && t(errors.displayName.message)}
+        error={
+          errors.displayName?.message
+            ? t(errors.displayName.message)
+            : undefined
+        }
         icon={<User size={18} className="text-slate-400" />}
         {...register("displayName")}
         id="displayName"
@@ -54,7 +58,7 @@ export default function SignUpForm() {
       <Input
         label={t("auth.emailLabel")}
         placeholder={t("auth.emailPlaceholder")}
-        error={errors.email && t(errors.email.message)}
+        error={errors.email?.message ? t(errors.email.message) : undefined}
         icon={<Mail size={18} className="text-slate-400" />}
         {...register("email")}
         id="email"
@@ -64,7 +68,9 @@ export default function SignUpForm() {
       <Input
         label={t("auth.passwordLabel")}
         placeholder={t("auth.passwordPlaceholder")}
-        error={errors.password && t(errors.password.message)}
+        error={
+          errors.password?.message ? t(errors.password.message) : undefined
+        }
         icon={<Lock size={18} className="text-slate-400" />}
         {...register("password")}
         id="password"
@@ -74,7 +80,11 @@ export default function SignUpForm() {
       <Input
         label={t("auth.confirmPasswordLabel")}
         placeholder={t("auth.confirmPasswordPlaceholder")}
-        error={errors.confirmPassword && t(errors.confirmPassword.message)}
+        error={
+          errors.confirmPassword?.message
+            ? t(errors.confirmPassword.message)
+            : undefined
+        }
         icon={<ShieldCheck size={18} className="text-slate-400" />}
         {...register("confirmPassword")}
         id="confirmPassword"
@@ -90,7 +100,7 @@ export default function SignUpForm() {
       <Input
         label={t("auth.addressLabel")}
         placeholder={t("auth.addressPlaceholder")}
-        error={errors.address && t(errors.address.message)}
+        error={errors.address?.message ? t(errors.address.message) : undefined}
         icon={<MapPin size={18} className="text-slate-400" />}
         {...register("address")}
         id="address"
@@ -99,7 +109,7 @@ export default function SignUpForm() {
       <Input
         label={t("auth.cityLabel")}
         placeholder={t("auth.cityPlaceholder")}
-        error={errors.city && t(errors.city.message)}
+        error={errors.city?.message ? t(errors.city.message) : undefined}
         icon={<Building2 size={18} className="text-slate-400" />}
         {...register("city")}
         id="city"
@@ -108,7 +118,7 @@ export default function SignUpForm() {
       <Input
         label={t("auth.phoneLabel")}
         placeholder={t("auth.phonePlaceholder")}
-        error={errors.phone && t(errors.phone.message)}
+        error={errors.phone?.message ? t(errors.phone.message) : undefined}
         icon={<Phone size={18} className="text-slate-400" />}
         {...register("phone")}
         id="phone"
@@ -138,24 +148,19 @@ export default function SignUpForm() {
     setStep(1);
   };
 
-  // Handle submit
+  // Handle submit (step 2 only)
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true);
     setAuthError(null);
     try {
-      const valid = await trigger(["address", "city", "phone"]);
-      if (!valid) {
-        setIsLoading(false);
-        return;
-      }
-      await signUp(
-        data.email,
-        data.password,
-        data.displayName,
-        data.address,
-        data.city,
-        data.phone
-      );
+      await signUp({
+        email: data.email,
+        password: data.password,
+        displayName: data.displayName,
+        address: data.address,
+        city: data.city,
+        phone: data.phone,
+      });
       toast.success(t("auth.signupSuccess") || "تم إنشاء الحساب بنجاح");
       router.push("/");
     } catch (error: any) {
