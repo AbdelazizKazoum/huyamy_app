@@ -7,12 +7,22 @@ import {
 import { generateSlug } from "@/lib/utils";
 import { Category } from "@/types";
 import { deleteImageFromR2, uploadImageToR2 } from "@/lib/services/R2Service";
+import { requireAdmin } from "@/lib/utils/requireAdmin";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
+  // Admin guard
+  const adminCheck = await requireAdmin(request);
+  if ("error" in adminCheck) {
+    return NextResponse.json(
+      { error: adminCheck.error },
+      { status: adminCheck.status }
+    );
+  }
+
   try {
     // Await the params since they're now a Promise in Next.js 15
     const { id } = await params;
@@ -50,6 +60,15 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  // Admin guard
+  const adminCheck = await requireAdmin(request);
+  if ("error" in adminCheck) {
+    return NextResponse.json(
+      { error: adminCheck.error },
+      { status: adminCheck.status }
+    );
+  }
+
   try {
     // Await the params since they're now a Promise in Next.js 15
     const { id } = await params;

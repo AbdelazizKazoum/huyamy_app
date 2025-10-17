@@ -1,11 +1,14 @@
-import { adminAuth, adminDb } from "@/lib/firebaseAdmin";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FieldValue } from "firebase-admin/firestore";
+import { adminAuth, adminDb } from "../firebaseAdmin";
 
 export interface SignUpData {
   email: string;
   password: string;
   displayName?: string;
-  phoneNumber?: string;
+  phone?: string;
+  address?: string; // <-- add this
+  city?: string; // <-- add this
 }
 
 export interface SignInData {
@@ -17,7 +20,9 @@ export interface AuthUser {
   uid: string;
   email: string | null;
   displayName: string | null;
-  phoneNumber: string | null;
+  phone: string | null;
+  address: string | null; // <-- add this
+  city: string | null; // <-- add this
   isAdmin: boolean;
   emailVerified: boolean;
   createdAt: Date;
@@ -27,42 +32,48 @@ export interface AuthUser {
  * Creates a new user account
  */
 export async function createUser(data: SignUpData): Promise<AuthUser> {
-  try {
-    // Create Firebase Auth user
-    const userRecord = await adminAuth.createUser({
-      email: data.email,
-      password: data.password,
-      displayName: data.displayName,
-      phoneNumber: data.phoneNumber,
-    });
+  // Prepare createUser payload
+  const createUserPayload: any = {
+    email: data.email,
+    password: data.password,
+    displayName: data.displayName ?? undefined,
+  };
 
-    // Create user profile in Firestore
-    const userProfile = {
-      uid: userRecord.uid,
-      email: userRecord.email,
-      displayName: data.displayName || null,
-      phoneNumber: data.phoneNumber || null,
-      isAdmin: false,
-      emailVerified: false,
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-
-    await adminDb.collection("users").doc(userRecord.uid).set(userProfile);
-
-    return {
-      uid: userRecord.uid,
-      email: userRecord.email || null,
-      displayName: data.displayName || null,
-      phoneNumber: data.phoneNumber || null,
-      isAdmin: false,
-      emailVerified: false,
-      createdAt: new Date(),
-    };
-  } catch (error) {
-    console.error("Error creating user:", error);
-    throw error;
+  // Only add phoneNumber if it's a valid E.164 string
+  if (data.phone && /^\+\d{10,15}$/.test(data.phone)) {
+    createUserPayload.phoneNumber = data.phone;
   }
+
+  // 1. Create user in Firebase Authentication
+  const userRecord = await adminAuth.createUser(createUserPayload);
+
+  // 2. Save extra info in Firestore
+  const userProfile = {
+    uid: userRecord.uid,
+    email: userRecord.email ?? undefined,
+    displayName: userRecord.displayName ?? undefined,
+    phone: data.phone ?? undefined,
+    address: data.address ?? undefined,
+    city: data.city ?? undefined,
+    isAdmin: false,
+    emailVerified: userRecord.emailVerified,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  await adminDb.collection("users").doc(userRecord.uid).set(userProfile);
+
+  return {
+    uid: userRecord.uid,
+    email: userRecord.email ?? null,
+    displayName: userRecord.displayName ?? null,
+    phone: data.phone ?? null,
+    address: data.address ?? null,
+    city: data.city ?? null,
+    isAdmin: false,
+    emailVerified: userRecord.emailVerified,
+    createdAt: new Date(),
+  };
 }
 
 /**
@@ -83,7 +94,9 @@ export async function verifyToken(idToken: string): Promise<AuthUser> {
       uid: decodedToken.uid,
       email: decodedToken.email || null,
       displayName: userData?.displayName || null,
-      phoneNumber: userData?.phoneNumber || null,
+      phone: userData?.phone || null,
+      address: userData?.address || null, // <-- add this
+      city: userData?.city || null, // <-- add this
       isAdmin: userData?.isAdmin || false,
       emailVerified: decodedToken.email_verified || false,
       createdAt: userData?.createdAt?.toDate() || new Date(),
@@ -114,7 +127,9 @@ export async function getUserById(uid: string): Promise<AuthUser | null> {
       uid: userRecord.uid,
       email: userRecord.email || null,
       displayName: userData?.displayName || null,
-      phoneNumber: userData?.phoneNumber || null,
+      phone: userData?.phone || null,
+      address: userData?.address || null, // <-- add this
+      city: userData?.city || null, // <-- add this
       isAdmin: userData?.isAdmin || false,
       emailVerified: userRecord.emailVerified,
       createdAt: userData?.createdAt?.toDate() || new Date(),
@@ -130,15 +145,14 @@ export async function getUserById(uid: string): Promise<AuthUser | null> {
  */
 export async function updateUserProfile(
   uid: string,
-  data: Partial<Pick<AuthUser, "displayName" | "phoneNumber">>
+  data: Partial<Pick<AuthUser, "displayName" | "phone" | "address" | "city">>
 ): Promise<void> {
   try {
     // Update Firebase Auth
-    const authUpdate: { displayName?: string; phoneNumber?: string } = {};
+    const authUpdate: { displayName?: string; phone?: string } = {};
     if (data.displayName !== undefined)
-      authUpdate.displayName = data.displayName;
-    if (data.phoneNumber !== undefined)
-      authUpdate.phoneNumber = data.phoneNumber;
+      authUpdate.displayName = data.displayName ?? undefined;
+    if (data.phone !== undefined) authUpdate.phone = data.phone ?? undefined;
 
     if (Object.keys(authUpdate).length > 0) {
       await adminAuth.updateUser(uid, authUpdate);

@@ -20,6 +20,7 @@ export const signUpSchema = z
 
 // API schema without confirmPassword
 export const signUpApiSchema = z.object({
+  idToken: z.string(),
   displayName: z.string().min(2, { message: "auth.nameRequired" }),
   email: z.string().email({ message: "auth.emailRequired" }),
   password: z.string().min(6, { message: "auth.passwordRequired" }),

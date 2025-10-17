@@ -42,89 +42,105 @@ export default function SignUpForm() {
   // Step 1: Personal Info
   const personalFields = (
     <>
-      <Input
-        label={t("auth.nameLabel")}
-        placeholder={t("auth.namePlaceholder")}
-        error={
-          errors.displayName?.message
-            ? t(errors.displayName.message)
-            : undefined
-        }
-        icon={<User size={18} className="text-slate-400" />}
-        {...register("displayName")}
-        id="displayName"
-        autoComplete="name"
-      />
-      <Input
-        label={t("auth.emailLabel")}
-        placeholder={t("auth.emailPlaceholder")}
-        error={errors.email?.message ? t(errors.email.message) : undefined}
-        icon={<Mail size={18} className="text-slate-400" />}
-        {...register("email")}
-        id="email"
-        type="email"
-        autoComplete="username"
-      />
-      <Input
-        label={t("auth.passwordLabel")}
-        placeholder={t("auth.passwordPlaceholder")}
-        error={
-          errors.password?.message ? t(errors.password.message) : undefined
-        }
-        icon={<Lock size={18} className="text-slate-400" />}
-        {...register("password")}
-        id="password"
-        type="password"
-        autoComplete="new-password"
-      />
-      <Input
-        label={t("auth.confirmPasswordLabel")}
-        placeholder={t("auth.confirmPasswordPlaceholder")}
-        error={
-          errors.confirmPassword?.message
-            ? t(errors.confirmPassword.message)
-            : undefined
-        }
-        icon={<ShieldCheck size={18} className="text-slate-400" />}
-        {...register("confirmPassword")}
-        id="confirmPassword"
-        type="password"
-        autoComplete="new-password"
-      />
+      <div className="mb-4">
+        <Input
+          label={t("auth.nameLabel")}
+          placeholder={t("auth.namePlaceholder")}
+          error={
+            errors.displayName?.message
+              ? t(errors.displayName.message)
+              : undefined
+          }
+          icon={<User size={18} className="text-slate-400" />}
+          {...register("displayName")}
+          id="displayName"
+          autoComplete="name"
+        />
+      </div>
+      <div className="mb-4">
+        <Input
+          label={t("auth.emailLabel")}
+          placeholder={t("auth.emailPlaceholder")}
+          error={errors.email?.message ? t(errors.email.message) : undefined}
+          icon={<Mail size={18} className="text-slate-400" />}
+          {...register("email")}
+          id="email"
+          type="email"
+          autoComplete="username"
+        />
+      </div>
+      <div className="mb-4">
+        <Input
+          label={t("auth.passwordLabel")}
+          placeholder={t("auth.passwordPlaceholder")}
+          error={
+            errors.password?.message ? t(errors.password.message) : undefined
+          }
+          icon={<Lock size={18} className="text-slate-400" />}
+          {...register("password")}
+          id="password"
+          type="password"
+          autoComplete="new-password"
+        />
+      </div>
+      <div className="mb-4">
+        <Input
+          label={t("auth.confirmPasswordLabel")}
+          placeholder={t("auth.confirmPasswordPlaceholder")}
+          error={
+            errors.confirmPassword?.message
+              ? t(errors.confirmPassword.message)
+              : undefined
+          }
+          icon={<ShieldCheck size={18} className="text-slate-400" />}
+          {...register("confirmPassword")}
+          id="confirmPassword"
+          type="password"
+          autoComplete="new-password"
+        />
+      </div>
     </>
   );
 
   // Step 2: Address Info
   const addressFields = (
     <>
-      <Input
-        label={t("auth.addressLabel")}
-        placeholder={t("auth.addressPlaceholder")}
-        error={errors.address?.message ? t(errors.address.message) : undefined}
-        icon={<MapPin size={18} className="text-slate-400" />}
-        {...register("address")}
-        id="address"
-        autoComplete="street-address"
-      />
-      <Input
-        label={t("auth.cityLabel")}
-        placeholder={t("auth.cityPlaceholder")}
-        error={errors.city?.message ? t(errors.city.message) : undefined}
-        icon={<Building2 size={18} className="text-slate-400" />}
-        {...register("city")}
-        id="city"
-        autoComplete="address-level2"
-      />
-      <Input
-        label={t("auth.phoneLabel")}
-        placeholder={t("auth.phonePlaceholder")}
-        error={errors.phone?.message ? t(errors.phone.message) : undefined}
-        icon={<Phone size={18} className="text-slate-400" />}
-        {...register("phone")}
-        id="phone"
-        type="tel"
-        autoComplete="tel"
-      />
+      <div className="mb-4">
+        <Input
+          label={t("auth.addressLabel")}
+          placeholder={t("auth.addressPlaceholder")}
+          error={
+            errors.address?.message ? t(errors.address.message) : undefined
+          }
+          icon={<MapPin size={18} className="text-slate-400" />}
+          {...register("address")}
+          id="address"
+          autoComplete="street-address"
+        />
+      </div>
+      <div className="mb-4">
+        <Input
+          label={t("auth.cityLabel")}
+          placeholder={t("auth.cityPlaceholder")}
+          error={errors.city?.message ? t(errors.city.message) : undefined}
+          icon={<Building2 size={18} className="text-slate-400" />}
+          {...register("city")}
+          id="city"
+          autoComplete="address-level2"
+        />
+      </div>
+      <div className="mb-4">
+        <Input
+          label={t("auth.phoneLabel")}
+          placeholder={t("auth.phonePlaceholder")}
+          error={errors.phone?.message ? t(errors.phone.message) : undefined}
+          icon={<Phone size={18} className="text-slate-400" />}
+          {...register("phone")}
+          id="phone"
+          type="tel"
+          autoComplete="tel"
+        />
+      </div>
     </>
   );
 
@@ -161,10 +177,11 @@ export default function SignUpForm() {
         city: data.city,
         phone: data.phone,
       });
+
       toast.success(t("auth.signupSuccess") || "تم إنشاء الحساب بنجاح");
       router.push("/");
-    } catch (error: any) {
-      setAuthError(error.message || t("auth.generic"));
+    } catch {
+      setAuthError(t("auth.generic"));
     } finally {
       setIsLoading(false);
     }
@@ -182,7 +199,9 @@ export default function SignUpForm() {
         </div>
       )}
 
-      {step === 1 ? personalFields : addressFields}
+      {/* Render all fields, hide those not in the current step */}
+      <div className={step === 1 ? "" : "hidden"}>{personalFields}</div>
+      <div className={step === 2 ? "" : "hidden"}>{addressFields}</div>
 
       <div className="flex gap-2">
         {step === 2 && (

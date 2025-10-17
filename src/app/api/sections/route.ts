@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSection, getAllSections } from "@/lib/services/sectionService";
 import { Section } from "@/types";
 import { uploadImageToR2 } from "@/lib/services/R2Service";
+import { requireAdmin } from "@/lib/utils/requireAdmin";
 
 export async function GET() {
   try {
@@ -17,6 +18,15 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  // Admin guard
+  const adminCheck = await requireAdmin(request);
+  if ("error" in adminCheck) {
+    return NextResponse.json(
+      { error: adminCheck.error },
+      { status: adminCheck.status }
+    );
+  }
+
   try {
     const formData = await request.formData();
     const sectionDataString = formData.get("sectionData") as string;

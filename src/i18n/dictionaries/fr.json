@@ -235,6 +235,10 @@
     "phoneRequired": "Veuillez entrer votre numéro de téléphone.",
     "passwordsDontMatch": "Les mots de passe ne correspondent pas.",
     "backStep": "Retour",
-    "signupSuccess": "Compte créé avec succès"
+    "signupSuccess": "Compte créé avec succès",
+    "email-already-in-use": "Cette adresse e-mail est déjà utilisée.",
+    "weak-password": "Le mot de passe est trop faible.",
+    "operation-not-allowed": "Inscription non autorisée.",
+    "invalid-email": "Adresse e-mail invalide."
   }
 }

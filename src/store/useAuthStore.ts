@@ -6,6 +6,8 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   User as FirebaseUser,
+  createUserWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
 import { auth } from "@/lib/firebaseClient";
 
@@ -58,13 +60,8 @@ export const useAuthStore = create<AuthState>()(
           );
           const idToken = await userCredential.user.getIdToken();
 
-          await fetch("/api/auth/session", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ idToken }),
-          });
-
-          const response = await fetch("/api/auth/verify-token", {
+          // Authenticate with your API
+          const response = await fetch("/api/auth/signin", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ idToken }),
@@ -77,7 +74,17 @@ export const useAuthStore = create<AuthState>()(
 
           const data = await response.json();
           set({ user: data.user, loading: false, error: null });
-          return null; // Success, no error
+
+          // Redirect based on admin status
+          if (typeof window !== "undefined") {
+            if (data.user.isAdmin) {
+              window.location.href = "/admin";
+            } else {
+              window.location.href = "/";
+            }
+          }
+
+          return null;
         } catch (error: any) {
           let code = "auth/generic";
           if (error.code) {
@@ -89,25 +96,68 @@ export const useAuthStore = create<AuthState>()(
             }
           }
           set({ error: code, loading: false });
-          return code; // e.g. "auth/invalid-credential"
+          return code;
         }
       },
 
       signUp: async (data: SignUpData) => {
         set({ loading: true, error: null });
         try {
-          // Use data.email, data.password, data.displayName, data.address, data.city, data.phone
-          // Example:
-          // await createUserWithEmailAndPassword(auth, data.email, data.password);
-          // Save additional fields to your backend as needed
-          set({ loading: false });
+          // 1. Create user in Firebase Auth
+          const userCredential = await createUserWithEmailAndPassword(
+            auth,
+            data.email,
+            data.password
+          );
+          await updateProfile(userCredential.user, {
+            displayName: data.displayName,
+          });
+
+          // 2. Get Firebase ID token
+          const idToken = await userCredential.user.getIdToken();
+
+          // 3. Send all profile fields to your API
+          const response = await fetch("/api/auth/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              idToken,
+              email: data.email,
+              password: data.password,
+              displayName: data.displayName,
+              address: data.address,
+              city: data.city,
+              phone: data.phone,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            set({ error: errorData.error || "auth/generic", loading: false });
+            return errorData.error || "auth/generic";
+          }
+
+          // Optionally, update local user state with returned user data
+          const result = await response.json();
+          set({ user: result.user, loading: false, error: null });
+
+          return null;
         } catch (error: any) {
+          let code = "auth/generic";
+          if (error.code) {
+            code = error.code;
+          } else if (error.message && error.message.includes("auth/")) {
+            const codeMatch = error.message.match(/auth\/[a-zA-Z0-9\-]+/);
+            if (codeMatch) {
+              code = codeMatch[0];
+            }
+          }
           set({
-            error: error.message || "فشل في إنشاء الحساب",
+            error: code,
             loading: false,
             initialized: true,
           });
-          throw error;
+          return code;
         }
       },
 

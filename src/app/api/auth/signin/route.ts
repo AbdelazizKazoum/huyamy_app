@@ -1,18 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/services/authService";
-import { signInSchema } from "@/lib/schemas/authSchema";
-import { ZodError } from "zod";
+import { ZodError, z } from "zod";
+
+// Only require idToken
+const idTokenSchema = z.object({
+  idToken: z.string(),
+});
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    // Validate input
-    const validatedData = signInSchema.parse(body);
+    // Validate input: only idToken
+    const validatedData = idTokenSchema.parse(body);
 
-    // Note: Firebase Auth sign-in happens on the client side
-    // This endpoint is for verifying tokens
-    const { idToken } = body;
+    const { idToken } = validatedData;
 
     if (!idToken) {
       return NextResponse.json(

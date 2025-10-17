@@ -234,6 +234,10 @@
     "phoneRequired": "يرجى إدخال رقم الهاتف.",
     "passwordsDontMatch": "كلمتا المرور غير متطابقتين.",
     "backStep": "رجوع",
-    "signupSuccess": "تم إنشاء الحساب بنجاح"
+    "signupSuccess": "تم إنشاء الحساب بنجاح",
+    "email-already-in-use": "البريد الإلكتروني مستخدم بالفعل.",
+    "weak-password": "كلمة المرور ضعيفة جداً.",
+    "operation-not-allowed": "التسجيل غير مسموح.",
+    "invalid-email": "البريد الإلكتروني غير صالح."
   }
 }

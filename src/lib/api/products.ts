@@ -1,4 +1,5 @@
 import { Product } from "@/types";
+import { fetchWithAuth } from "@/lib/api/fetchWithAuth";
 
 /**
  * Fetches all products from the API.
@@ -18,7 +19,7 @@ export const fetchAllProductsAPI = async (): Promise<Product[]> => {
 export const createProductAPI = async (
   formData: FormData
 ): Promise<Product> => {
-  const response = await fetch("/api/products", {
+  const response = await fetchWithAuth("/api/products", {
     method: "POST",
     body: formData,
   });
@@ -38,7 +39,7 @@ export const updateProductAPI = async (
   productId: string,
   formData: FormData
 ): Promise<{ message: string; productId: string }> => {
-  const response = await fetch(`/api/products/${productId}`, {
+  const response = await fetchWithAuth(`/api/products/${productId}`, {
     method: "PUT",
     body: formData,
   });
@@ -56,7 +57,7 @@ export const updateProductAPI = async (
 export const deleteProductAPI = async (
   productId: string
 ): Promise<{ message: string }> => {
-  const response = await fetch(`/api/products/${productId}`, {
+  const response = await fetchWithAuth(`/api/products/${productId}`, {
     method: "DELETE",
   });
   if (!response.ok) {

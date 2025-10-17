@@ -3,6 +3,7 @@ import { createProduct, getAllProducts } from "@/lib/services/productService";
 import { generateSlug } from "@/lib/utils";
 import { Product } from "@/types";
 import { uploadImagesToR2, uploadImageToR2 } from "@/lib/services/R2Service";
+import { requireAdmin } from "@/lib/utils/requireAdmin";
 
 export async function GET(request: NextRequest) {
   console.log("Products API called");
@@ -35,6 +36,15 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: Request) {
+  // Admin guard
+  const adminCheck = await requireAdmin(request);
+  if ("error" in adminCheck) {
+    return NextResponse.json(
+      { error: adminCheck.error },
+      { status: adminCheck.status }
+    );
+  }
+
   try {
     const formData = await request.formData();
     const productDataString = formData.get("productData") as string;
