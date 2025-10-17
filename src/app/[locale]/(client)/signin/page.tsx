@@ -6,7 +6,7 @@ export default function SignInPage() {
   const t = useTranslations();
 
   return (
-    <main className="min-h-screen pt-[8px] flex items-center justify-center bg-gradient-to-br from-primary-50 to-gray-100 py-12 px-4">
+    <main className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-gradient-to-br from-primary-50 to-gray-100 py-12 px-4">
       <section className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-8">
         <header className="text-center space-y-2">
           <h2 className="text-3xl font-bold text-gray-900">
