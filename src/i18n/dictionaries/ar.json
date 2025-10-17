@@ -205,6 +205,34 @@
     "showPassword": "إظهار كلمة المرور",
     "hidePassword": "إخفاء كلمة المرور",
     "signingIn": "جاري تسجيل الدخول...",
-    "signinBtn": "تسجيل الدخول"
+    "signinBtn": "تسجيل الدخول",
+    "signupTitle": "إنشاء حساب جديد",
+    "signupSubtitle": "أدخل بياناتك الشخصية للمتابعة",
+    "nameLabel": "الاسم الكامل",
+    "namePlaceholder": "أدخل اسمك الكامل",
+    "confirmPasswordLabel": "تأكيد كلمة المرور",
+    "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور",
+    "nextStep": "التالي",
+    "addressLabel": "العنوان",
+    "addressPlaceholder": "أدخل عنوانك",
+    "cityLabel": "المدينة",
+    "cityPlaceholder": "أدخل مدينتك",
+    "phoneLabel": "رقم الهاتف",
+    "phonePlaceholder": "أدخل رقم هاتفك",
+    "submitBtn": "إنشاء حساب",
+    "signingUp": "جاري إنشاء الحساب...",
+    "haveAccount": "لديك حساب؟ سجل الدخول",
+    "error": {
+      "generic": "حدث خطأ أثناء إنشاء الحساب. حاول مرة أخرى."
+    },
+    "nameRequired": "يرجى إدخال الاسم الكامل.",
+    "emailRequired": "يرجى إدخال بريد إلكتروني صحيح.",
+    "passwordRequired": "يرجى إدخال كلمة مرور (6 أحرف على الأقل).",
+    "confirmPasswordRequired": "يرجى تأكيد كلمة المرور.",
+    "addressRequired": "يرجى إدخال العنوان.",
+    "cityRequired": "يرجى إدخال المدينة.",
+    "phoneRequired": "يرجى إدخال رقم الهاتف.",
+    "passwordsDontMatch": "كلمتا المرور غير متطابقتين.",
+    "backStep": "رجوع"
   }
 }

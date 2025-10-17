@@ -206,6 +206,34 @@
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
     "signingIn": "Connexion en cours...",
-    "signinBtn": "Se connecter"
+    "signinBtn": "Se connecter",
+    "signupTitle": "Créer un nouveau compte",
+    "signupSubtitle": "Entrez vos informations personnelles pour continuer",
+    "nameLabel": "Nom complet",
+    "namePlaceholder": "Entrez votre nom complet",
+    "confirmPasswordLabel": "Confirmer le mot de passe",
+    "confirmPasswordPlaceholder": "Retapez le mot de passe",
+    "nextStep": "Suivant",
+    "addressLabel": "Adresse",
+    "addressPlaceholder": "Entrez votre adresse",
+    "cityLabel": "Ville",
+    "cityPlaceholder": "Entrez votre ville",
+    "phoneLabel": "Numéro de téléphone",
+    "phonePlaceholder": "Entrez votre numéro de téléphone",
+    "submitBtn": "Créer un compte",
+    "signingUp": "Création du compte...",
+    "haveAccount": "Vous avez déjà un compte ? Connectez-vous",
+    "error": {
+      "generic": "حدث خطأ أثناء إنشاء الحساب. حاول مرة أخرى."
+    },
+    "nameRequired": "Veuillez entrer votre nom complet.",
+    "emailRequired": "Veuillez entrer une adresse e-mail valide.",
+    "passwordRequired": "Veuillez entrer un mot de passe (au moins 6 caractères).",
+    "confirmPasswordRequired": "Veuillez confirmer le mot de passe.",
+    "addressRequired": "Veuillez entrer votre adresse.",
+    "cityRequired": "Veuillez entrer votre ville.",
+    "phoneRequired": "Veuillez entrer votre numéro de téléphone.",
+    "passwordsDontMatch": "Les mots de passe ne correspondent pas.",
+    "backStep": "Retour"
   }
 }

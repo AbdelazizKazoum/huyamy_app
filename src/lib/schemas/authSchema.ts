@@ -3,29 +3,29 @@ import { z } from "zod";
 // Client-side schema with confirmPassword
 export const signUpSchema = z
   .object({
-    email: z.string().email("البريد الإلكتروني غير صالح"),
-    password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
-    confirmPassword: z.string(),
-    displayName: z
+    displayName: z.string().min(2, { message: "auth.nameRequired" }),
+    email: z.string().email({ message: "auth.emailRequired" }),
+    password: z.string().min(6, { message: "auth.passwordRequired" }),
+    confirmPassword: z
       .string()
-      .min(2, "الاسم يجب أن يكون حرفين على الأقل")
-      .optional(),
-    phoneNumber: z.string().optional(),
+      .min(6, { message: "auth.confirmPasswordRequired" }),
+    address: z.string().min(2, { message: "auth.addressRequired" }),
+    city: z.string().min(2, { message: "auth.cityRequired" }),
+    phone: z.string().min(6, { message: "auth.phoneRequired" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "كلمات المرور غير متطابقة",
+    message: "auth.passwordsDontMatch",
     path: ["confirmPassword"],
   });
 
 // API schema without confirmPassword
 export const signUpApiSchema = z.object({
-  email: z.string().email("البريد الإلكتروني غير صالح"),
-  password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
-  displayName: z
-    .string()
-    .min(2, "الاسم يجب أن يكون حرفين على الأقل")
-    .optional(),
-  phoneNumber: z.string().optional(),
+  displayName: z.string().min(2, { message: "auth.nameRequired" }),
+  email: z.string().email({ message: "auth.emailRequired" }),
+  password: z.string().min(6, { message: "auth.passwordRequired" }),
+  address: z.string().min(2, { message: "auth.addressRequired" }),
+  city: z.string().min(2, { message: "auth.cityRequired" }),
+  phone: z.string().min(6, { message: "auth.phoneRequired" }),
 });
 
 export const signInSchema = z.object({
