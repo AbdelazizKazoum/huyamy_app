@@ -234,6 +234,7 @@
     "cityRequired": "Veuillez entrer votre ville.",
     "phoneRequired": "Veuillez entrer votre numéro de téléphone.",
     "passwordsDontMatch": "Les mots de passe ne correspondent pas.",
-    "backStep": "Retour"
+    "backStep": "Retour",
+    "signupSuccess": "Compte créé avec succès"
   }
 }

@@ -233,6 +233,7 @@
     "cityRequired": "يرجى إدخال المدينة.",
     "phoneRequired": "يرجى إدخال رقم الهاتف.",
     "passwordsDontMatch": "كلمتا المرور غير متطابقتين.",
-    "backStep": "رجوع"
+    "backStep": "رجوع",
+    "signupSuccess": "تم إنشاء الحساب بنجاح"
   }
 }
