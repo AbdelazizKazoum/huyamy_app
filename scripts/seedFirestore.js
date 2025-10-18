@@ -1,7 +1,4 @@
-// scripts/seedFirestore.js
 import admin from "firebase-admin";
-
-// 1) path to the JSON key you downloaded from Firebase console:
 import serviceAccount from "../serviceAccountKey.json" with { type: "json" }; // <- put this JSON at project root (gitignored)
 
 admin.initializeApp({
@@ -10,126 +7,11 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-// import your prepared data
-import { categories } from "../src/data/categories.ts";
-import { products } from "../src/data/products.ts";
-
-// helper slugify (keeps Arabic characters, removes spaces & diacritics from Latin)
-function slugify(text) {
-  if (!text) return "";
-  const s = String(text)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // remove diacritics
-    .toLowerCase()
-    .replace(/[^0-9a-z\u0600-\u06FF]+/g, "-") // allow Arabic range
-    .replace(/^-+|-+$/g, "")
-    .replace(/--+/g, "-");
-  return s || `item-${Date.now()}`;
-}
-
-async function seed() {
-  console.log("Seeding Firestore...");
-
-  // use batch for categories + products
-  const batch = db.batch();
-
-  // 1) categories -> ids: cat-<id>
-  categories.forEach((cat) => {
-    const docId = `cat-${cat.id}`;
-    const ref = db.collection("categories").doc(docId);
-    batch.set(ref, {
-      id: cat.id,
-      name: cat.name,
-      description: cat.description,
-      image: cat.image,
-      slug: slugify(cat.name.fr || cat.name.ar),
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-  });
-
-  // 2) products -> ids: prod-<id>, link to categoryId "cat-<id>"
-  products.forEach((p) => {
-    const docId = `prod-${p.id}`;
-    const ref = db.collection("products").doc(docId);
-    batch.set(ref, {
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      originalPrice: p.originalPrice || null,
-      image: p.image,
-      subImages: p.subImages || [],
-      isNew: !!p.isNew,
-      description: p.description,
-      keywords: p.keywords || [],
-      categoryId: `cat-${p.category.id}`,
-      category: { id: p.category.id, name: p.category.name }, // denormalized tiny snapshot
-      slug: slugify(p.name.fr || p.name.ar) || `prod-${p.id}`,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-  });
-
-  // 3) example sections document
-  const sectionRef = db.collection("sections").doc("home-hero");
-  batch.set(sectionRef, {
-    id: "home-hero",
-    type: "hero",
-    data: {
-      title: { ar: "منتجاتنا المميزة", fr: "Nos produits phares" },
-      subtitle: {
-        ar: "اختاري الأفضل لبشرتك",
-        fr: "Choisissez le meilleur pour votre peau",
-      },
-      ctaProductIds: ["prod-1", "prod-4", "prod-9"],
-    },
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
-
-  // 4) Landing page sections
-  const landingSection1 = db.collection("sections").doc("landing-featured");
-  batch.set(landingSection1, {
-    id: "landing-featured",
-    type: "landing-page",
-    data: {
-      title: { ar: "المنتجات المميزة", fr: "Produits en vedette" },
-      subtitle: {
-        ar: "اكتشف تشكيلتنا المختارة من أفضل المنتجات",
-        fr: "Découvrez notre sélection des meilleurs produits",
-      },
-      ctaProductIds: ["prod-2", "prod-5", "prod-8", "prod-10"],
-    },
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
-
-  const landingSection2 = db.collection("sections").doc("landing-popular");
-  batch.set(landingSection2, {
-    id: "landing-popular",
-    type: "landing-page",
-    data: {
-      title: { ar: "الأكثر مبيعاً", fr: "Les plus vendus" },
-      subtitle: {
-        ar: "المنتجات التي يحبها عملاؤنا أكثر",
-        fr: "Les produits que nos clients préfèrent",
-      },
-      ctaProductIds: ["prod-3", "prod-6", "prod-7"],
-    },
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
-
-  // commit
-  await batch.commit();
-  console.log("Categories, products and sections created.");
-
-  // 4) create an admin Auth user and set custom claim 'admin'
+async function createAdminUser() {
   const adminEmail = "admin@your-domain.test";
-  const adminPassword = "ChangeThisStrongPw123!";
+  const adminPassword = "admin051688";
 
   try {
-    // try to find an existing user
     let userRecord;
     try {
       userRecord = await admin.auth().getUserByEmail(adminEmail);
@@ -144,14 +26,13 @@ async function seed() {
       console.log("Admin user created:", userRecord.uid);
     }
 
-    // set custom claim
     await admin.auth().setCustomUserClaims(userRecord.uid, { admin: true });
-    // optionally write user profile to Firestore
+
     await db.collection("users").doc(userRecord.uid).set({
       uid: userRecord.uid,
       email: adminEmail,
       displayName: "Super Admin",
-      role: "admin",
+      isAdmin: true,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
@@ -168,11 +49,10 @@ async function seed() {
     console.error("Error creating admin user:", err);
   }
 
-  console.log("Seeding finished.");
   process.exit(0);
 }
 
-seed().catch((err) => {
-  console.error("Seeding failed:", err);
+createAdminUser().catch((err) => {
+  console.error("Failed:", err);
   process.exit(1);
 });
