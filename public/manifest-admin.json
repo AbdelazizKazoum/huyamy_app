@@ -1,8 +1,8 @@
 {
   "name": "Huyamy Admin",
   "short_name": "Admin",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/admin",
+  "scope": "/admin",
   "display": "standalone",
   "background_color": "#222831",
   "theme_color": "#222831",
