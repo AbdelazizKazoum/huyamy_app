@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, MenuIcon, ChevronDown } from "lucide-react";
+import { LogOut, MenuIcon, ChevronDown, Store } from "lucide-react"; // Add Store icon
 import React, { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
@@ -90,6 +90,15 @@ const Header: React.FC<{
 
       {/* Right Section - User Menu */}
       <div className="flex items-center gap-3">
+        {/* Go to Store Button */}
+        <button
+          onClick={() => router.push("/ar")}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-primary-500 to-primary-700 text-white hover:from-primary-600 hover:to-primary-800 transition-all duration-200 font-semibold shadow-md border border-primary-600 hover:scale-105 active:scale-95"
+          aria-label="Go to Store"
+        >
+          <Store size={18} className="mb-0.5" /> {/* Modern store icon */}
+          <span>زيارة المتجر</span>
+        </button>
         <div className="relative" ref={userMenuRef}>
           <button
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}

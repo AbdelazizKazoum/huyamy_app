@@ -208,13 +208,13 @@ const ProductsPage: React.FC = () => {
         emptyMessage="لا توجد منتجات"
         renderActions={(item: Product) => (
           <div className="flex items-center justify-center gap-2">
-            <button
+            {/* <button
               title="عرض المنتج"
               className="flex items-center gap-1 px-3 py-1.5 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm transition-colors justify-center"
             >
               <Eye size={14} />
               <span className="hidden sm:inline">عرض</span>
-            </button>
+            </button> */}
             <button
               title="تعديل المنتج"
               onClick={() => handleOpenEditModal(item)}
