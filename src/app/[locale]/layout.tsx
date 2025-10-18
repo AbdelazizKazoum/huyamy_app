@@ -126,9 +126,7 @@ export default async function LocaleLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${notoSansArabic.variable} ${inter.variable} antialiased`}
       >
         <NextIntlClientProvider locale={typedLocale} messages={messages}>
-          <ToasterProvider />
-          <ServiceWorkerRegister /> {/* Register service worker */}
-          <InstallPrompt /> {/* Show install prompt */}
+          <InstallPrompt />
           {children}
         </NextIntlClientProvider>
       </body>
