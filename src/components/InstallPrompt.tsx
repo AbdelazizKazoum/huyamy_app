@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 import { useEffect, useState } from "react";
@@ -7,7 +8,8 @@ export default function InstallPrompt() {
   const [showInstall, setShowInstall] = useState(false);
 
   useEffect(() => {
-    const handler = (e: Event) => {
+    const handler = (e: any) => {
+      console.log("beforeinstallprompt fired");
       e.preventDefault();
       setDeferredPrompt(e);
       setShowInstall(true);
