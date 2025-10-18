@@ -39,12 +39,16 @@ export default function InstallPrompt() {
     <div
       style={{
         position: "fixed",
-        inset: 0,
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
         background: "rgba(0,0,0,0.35)",
         zIndex: 9999,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        overflow: "hidden",
       }}
       aria-modal="true"
       role="dialog"
