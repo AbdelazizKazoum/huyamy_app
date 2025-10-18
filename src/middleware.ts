@@ -6,6 +6,17 @@ import { routing } from "./i18n/config";
 const intlMiddleware = createMiddleware(routing);
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Allow service worker and manifest files through without i18n redirect
+  if (
+    pathname === "/sw.js" ||
+    pathname === "/manifest-client.json" ||
+    pathname === "/manifest-admin.json"
+  ) {
+    return NextResponse.next();
+  }
+
   // Just handle i18n routing, let client-side guards handle auth
   return intlMiddleware(request);
 }

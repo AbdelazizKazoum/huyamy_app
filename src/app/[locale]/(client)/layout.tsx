@@ -1,6 +1,12 @@
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import NoticeBar from "@/components/layout/NoticeBar";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+import ToasterProvider from "@/providers/ToasterProvider";
+
+export const metadata = {
+  manifest: "/manifest-client.json",
+};
 
 export default function RootLayout({
   children,
@@ -9,9 +15,11 @@ export default function RootLayout({
 }>) {
   return (
     <>
+      <ToasterProvider />
+      <ServiceWorkerRegister />
       <NoticeBar />
       <Header />
-      <main className={``}>{children}</main>
+      <main>{children}</main>
       <Footer />
     </>
   );
