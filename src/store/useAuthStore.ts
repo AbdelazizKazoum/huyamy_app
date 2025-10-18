@@ -6,8 +6,6 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   User as FirebaseUser,
-  createUserWithEmailAndPassword,
-  updateProfile,
 } from "firebase/auth";
 import { auth } from "@/lib/firebaseClient";
 
@@ -115,7 +113,6 @@ export const useAuthStore = create<AuthState>()(
             throw { code: result.error || "auth/generic" };
           }
           set({ user: result.user, loading: false, error: null });
-          return null;
         } catch (error: any) {
           set({ error: error.code || "auth/generic", loading: false });
           throw error; // <-- Throw so the form can catch it
