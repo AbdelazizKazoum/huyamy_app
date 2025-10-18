@@ -28,7 +28,7 @@ const ProductImageGallery: React.FC<{ product: Product; lang: Language }> = ({
   return (
     <div className="flex flex-col gap-4">
       {/* Main Image */}
-      <div className="w-full h-96 bg-gray-100 rounded-lg overflow-hidden relative border border-white/60 shadow-lg group">
+      <div className="w-full h-96 bg-gray-100 rounded-lg overflow-hidden relative border border-white/60  group">
         <Image
           src={mainImage}
           alt={product.name[lang as keyof typeof product.name]}
