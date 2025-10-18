@@ -16,7 +16,30 @@
       "src": "/images/huyami_logo.jpeg",
       "sizes": "512x512",
       "type": "image/jpeg"
+    },
+    {
+      "src": "/images/huyami_logo.jpeg",
+      "sizes": "72x72",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/images/huyami_logo.jpeg",
+      "sizes": "96x96",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/images/huyami_logo.jpeg",
+      "sizes": "144x144",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/images/huyami_logo.jpeg",
+      "sizes": "256x256",
+      "type": "image/jpeg"
     }
   ],
-  "lang": "ar"
+  "scope": "/",
+  "lang": "ar",
+  "orientation": "portrait",
+  "categories": ["shopping", "e-commerce", "beauty", "organic"]
 }
