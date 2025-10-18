@@ -1,15 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 import { useEffect, useState } from "react";
 
 export default function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstall, setShowInstall] = useState(false);
 
   useEffect(() => {
     const handler = (e: any) => {
-      console.log("beforeinstallprompt fired");
       e.preventDefault();
       setDeferredPrompt(e);
       setShowInstall(true);
@@ -23,9 +21,7 @@ export default function InstallPrompt() {
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
-      // @ts-ignore
       deferredPrompt.prompt();
-      // @ts-ignore
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === "accepted") {
         setShowInstall(false);
@@ -34,27 +30,87 @@ export default function InstallPrompt() {
     }
   };
 
+  const handleClose = () => setShowInstall(false);
+
   if (!showInstall) return null;
 
   return (
-    <button
-      onClick={handleInstallClick}
+    <div
       style={{
         position: "fixed",
-        bottom: 24,
-        right: 24,
-        zIndex: 1000,
-        background: "#059669",
-        color: "#fff",
-        border: "none",
-        borderRadius: 8,
-        padding: "12px 20px",
-        fontSize: "1rem",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-        cursor: "pointer",
+        inset: 0,
+        background: "rgba(0,0,0,0.35)",
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
+      aria-modal="true"
+      role="dialog"
     >
-      تثبيت التطبيق على الهاتف
-    </button>
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: 16,
+          boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
+          padding: "2rem 1.5rem 1.5rem 1.5rem",
+          maxWidth: 340,
+          width: "90%",
+          textAlign: "center",
+          position: "relative",
+        }}
+      >
+        <button
+          onClick={handleClose}
+          aria-label="إغلاق"
+          style={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            background: "transparent",
+            border: "none",
+            fontSize: 22,
+            color: "#888",
+            cursor: "pointer",
+          }}
+        >
+          ×
+        </button>
+        <img
+          src="/images/huyami_logo.jpeg"
+          alt="Huyamy Logo"
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 12,
+            marginBottom: 16,
+            objectFit: "cover",
+          }}
+        />
+        <h2 style={{ fontWeight: 700, fontSize: "1.3rem", marginBottom: 8 }}>
+          تثبيت تطبيق هيوامي
+        </h2>
+        <p style={{ color: "#444", marginBottom: 20, fontSize: "1rem" }}>
+          احصل على تجربة أفضل من خلال تثبيت التطبيق على هاتفك!
+        </p>
+        <button
+          onClick={handleInstallClick}
+          style={{
+            background: "#059669",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            padding: "12px 28px",
+            fontSize: "1rem",
+            fontWeight: 600,
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+            transition: "background 0.2s",
+          }}
+        >
+          تثبيت التطبيق
+        </button>
+      </div>
+    </div>
   );
 }
