@@ -1,7 +1,8 @@
 {
   "name": "Huyamy Store",
   "short_name": "Huyamy",
-  "start_url": "/ar",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#059669",
@@ -18,7 +19,6 @@
       "type": "image/jpeg"
     }
   ],
-  "scope": "/ar/(client)/",
   "lang": "ar",
   "orientation": "portrait",
   "categories": ["shopping", "e-commerce", "beauty", "organic"]
