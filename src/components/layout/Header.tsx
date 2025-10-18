@@ -23,6 +23,7 @@ import CartSidebar from "../CartSidebar";
 import { LanguageSelector } from "../ui";
 import { useCartStore } from "@/store/useCartStore";
 import { siteConfig } from "@/config/site";
+import { useAuth } from "@/hooks/useAuth";
 
 type HeaderProps = Record<string, never>;
 
@@ -75,6 +76,7 @@ const Header: React.FC<HeaderProps> = () => {
   const mobileAuthMenuRef = useRef<HTMLDivElement>(null); // This ref is no longer used by the mobile header icon, but might be by renderAuthDropdown logic
 
   const { items: cartItems } = useCartStore();
+  const { isAuthenticated } = useAuth();
 
   const currentLocale = useLocale() as Locale;
   const pathname = usePathname();
@@ -144,8 +146,12 @@ const Header: React.FC<HeaderProps> = () => {
     };
   }, [isAuthMenuOpen]);
 
-  // Dummy auth state for design
-  const isAuthenticated = false; // Replace with real auth logic
+  const searchButtonClasses =
+    "flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300";
+  const cartButtonClasses =
+    "flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300 relative";
+  const authButtonClasses =
+    "p-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300";
 
   const renderAuthDropdown = () => (
     <div
@@ -155,11 +161,23 @@ const Header: React.FC<HeaderProps> = () => {
     >
       {!isAuthenticated ? (
         <div className="p-2 flex flex-col gap-1">
-          <button className="flex items-center gap-3 w-full px-3 py-2 hover:bg-neutral-100 text-left text-neutral-700 font-medium transition-colors rounded-md">
+          <button
+            className="flex items-center gap-3 w-full px-3 py-2 hover:bg-neutral-100 text-left text-neutral-700 font-medium transition-colors rounded-md"
+            onClick={() => {
+              router.push("/signin");
+              setIsAuthMenuOpen(false);
+            }}
+          >
             <LogIn size={16} className="text-neutral-500" />
             <span>{authText[currentLocale]}</span>
           </button>
-          <button className="flex items-center gap-3 w-full px-3 py-2 bg-primary-50 hover:bg-primary-100 text-left text-primary-700 font-medium transition-colors rounded-md">
+          <button
+            className="flex items-center gap-3 w-full px-3 py-2 bg-primary-50 hover:bg-primary-100 text-left text-primary-700 font-medium transition-colors rounded-md"
+            onClick={() => {
+              router.push("/signup");
+              setIsAuthMenuOpen(false);
+            }}
+          >
             <UserPlus size={16} />
             <span>{signupText[currentLocale]}</span>
           </button>
@@ -245,7 +263,7 @@ const Header: React.FC<HeaderProps> = () => {
                 />
                 <button
                   onClick={() => setIsSearchOpen((prev) => !prev)}
-                  className="flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300"
+                  className={searchButtonClasses}
                 >
                   <Search
                     size={22}
@@ -257,7 +275,7 @@ const Header: React.FC<HeaderProps> = () => {
                 </button>
                 <button
                   onClick={() => setIsCartOpen(true)}
-                  className="flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300 relative"
+                  className={cartButtonClasses}
                 >
                   <ShoppingCart size={22} />
                   {cartItems.length > 0 && (
@@ -271,7 +289,7 @@ const Header: React.FC<HeaderProps> = () => {
                   {isAuthenticated ? (
                     <button
                       onClick={() => setIsAuthMenuOpen((v) => !v)}
-                      className="p-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300"
+                      className={authButtonClasses}
                       aria-label="Open user menu"
                     >
                       <User size={22} />
@@ -468,10 +486,7 @@ const Header: React.FC<HeaderProps> = () => {
                   <div className="flex flex-col gap-2">
                     <button
                       onClick={() => {
-                        // This button can now just open the desktop dropdown
-                        // Or you can link it directly to the login page
-                        // For consistency, let's try opening the auth dropdown
-                        setIsAuthMenuOpen(true);
+                        router.push("/signin");
                         setIsMenuOpen(false);
                       }}
                       className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-800 font-medium"
@@ -481,7 +496,7 @@ const Header: React.FC<HeaderProps> = () => {
                     </button>
                     <button
                       onClick={() => {
-                        setIsAuthMenuOpen(true);
+                        router.push("/signup");
                         setIsMenuOpen(false);
                       }}
                       className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-primary-700 border border-primary-700 rounded-lg text-white font-medium"

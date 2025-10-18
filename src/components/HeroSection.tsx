@@ -73,7 +73,13 @@ const HeroSection: React.FC = () => {
                 variants={cardItemVariants}
                 className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-row md:flex-col items-center text-left md:text-center"
               >
-                <div className="flex-shrink-0 mr-5 md:mr-0 md:mb-4">
+                <div
+                  className={`flex-shrink-0 ${
+                    currentLocale === "ar"
+                      ? "ml-5 md:ml-0 md:mb-4"
+                      : "mr-5 md:mr-0 md:mb-4"
+                  }`}
+                >
                   {getFeatureIcon(feature.iconName, 40, "text-primary-800")}
                 </div>
                 <div>
