@@ -9,6 +9,7 @@ import { Section } from "@/types";
 import { deleteImageFromR2, uploadImageToR2 } from "@/lib/services/R2Service";
 import { revalidateTag } from "next/cache";
 import { MASTER_CACHE_TAGS } from "@/lib/cache/tags";
+import { requireAdmin } from "@/lib/utils/requireAdmin";
 
 interface RouteParams {
   // The params object is now a Promise in recent Next.js versions
@@ -34,6 +35,15 @@ export async function GET(request: Request, { params }: RouteParams) {
 }
 
 export async function PUT(request: Request, { params }: RouteParams) {
+  // Admin guard
+  const adminCheck = await requireAdmin(request);
+  if ("error" in adminCheck) {
+    return NextResponse.json(
+      { error: adminCheck.error },
+      { status: adminCheck.status }
+    );
+  }
+
   let id: string;
   try {
     const awaitedParams = await params; // Await the params
@@ -83,6 +93,15 @@ export async function PUT(request: Request, { params }: RouteParams) {
 }
 
 export async function DELETE(request: Request, { params }: RouteParams) {
+  // Admin guard
+  const adminCheck = await requireAdmin(request);
+  if ("error" in adminCheck) {
+    return NextResponse.json(
+      { error: adminCheck.error },
+      { status: adminCheck.status }
+    );
+  }
+
   let id: string;
   try {
     const awaitedParams = await params; // Await the params

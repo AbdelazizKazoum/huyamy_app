@@ -4,6 +4,7 @@ import {
   updateOrderStatus,
   deleteOrder,
 } from "@/lib/services/orderService";
+import { requireAdmin } from "@/lib/utils/requireAdmin";
 
 type RouteParams = {
   params: Promise<{ id: string }>;
@@ -45,6 +46,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // PATCH /api/admin/orders/[id] - Update order status
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  // Admin guard
+  const adminCheck = await requireAdmin(request);
+  if ("error" in adminCheck) {
+    return NextResponse.json(
+      { error: adminCheck.error },
+      { status: adminCheck.status }
+    );
+  }
+
   try {
     const { id } = await params;
     const { status } = await request.json();
@@ -94,6 +104,15 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 // DELETE /api/admin/orders/[id] - Delete an order
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  // Admin guard
+  const adminCheck = await requireAdmin(request);
+  if ("error" in adminCheck) {
+    return NextResponse.json(
+      { error: adminCheck.error },
+      { status: adminCheck.status }
+    );
+  }
+
   try {
     const { id } = await params;
 

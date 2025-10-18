@@ -1,4 +1,5 @@
 import { Category } from "@/types";
+import { fetchWithAuth } from "@/lib/api/fetchWithAuth"; // <-- Import the helper
 
 /**
  * Fetches all categories from the API.
@@ -18,7 +19,7 @@ export const fetchAllCategoriesAPI = async (): Promise<Category[]> => {
 export const createCategoryAPI = async (
   formData: FormData
 ): Promise<Category> => {
-  const response = await fetch("/api/categories", {
+  const response = await fetchWithAuth("/api/categories", {
     method: "POST",
     body: formData,
   });
@@ -38,7 +39,7 @@ export const updateCategoryAPI = async (
   categoryId: string,
   formData: FormData
 ): Promise<{ message: string }> => {
-  const response = await fetch(`/api/categories/${categoryId}`, {
+  const response = await fetchWithAuth(`/api/categories/${categoryId}`, {
     method: "PUT",
     body: formData,
   });
@@ -56,7 +57,7 @@ export const updateCategoryAPI = async (
 export const deleteCategoryAPI = async (
   categoryId: string
 ): Promise<{ message: string }> => {
-  const response = await fetch(`/api/categories/${categoryId}`, {
+  const response = await fetchWithAuth(`/api/categories/${categoryId}`, {
     method: "DELETE",
   });
   if (!response.ok) {

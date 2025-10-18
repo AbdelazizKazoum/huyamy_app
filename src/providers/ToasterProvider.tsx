@@ -1,5 +1,3 @@
-"use client";
-
 import { Toaster } from "react-hot-toast";
 
 const ToasterProvider = () => {
@@ -9,11 +7,6 @@ const ToasterProvider = () => {
       reverseOrder={false}
       toastOptions={{
         duration: 3000,
-        style: {
-          background: "transparent",
-          boxShadow: "none",
-          padding: "0",
-        },
       }}
     />
   );
