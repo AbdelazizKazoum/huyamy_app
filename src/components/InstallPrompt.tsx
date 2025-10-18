@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 export default function InstallPrompt() {
@@ -76,17 +77,24 @@ export default function InstallPrompt() {
         >
           ×
         </button>
-        <img
-          src="/images/huyami_logo.jpeg"
-          alt="Huyamy Logo"
+        <div
           style={{
-            width: 64,
-            height: 64,
-            borderRadius: 12,
+            display: "flex",
+            justifyContent: "center",
             marginBottom: 16,
-            objectFit: "cover",
           }}
-        />
+        >
+          <Image
+            src="/images/huyami_logo.jpeg"
+            alt="Huyamy Logo"
+            width={64}
+            height={64}
+            style={{
+              borderRadius: 12,
+              objectFit: "cover",
+            }}
+          />
+        </div>
         <h2 style={{ fontWeight: 700, fontSize: "1.3rem", marginBottom: 8 }}>
           تثبيت تطبيق هيوامي
         </h2>
