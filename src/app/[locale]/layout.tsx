@@ -8,6 +8,7 @@ import { Geist, Geist_Mono, Noto_Sans_Arabic, Inter } from "next/font/google";
 import "../globals.css";
 import ToasterProvider from "@/providers/ToasterProvider";
 import InstallPrompt from "@/components/InstallPrompt";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { siteConfig } from "@/config/site";
 
 const geistSans = Geist({
@@ -126,7 +127,8 @@ export default async function LocaleLayout({
       >
         <NextIntlClientProvider locale={typedLocale} messages={messages}>
           <ToasterProvider />
-          <InstallPrompt /> {/* <-- Add here */}
+          <ServiceWorkerRegister /> {/* Register service worker */}
+          <InstallPrompt /> {/* Show install prompt */}
           {children}
         </NextIntlClientProvider>
       </body>
