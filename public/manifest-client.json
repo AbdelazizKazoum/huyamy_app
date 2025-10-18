@@ -1,7 +1,7 @@
 {
   "name": "Huyamy Store",
   "short_name": "Huyamy",
-  "start_url": "/ar/(client)/",
+  "start_url": "/ar",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#059669",
