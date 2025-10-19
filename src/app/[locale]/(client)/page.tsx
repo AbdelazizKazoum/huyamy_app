@@ -370,6 +370,9 @@ export default async function EcommerceLandingPage({ params }: Props) {
                 const sectionSubtitle =
                   section.data.subtitle?.[locale as "ar" | "fr"] || "";
 
+                // Determine if this is the last section
+                const isLast = index === landingPageSections.length - 1;
+
                 return (
                   <article
                     key={section.id}
@@ -384,7 +387,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
                       subtitle={sectionSubtitle}
                       products={section.products}
                       bgColor={index % 2 === 0 ? "bg-stone-50" : "bg-white"}
-                      showButton={section.products.length > 6}
+                      showButton={isLast}
                     />
                   </article>
                 );
