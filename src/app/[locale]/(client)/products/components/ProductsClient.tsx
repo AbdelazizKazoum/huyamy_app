@@ -9,6 +9,7 @@ import ProductsHeader from "./ProductsHeader";
 import ProductsPagination from "./ProductsPagination";
 import MobileFilterOverlay from "./MobileFilterOverlay";
 import ProductCard from "@/components/ProductCard";
+import { useSearchParams } from "next/navigation";
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -28,11 +29,14 @@ export default function ProductsClient({
   const t = useTranslations("products");
   const { products, categories, maxPrice } = initialData;
 
+  const searchParams = useSearchParams();
+  const initialSearchQuery = searchParams.get("search") || "";
+
   // Determine if the view is for a single category page
   const isCategoryPage = categories.length === 1;
 
   // Filter states
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     isCategoryPage ? [categories[0].id] : []
   );
@@ -68,8 +72,12 @@ export default function ProductsClient({
       const lowerQuery = searchQuery.toLowerCase();
       filtered = filtered.filter(
         (p) =>
-          p.name[locale]?.toLowerCase().includes(lowerQuery) ||
-          p.description?.[locale]?.toLowerCase().includes(lowerQuery)
+          Object.values(p.name).some((n) =>
+            n?.toLowerCase().includes(lowerQuery)
+          ) ||
+          Object.values(p.description ?? {}).some((d) =>
+            d?.toLowerCase().includes(lowerQuery)
+          )
       );
     }
 
