@@ -507,7 +507,7 @@ const Header: React.FC<HeaderProps> = () => {
         <SearchModal
           isOpen={isSearchOpen}
           onClose={() => setIsSearchOpen(false)}
-          placeholder={searchPlaceholder[currentLocale]}
+          currentLocale={currentLocale}
         />
       </div>
     </>
