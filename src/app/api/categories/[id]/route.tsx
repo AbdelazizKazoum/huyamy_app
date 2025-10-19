@@ -8,6 +8,8 @@ import { generateSlug } from "@/lib/utils";
 import { Category } from "@/types";
 import { deleteImageFromR2, uploadImageToR2 } from "@/lib/services/R2Service";
 import { requireAdmin } from "@/lib/utils/requireAdmin";
+import { revalidateTag, revalidatePath } from "next/cache";
+import { MASTER_CACHE_TAGS } from "@/lib/cache/tags";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -49,6 +51,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     await updateCategory(id, updateData);
 
+    // Revalidate the landing page cache tag
+    revalidateTag(MASTER_CACHE_TAGS.LANDING_PAGE);
+
+    // Revalidate the products pages
+    revalidatePath("/fr/products");
+    revalidatePath("/ar/products");
+
     return NextResponse.json({ message: "Category updated successfully" });
   } catch (error) {
     console.error(`Failed to update category:`, error);
@@ -79,6 +88,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     await deleteCategory(id);
+
+    // Revalidate the landing page cache tag
+    revalidateTag(MASTER_CACHE_TAGS.LANDING_PAGE);
+
+    // Revalidate the products pages
+    revalidatePath("/fr/products");
+    revalidatePath("/ar/products");
 
     return NextResponse.json({ message: "Category deleted successfully" });
   } catch (error) {

@@ -4,6 +4,7 @@ import { generateSlug } from "@/lib/utils";
 import { Product } from "@/types";
 import { uploadImagesToR2, uploadImageToR2 } from "@/lib/services/R2Service";
 import { requireAdmin } from "@/lib/utils/requireAdmin";
+import { revalidatePath } from "next/cache";
 
 export async function GET(request: NextRequest) {
   console.log("Products API called");
@@ -91,6 +92,16 @@ export async function POST(request: Request) {
 
     // 3. Create product in Firestore
     const newProduct = await createProduct(finalProduct);
+
+    // 4. Revalidate products pages
+    revalidatePath("/fr/products");
+    revalidatePath("/ar/products");
+
+    // 5. Revalidate category pages for the new product
+    if (finalProduct.category?.slug) {
+      revalidatePath(`/fr/category/${finalProduct.category.slug}`);
+      revalidatePath(`/ar/category/${finalProduct.category.slug}`);
+    }
 
     return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {

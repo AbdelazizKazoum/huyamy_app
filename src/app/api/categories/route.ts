@@ -4,6 +4,8 @@ import { generateSlug } from "@/lib/utils";
 import { Category } from "@/types";
 import { uploadImageToR2 } from "@/lib/services/R2Service";
 import { requireAdmin } from "@/lib/utils/requireAdmin";
+import { revalidateTag, revalidatePath } from "next/cache";
+import { MASTER_CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function GET() {
   try {
@@ -48,11 +50,18 @@ export async function POST(request: Request) {
     const newCategoryData: Omit<Category, "id"> = {
       name: { ar: nameAr, fr: nameFr },
       description: { ar: descriptionAr, fr: descriptionFr },
-      slug: generateSlug(nameFr), // Generate slug from French name
+      slug: generateSlug(nameFr),
       image: imageUrl,
     };
 
     const createdCategory = await createCategory(newCategoryData);
+
+    // Revalidate the landing page cache tag
+    revalidateTag(MASTER_CACHE_TAGS.LANDING_PAGE);
+
+    // Revalidate the products pages
+    revalidatePath("/fr/products");
+    revalidatePath("/ar/products");
 
     return NextResponse.json(createdCategory, { status: 201 });
   } catch (error) {
