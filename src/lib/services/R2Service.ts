@@ -5,6 +5,7 @@ import {
   DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
+import sharp from "sharp";
 
 // Configure the S3 client for Cloudflare R2
 const s3Client = new S3Client({
@@ -20,23 +21,27 @@ const BUCKET_NAME = process.env.R2_BUCKET_NAME!;
 const PUBLIC_URL = process.env.R2_PUBLIC_URL!;
 
 /**
- * Uploads a single file to Cloudflare R2.
+ * Uploads a single file to Cloudflare R2, compressing and converting to WebP.
  * @param file The file to upload.
  * @returns The public URL of the uploaded file.
  */
 export async function uploadImageToR2(file: File): Promise<string> {
-  // Generate a unique key for the file
-  const fileExtension = file.name.split(".").pop();
-  const key = `${uuidv4()}.${fileExtension}`;
-
   // Get the file content as a buffer
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  // Compress and convert to WebP using sharp
+  const webpBuffer = await sharp(buffer)
+    .webp({ quality: 80 }) // Adjust quality as needed
+    .toBuffer();
+
+  // Generate a unique key for the file with .webp extension
+  const key = `${uuidv4()}.webp`;
 
   const command = new PutObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
-    Body: buffer,
-    ContentType: file.type,
+    Body: webpBuffer,
+    ContentType: "image/webp",
   });
 
   await s3Client.send(command);
