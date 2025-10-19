@@ -25,6 +25,7 @@ import { useCartStore } from "@/store/useCartStore";
 import { siteConfig } from "@/config/site";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
+import SearchModal from "../SearchModal";
 
 type HeaderProps = Record<string, never>;
 
@@ -503,42 +504,11 @@ const Header: React.FC<HeaderProps> = () => {
         </header>
 
         {/* Search Form Modal */}
-        {isSearchOpen && (
-          <div ref={searchRef} className="absolute top-full left-0 w-full z-50">
-            <div className="bg-white shadow-md border-t border-neutral-100 transition-all duration-300">
-              <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <form
-                  className="relative"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    setIsSearchOpen(false);
-                  }}
-                >
-                  <input
-                    type="text"
-                    placeholder={
-                      currentLocale === "ar"
-                        ? "ابحث عن منتجك المفضل..."
-                        : "Recherchez votre produit préféré..."
-                    }
-                    autoFocus
-                    className="w-full h-12 text-lg bg-neutral-100 border-2 border-transparent rounded-full pl-14 pr-12 focus:outline-none focus:ring-2 focus:ring-primary-700"
-                  />
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                    <Search className="h-6 w-6 text-neutral-400" />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsSearchOpen(false)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-neutral-400 hover:text-neutral-800 rounded-full transition-colors"
-                  >
-                    <X size={24} />
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
+        <SearchModal
+          isOpen={isSearchOpen}
+          onClose={() => setIsSearchOpen(false)}
+          placeholder={searchPlaceholder[currentLocale]}
+        />
       </div>
     </>
   );
