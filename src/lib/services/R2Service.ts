@@ -25,21 +25,18 @@ const PUBLIC_URL = process.env.R2_PUBLIC_URL!;
  * @returns The public URL of the uploaded file.
  */
 export async function uploadImageToR2(file: File): Promise<string> {
+  // Generate a unique key for the file
+  const fileExtension = file.name.split(".").pop();
+  const key = `${uuidv4()}.${fileExtension}`;
+
   // Get the file content as a buffer
   const buffer = Buffer.from(await file.arrayBuffer());
-
-  // Get the file extension and mime type
-  const ext = file.name.split(".").pop() || "jpg";
-  const mimeType = file.type || "application/octet-stream";
-
-  // Generate a unique key for the file with its original extension
-  const key = `${uuidv4()}.${ext}`;
 
   const command = new PutObjectCommand({
     Bucket: BUCKET_NAME,
     Key: key,
     Body: buffer,
-    ContentType: mimeType,
+    ContentType: file.type,
   });
 
   await s3Client.send(command);
