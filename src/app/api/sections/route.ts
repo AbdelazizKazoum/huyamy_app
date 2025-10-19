@@ -3,6 +3,8 @@ import { createSection, getAllSections } from "@/lib/services/sectionService";
 import { Section } from "@/types";
 import { uploadImageToR2 } from "@/lib/services/R2Service";
 import { requireAdmin } from "@/lib/utils/requireAdmin";
+import { revalidateTag } from "next/cache";
+import { MASTER_CACHE_TAGS } from "@/lib/cache/tags";
 
 export async function GET() {
   try {
@@ -52,6 +54,9 @@ export async function POST(request: Request) {
     }
 
     const createdSection = await createSection(newSection);
+
+    // Revalidate the landing page cache tag
+    revalidateTag(MASTER_CACHE_TAGS.LANDING_PAGE);
 
     return NextResponse.json(createdSection, { status: 201 });
   } catch (error) {
