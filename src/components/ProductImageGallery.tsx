@@ -46,10 +46,10 @@ const ProductImageGallery: React.FC<{ product: Product; lang: Language }> = ({
             key={index}
             onClick={() => setMainImage(img)}
             aria-label={`Show image ${index + 1}`}
-            className={`aspect-square rounded-md overflow-hidden border relative transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-700 hover:shadow-md ${
+            className={`aspect-square rounded-md overflow-hidden border relative transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-700 hover:shadow-md ${
               mainImage === img
-                ? "border-green-700 shadow-lg"
-                : "border-white/60 hover:border-green-300"
+                ? "border-primary-700 shadow-lg"
+                : "border-white/60 hover:border-primary-300"
             }`}
           >
             <Image
@@ -73,10 +73,10 @@ const ProductImageGallery: React.FC<{ product: Product; lang: Language }> = ({
               key={index + 2}
               onClick={() => setMainImage(img)}
               aria-label={`Show image ${index + 3}`}
-              className={`w-16 h-16 min-w-16 rounded-md overflow-hidden border relative transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-700 hover:shadow-md ${
+              className={`w-16 h-16 min-w-16 rounded-md overflow-hidden border relative transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-700 hover:shadow-md ${
                 mainImage === img
-                  ? "border-green-700 shadow-lg"
-                  : "border-white/60 hover:border-green-300"
+                  ? "border-primary-700 shadow-lg"
+                  : "border-white/60 hover:border-primary-300"
               }`}
             >
               <Image
