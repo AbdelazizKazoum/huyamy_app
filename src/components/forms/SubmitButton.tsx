@@ -131,7 +131,7 @@ const SubmitButton = ({ lang }: { lang: Language }) => {
       <button
         type="submit"
         disabled={pending}
-        className={`w-full cursor-pointer bg-green-800 text-white font-bold py-4 px-6 rounded-full text-lg hover:bg-green-900 transition-all duration-300 relative overflow-hidden disabled:bg-gray-500 disabled:cursor-not-allowed ${
+        className={`w-full cursor-pointer bg-primary-800 text-white font-bold py-4 px-6 rounded-full text-lg hover:bg-primary-900 transition-all duration-300 relative overflow-hidden disabled:bg-gray-500 disabled:cursor-not-allowed ${
           !pending ? "animate-slide animate-shiny" : ""
         }`}
       >
