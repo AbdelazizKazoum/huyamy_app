@@ -4,6 +4,7 @@ import ProductCard from "./ProductCard";
 import { ButtonSecondary } from "./ui";
 import { useLocale, useTranslations } from "next-intl";
 import { siteConfig } from "@/config/site";
+import { Link } from "@/i18n/config"; // <-- Import Link
 
 interface ProductSectionProps {
   title: string;
@@ -87,12 +88,15 @@ const ProductSection: React.FC<ProductSectionProps> = ({
         {/* View All Button with enhanced SEO */}
         {showButton && (
           <footer className="text-center mt-16">
-            <ButtonSecondary
+            <Link
+              href="/products"
+              locale={currentLocale}
               aria-label={`${t("viewAll")} ${title.toLowerCase()}`}
               role="button"
+              className="inline-block"
             >
-              {t("viewAll")}
-            </ButtonSecondary>
+              <ButtonSecondary>{t("viewAll")}</ButtonSecondary>
+            </Link>
           </footer>
         )}
       </div>

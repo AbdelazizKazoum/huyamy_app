@@ -165,6 +165,7 @@
     "description": "Nous sommes ravis de vous entendre ! Que vous ayez une question sur nos produits, nos services, nos prix ou toute autre chose, notre équipe est prête à répondre à toutes vos demandes.",
     "phone": "Téléphone",
     "email": "Email",
+    "location": "Emplacement",
     "followUs": "Suivez-nous sur"
   },
   "footer": {

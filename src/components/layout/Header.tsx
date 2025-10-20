@@ -57,6 +57,7 @@ const Header: React.FC<HeaderProps> = () => {
   const searchRef = useRef<HTMLDivElement>(null);
 
   const currency = siteConfig.currencies[currentLocale];
+  const logoPath = siteConfig.logo || "/images/huyami_logo.jpeg";
 
   // Update menuItems to use translation keys:
   const menuItems: MenuItem[] = [
@@ -193,7 +194,7 @@ const Header: React.FC<HeaderProps> = () => {
               <div className="flex-shrink-0">
                 <Link href="/" className="flex items-center">
                   <Image
-                    src="/images/huyami_logo.jpeg"
+                    src={logoPath}
                     alt="Huyamy Coopérative"
                     width={160}
                     height={80}

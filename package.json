@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "npm install --platform=linux --arch=x64 sharp"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.906.0",
@@ -23,7 +24,6 @@
     "react-dom": "19.1.0",
     "react-hook-form": "^7.65.0",
     "react-hot-toast": "^2.6.0",
-    "sharp": "^0.34.4",
     "zod": "^4.1.11",
     "zustand": "^5.0.8"
   },
