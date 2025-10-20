@@ -130,8 +130,8 @@ const Header: React.FC<HeaderProps> = () => {
                   <Image
                     src={logoPath}
                     alt="Huyamy Coopérative"
-                    width={160}
-                    height={80}
+                    width={240}
+                    height={120}
                     className="h-10 w-auto object-contain"
                     priority
                   />
