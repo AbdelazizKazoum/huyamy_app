@@ -74,8 +74,8 @@ export const siteConfig: SiteConfig = {
   },
   url: "https://huyamybio.com",
   baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://huyamybio.com",
-  logo: "/images/huyami_logo.jpeg",
-  ogImage: "/images/huyami_logo.jpeg", // Default OG image
+  logo: "/images/logo2.png",
+  ogImage: "/images/logo2.png", // Default OG image
   keywords: {
     ar: [
       "زيت الأرغان",
