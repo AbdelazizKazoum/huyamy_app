@@ -131,7 +131,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
           value={JSON.stringify(orderProducts)}
         />
 
-        <div className="bg-white p-6 rounded-3xl shadow-2xl border-[5px] border-green-700 space-y-4">
+        <div className="bg-white p-6 rounded-3xl shadow-2xl border-[5px] border-primary-700 space-y-4">
           <h2 className="text-xl font-bold text-center text-gray-800">
             {t("customerInfo")}
           </h2>
@@ -142,7 +142,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 type="text"
                 name="fullName"
                 placeholder={t("fullNamePlaceholder")}
-                className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
+                className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-700 text-center"
               />
               {state.errors?.fullName && (
                 <p className="text-red-500 text-sm mt-1 text-center">
@@ -156,7 +156,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 type="text"
                 name="phone"
                 placeholder={t("phonePlaceholder")}
-                className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
+                className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-700 text-center"
               />
               {state.errors?.phone && (
                 <p className="text-red-500 text-sm mt-1 text-center">
@@ -171,7 +171,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
               type="text"
               name="address"
               placeholder={t("addressPlaceholder")}
-              className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-green-700 focus:outline-none focus:ring-2 focus:ring-green-700 text-center"
+              className="w-full p-3 rounded-xl bg-transparent border-2 border-dashed border-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-700 text-center"
             />
             {state.errors?.address && (
               <p className="text-red-500 text-sm mt-1 text-center">
