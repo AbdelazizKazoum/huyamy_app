@@ -1,4 +1,3 @@
-import { Phone } from "lucide-react";
 import { Language } from "@/types";
 
 type SiteConfig = {

@@ -6,11 +6,6 @@ import {
   Search,
   ShoppingCart,
   X,
-  User,
-  LogIn,
-  UserPlus,
-  LayoutDashboard,
-  LogOut,
   ChevronDown,
   LayoutGrid, // --- ADDED: For Categories icon ---
   Globe, // --- ADDED: For Language icon ---
@@ -114,6 +109,9 @@ const Header: React.FC<HeaderProps> = () => {
     };
   }, [isSearchOpen]);
 
+  // Get logo path from siteConfig
+  const logoPath = siteConfig.logo || "/images/huyami_logo.jpeg";
+
   return (
     <>
       <CartSidebar
@@ -130,7 +128,7 @@ const Header: React.FC<HeaderProps> = () => {
               <div className="flex-shrink-0">
                 <Link href="/" className="flex items-center">
                   <Image
-                    src="/images/huyami_logo.jpeg"
+                    src={logoPath}
                     alt="Huyamy Coopérative"
                     width={160}
                     height={80}
