@@ -165,16 +165,16 @@ const CartPage = () => {
                 </div>
               </div>
               <div className="space-y-4">
-                {items.map((item, index) => (
+                {items.map((item) => (
                   <div
-                    key={`cart-item-${item.product.id}-${index}`} // Use combination of product ID and index
+                    key={item.cartItemId}
                     className="flex items-start gap-4 p-4 bg-white rounded-xl shadow-md border border-slate-200/80"
                   >
                     <Checkbox
                       className="mt-1 flex-shrink-0"
                       checked={item.selected}
-                      onCheckedChange={() =>
-                        toggleItemSelected(item.product.id)
+                      onCheckedChange={
+                        () => toggleItemSelected(item.cartItemId) // Use cartItemId here
                       }
                       aria-label={`Select ${
                         item.product.name[locale] ||
@@ -202,7 +202,7 @@ const CartPage = () => {
                             "Product"}
                         </h3>
                         <button
-                          onClick={() => removeItem(item.product.id)}
+                          onClick={() => removeItem(item.cartItemId)} // Use cartItemId here
                           className="p-1 text-slate-400 hover:text-red-600 flex-shrink-0"
                         >
                           <X size={18} />
@@ -212,8 +212,12 @@ const CartPage = () => {
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-2">
                         <div className="flex items-center border border-slate-200 rounded-md self-start sm:self-center">
                           <button
-                            onClick={() =>
-                              updateQuantity(item.product.id, item.quantity - 1)
+                            onClick={
+                              () =>
+                                updateQuantity(
+                                  item.cartItemId,
+                                  item.quantity - 1
+                                ) // Use cartItemId here
                             }
                             disabled={item.quantity <= 1}
                             className="p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
@@ -224,8 +228,12 @@ const CartPage = () => {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() =>
-                              updateQuantity(item.product.id, item.quantity + 1)
+                            onClick={
+                              () =>
+                                updateQuantity(
+                                  item.cartItemId,
+                                  item.quantity + 1
+                                ) // Use cartItemId here
                             }
                             className="p-1.5 text-slate-500 hover:bg-slate-100"
                           >

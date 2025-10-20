@@ -60,31 +60,31 @@ export const useCartStore = create<CartState>()(
       },
 
       // Action to remove an item from the cart
-      removeItem: (productId) => {
+      removeItem: (cartItemId) => {
         set((state) => ({
-          items: state.items.filter((item) => item.product.id !== productId),
+          items: state.items.filter((item) => item.cartItemId !== cartItemId),
         }));
       },
 
       // Action to update the quantity of an item
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (cartItemId, quantity) => {
         if (quantity <= 0) {
           // If quantity is 0 or less, remove the item
-          get().removeItem(productId);
+          get().removeItem(cartItemId);
         } else {
           set((state) => ({
             items: state.items.map((item) =>
-              item.product.id === productId ? { ...item, quantity } : item
+              item.cartItemId === cartItemId ? { ...item, quantity } : item
             ),
           }));
         }
       },
 
       // Action to toggle the 'selected' state of an item
-      toggleItemSelected: (productId) => {
+      toggleItemSelected: (cartItemId) => {
         set((state) => ({
           items: state.items.map((item) =>
-            item.product.id === productId
+            item.cartItemId === cartItemId
               ? { ...item, selected: !item.selected }
               : item
           ),
