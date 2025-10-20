@@ -1,29 +1,37 @@
 @import "tailwindcss";
 
 @theme {
-  /* Primary Brand Colors - Green Palette */
-  --color-primary-50: #f0fdf4; /* Very light green for subtle backgrounds */
-  --color-primary-100: #dcfce7; /* Light green for subtle highlights */
-  --color-primary-200: #bbf7d0; /* Light green */
-  --color-primary-300: #86efac; /* Medium light green */
-  --color-primary-400: #4ade80; /* Medium green */
-  --color-primary-500: #22c55e; /* Standard green */
-  --color-primary-600: #16a34a; /* Medium dark green */
-  --color-primary-700: #15803d; /* Dark green - main brand color */
-  --color-primary-800: #166534; /* Very dark green - primary buttons */
-  --color-primary-900: #14532d; /* Darkest green - text and accents */
+  /* ==========================================================================
+     Cosmetics & Beauty Theme
+     ==========================================================================
+     Primary: A sophisticated Rose palette for a modern, feminine feel.
+     Secondary: An elegant Gold palette to convey luxury and quality.
+     Neutrals: A versatile Gray palette for clarity and balance.
+   ========================================================================== */
 
-  /* Secondary Brand Colors - Amber Palette */
-  --color-secondary-50: #fffbeb; /* Very light amber background */
-  --color-secondary-100: #fef3c7; /* Light amber background */
-  --color-secondary-200: #fde68a; /* Light amber */
-  --color-secondary-300: #fcd34d; /* Medium light amber */
-  --color-secondary-400: #fbbf24; /* Medium amber - logo color */
-  --color-secondary-500: #f59e0b; /* Standard amber - badges/highlights */
-  --color-secondary-600: #d97706; /* Medium dark amber */
-  --color-secondary-700: #b45309; /* Dark amber */
-  --color-secondary-800: #92400e; /* Very dark amber */
-  --color-secondary-900: #78350f; /* Darkest amber */
+  /* Primary Brand Colors - Rose Palette */
+  --color-primary-50: #fff1f2; /* Very light rose for subtle backgrounds */
+  --color-primary-100: #ffe4e6; /* Light rose for highlights */
+  --color-primary-200: #fecdd3; /* Light rose */
+  --color-primary-300: #fda4af; /* Medium light rose */
+  --color-primary-400: #fb7185; /* Medium rose */
+  --color-primary-500: #f43f5e; /* Standard, vibrant rose */
+  --color-primary-600: #e11d48; /* Main brand rose - buttons & CTAs */
+  --color-primary-700: #be123c; /* Dark rose - hover states & accents */
+  --color-primary-800: #9f1239; /* Very dark rose - text & accents */
+  --color-primary-900: #881337; /* Darkest rose */
+
+  /* Secondary Brand Colors - Gold Palette */
+  --color-secondary-50: #fffaf0; /* Very light cream/gold background */
+  --color-secondary-100: #fef6e4; /* Light champagne background */
+  --color-secondary-200: #fdecc8; /* Light champagne */
+  --color-secondary-300: #f7e0ac; /* Light gold */
+  --color-secondary-400: #e9c46a; /* Medium gold - secondary brand color */
+  --color-secondary-500: #d4af37; /* Standard gold - badges/highlights */
+  --color-secondary-600: #c09b2e; /* Medium dark gold */
+  --color-secondary-700: #ab8825; /* Dark gold / antique */
+  --color-secondary-800: #96751c; /* Very dark gold */
+  --color-secondary-900: #816213; /* Darkest gold / bronze */
 
   /* Neutral Colors - Gray Palette */
   --color-neutral-50: #f9fafb; /* Very light background */
@@ -39,9 +47,15 @@
 
   /* Background Colors */
   --color-background-primary: #ffffff; /* Main white background */
-  --color-background-secondary: #f7f6f2; /* Warm off-white background */
-  --color-background-tertiary: #f5f5f4; /* Stone background */
-  --color-background-accent: #fffbeb; /* Light amber background */
+  --color-background-secondary: var(
+    --color-primary-50
+  ); /* Subtle rose off-white */
+  --color-background-tertiary: var(
+    --color-neutral-100
+  ); /* Light gray background */
+  --color-background-accent: var(
+    --color-secondary-100
+  ); /* Light champagne background */
 
   /* Text Colors */
   --color-text-primary: var(--color-neutral-800); /* Main dark text */
@@ -51,20 +65,20 @@
   --color-text-inverse: #ffffff; /* White text on dark backgrounds */
 
   /* Brand Specific Colors */
-  --color-brand-primary: var(--color-primary-800); /* Main brand green */
-  --color-brand-secondary: var(--color-secondary-500); /* Brand amber */
-  --color-brand-accent: var(--color-primary-700); /* Accent green */
+  --color-brand-primary: var(--color-primary-600); /* Main brand rose */
+  --color-brand-secondary: var(--color-secondary-400); /* Brand gold */
+  --color-brand-accent: var(--color-primary-700); /* Accent rose */
 
   /* Interactive Colors */
-  --color-hover-primary: var(--color-primary-900); /* Green hover state */
-  --color-hover-secondary: var(--color-secondary-600); /* Amber hover state */
-  --color-focus: var(--color-primary-700); /* Focus ring color */
+  --color-hover-primary: var(--color-primary-700); /* Rose hover state */
+  --color-hover-secondary: var(--color-secondary-500); /* Gold hover state */
+  --color-focus: var(--color-primary-500); /* Focus ring color */
 
   /* Status Colors */
-  --color-success: var(--color-primary-600); /* Success green */
-  --color-warning: var(--color-secondary-500); /* Warning amber */
-  --color-error: #dc2626; /* Error red */
-  --color-info: #2563eb; /* Info blue */
+  --color-success: #16a34a; /* Success green (universal) */
+  --color-warning: #f59e0b; /* Warning amber (universal) */
+  --color-error: #dc2626; /* Error red (universal) */
+  --color-info: #2563eb; /* Info blue (universal) */
 
   /* Utility Colors */
   --color-white: #ffffff;
@@ -75,12 +89,17 @@
   --color-border-light: var(--color-neutral-200);
   --color-border-medium: var(--color-neutral-300);
   --color-border-dark: var(--color-neutral-400);
-  --color-border-accent: var(--color-primary-700);
+  --color-border-accent: var(--color-primary-500);
 
   /* Shadow Colors */
-  --color-shadow-light: rgba(0, 0, 0, 0.05);
-  --color-shadow-medium: rgba(0, 0, 0, 0.1);
-  --color-shadow-dark: rgba(0, 0, 0, 0.15);
+  --color-shadow-light: rgba(
+    136,
+    19,
+    55,
+    0.05
+  ); /* Using a hint of the darkest rose */
+  --color-shadow-medium: rgba(136, 19, 55, 0.1);
+  --color-shadow-dark: rgba(136, 19, 55, 0.15);
 
   /* Overlay Colors */
   --color-overlay-light: rgba(0, 0, 0, 0.1);
