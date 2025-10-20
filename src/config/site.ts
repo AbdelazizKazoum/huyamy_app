@@ -1,3 +1,4 @@
+import { Phone } from "lucide-react";
 import { Language } from "@/types";
 
 type SiteConfig = {
@@ -24,6 +25,7 @@ type SiteConfig = {
   contact: {
     email: string;
     whatsapp: string;
+    phone: string;
   };
   social: {
     twitter: string;
@@ -41,6 +43,10 @@ type SiteConfig = {
   creator: string;
   publisher: string;
   location: string;
+  locationCoordinates?: {
+    lat: number;
+    lng: number;
+  };
   manifest: string;
   verification: {
     google?: string;
@@ -104,8 +110,9 @@ export const siteConfig: SiteConfig = {
   },
   themeColor: "#059669",
   contact: {
-    email: "contact@huyamy.com",
-    whatsapp: "+212636739071",
+    email: "huyamycoop@gmail.com",
+    whatsapp: "+212668076714",
+    phone: "+212668076714",
   },
   social: {
     twitter: "@huyamy",
@@ -122,7 +129,11 @@ export const siteConfig: SiteConfig = {
   authors: [{ name: "Huyamy" }],
   creator: "Huyamy",
   publisher: "Huyamy",
-  location: "Morocco",
+  location: "Dr boughanim assadss ouled teima", // or "Agadir, Morocco" or any string
+  locationCoordinates: {
+    lat: 30.427755,
+    lng: -9.598107,
+  },
   manifest: "/manifest.json",
   verification: {
     google: "your-google-verification-code",
