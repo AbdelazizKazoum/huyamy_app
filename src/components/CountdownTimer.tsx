@@ -1,6 +1,5 @@
 "use client";
-import { Language } from "firebase/ai";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 type TimeLabels = {
   days: string;
@@ -10,43 +9,27 @@ type TimeLabels = {
 };
 
 type LabelsConfig = {
-  [K in Language]: TimeLabels;
+  ar: TimeLabels;
+  fr: TimeLabels;
 };
 
-const CountdownTimer: React.FC<{ lang: Language }> = ({ lang }) => {
-  // Set offer to end 3 days from now for demonstration
-  const expiryTimestamp = new Date().getTime() + 3 * 24 * 60 * 60 * 1000;
+const COUNTDOWN_SECONDS = 1 * 24 * 60 * 60 - 5 * 60 * 60; // 1 day minus 5 hours
 
-  const calculateTimeLeft = () => {
-    const difference = +new Date(expiryTimestamp) - +new Date();
-    let timeLeft = {
-      days: 0,
-      hours: 0,
-      minutes: 0,
-      seconds: 0,
-    };
-
-    if (difference > 0) {
-      timeLeft = {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
-    }
-
-    return timeLeft;
-  };
-
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+const CountdownTimer: React.FC<{ lang: "ar" | "fr" }> = ({ lang }) => {
+  const [remaining, setRemaining] = useState(COUNTDOWN_SECONDS);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setTimeLeft(calculateTimeLeft());
+    if (remaining <= 0) return;
+    const interval = setInterval(() => {
+      setRemaining((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
+    return () => clearInterval(interval);
+  }, [remaining]);
 
-    return () => clearTimeout(timer);
-  });
+  const days = Math.floor(remaining / (24 * 60 * 60));
+  const hours = Math.floor((remaining % (24 * 60 * 60)) / (60 * 60));
+  const minutes = Math.floor((remaining % (60 * 60)) / 60);
+  const seconds = remaining % 60;
 
   const labels: LabelsConfig = {
     ar: { days: "أيام", hours: "ساعات", minutes: "دقائق", seconds: "ثواني" },
@@ -65,23 +48,19 @@ const CountdownTimer: React.FC<{ lang: Language }> = ({ lang }) => {
     </div>
   );
 
-  if (!Object.values(timeLeft).some((v) => v > 0)) {
-    return null;
-  }
-
   return (
     <div className="bg-green-50 p-4 rounded-lg my-4 flex items-center justify-between">
       <h3 className="font-bold text-green-800 text-sm md:text-base">
         {lang === "ar" ? "العرض ينتهي في:" : "L'offre se termine dans :"}
       </h3>
       <div className="flex justify-center items-center gap-3" dir="ltr">
-        <TimeSlot value={timeLeft.days} label={labels[lang].days} />
+        <TimeSlot value={days} label={labels[lang].days} />
         <span className="text-3xl font-bold text-green-800">:</span>
-        <TimeSlot value={timeLeft.hours} label={labels[lang].hours} />
+        <TimeSlot value={hours} label={labels[lang].hours} />
         <span className="text-3xl font-bold text-green-800">:</span>
-        <TimeSlot value={timeLeft.minutes} label={labels[lang].minutes} />
+        <TimeSlot value={minutes} label={labels[lang].minutes} />
         <span className="text-3xl font-bold text-green-800">:</span>
-        <TimeSlot value={timeLeft.seconds} label={labels[lang].seconds} />
+        <TimeSlot value={seconds} label={labels[lang].seconds} />
       </div>
     </div>
   );
