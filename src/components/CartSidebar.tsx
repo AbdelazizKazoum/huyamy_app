@@ -125,14 +125,14 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                 <div className="flex-grow overflow-y-auto p-4 space-y-4">
                   {items.map((item) => (
                     <div
-                      key={item.product.id}
+                      key={item.cartItemId} // Use cartItemId as key
                       className="flex items-start gap-4"
                     >
                       <Checkbox
                         className="mt-1"
                         checked={item.selected}
-                        onCheckedChange={() =>
-                          toggleItemSelected(item.product.id)
+                        onCheckedChange={
+                          () => toggleItemSelected(item.cartItemId) // Use cartItemId here
                         }
                       />
                       <Image
@@ -154,7 +154,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                             <button
                               onClick={() =>
                                 updateQuantity(
-                                  item.product.id,
+                                  item.cartItemId, // Use cartItemId here
                                   item.quantity - 1
                                 )
                               }
@@ -169,7 +169,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                             <button
                               onClick={() =>
                                 updateQuantity(
-                                  item.product.id,
+                                  item.cartItemId, // Use cartItemId here
                                   item.quantity + 1
                                 )
                               }
@@ -178,15 +178,13 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                               <Plus size={14} />
                             </button>
                           </div>
-                          {/* Item Subtotal Added Here */}
                           <div className="flex items-center gap-2">
-                            {/* Changed text color to green */}
                             <span className="font-bold text-green-700 text-sm">
                               {(item.product.price * item.quantity).toFixed(2)}{" "}
                               {currency}
                             </span>
                             <button
-                              onClick={() => removeItem(item.product.id)}
+                              onClick={() => removeItem(item.cartItemId)} // Use cartItemId here
                               className="p-1 text-slate-400 hover:text-red-600"
                             >
                               <Trash2 size={16} />
@@ -203,12 +201,10 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                     <span className="text-base text-slate-600">
                       {t("subtotal")} ({selectedItems.length} {t("items")})
                     </span>
-                    {/* Changed text color to green */}
                     <span className="text-xl font-bold text-green-700">
                       {subtotal.toFixed(2)} {currency}
                     </span>
                   </div>
-                  {/* "View Cart" is the primary button */}
                   <Link
                     href="/cart"
                     onClick={onClose}
@@ -216,7 +212,6 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                   >
                     {t("viewCart")}
                   </Link>
-                  {/* "Checkout" is now a neutral outlined button with primary text */}
                   <Link href="/checkout" passHref>
                     <button
                       onClick={onClose}
