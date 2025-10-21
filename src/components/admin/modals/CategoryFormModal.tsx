@@ -2,7 +2,7 @@
 
 import { ChangeEvent, FormEvent, useEffect, useState, useRef } from "react";
 import { Category, Language } from "@/types";
-import { Loader2, UploadCloud, X } from "lucide-react";
+import { UploadCloud, X } from "lucide-react";
 import Image from "next/image";
 import FormInput from "../ui/FormInput";
 import FormTextarea from "../ui/FormTextarea";
@@ -23,7 +23,6 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
   onClose,
   onSubmit,
   category,
-  lang,
   isSubmitting = false,
 }) => {
   const [nameAr, setNameAr] = useState("");

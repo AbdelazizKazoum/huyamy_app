@@ -36,7 +36,7 @@ const DateInput: React.FC<DateInputProps> = ({
         onChange={onChange}
         placeholder={placeholder}
         disabled={disabled}
-        className="w-full p-2.5 pr-10 rounded-lg bg-white border-neutral-200 border focus:outline-none focus:ring-2 focus:ring-green-500/50 [&::-webkit-calendar-picker-indicator]:hidden disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full p-2.5 pr-10 rounded-lg bg-white border-neutral-200 border focus:outline-none focus:ring-2 focus:ring-primary-500/50 [&::-webkit-calendar-picker-indicator]:hidden disabled:opacity-50 disabled:cursor-not-allowed"
       />
       <Calendar
         size={20}
