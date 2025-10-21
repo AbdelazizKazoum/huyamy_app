@@ -18,7 +18,7 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
     <button
       type="submit"
       disabled={isSubmitting}
-      className="px-6 py-2.5 rounded-lg text-white bg-green-700 hover:bg-green-800 disabled:bg-green-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[120px]"
+      className="px-6 py-2.5 rounded-lg text-white bg-primary-700 hover:bg-primary-800 disabled:bg-primary-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[120px]"
       {...props}
     >
       {isSubmitting ? (
