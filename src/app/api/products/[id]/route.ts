@@ -125,6 +125,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     revalidatePath("/fr/products");
     revalidatePath("/ar/products");
 
+    // 5. Revalidate category pages for the UPDATED product
+    if (updateData.category?.slug) {
+      revalidatePath(`/category/${updateData.category.slug}`);
+      revalidatePath(`/fr/category/${updateData.category.slug}`);
+      revalidatePath(`/ar/category/${updateData.category.slug}`);
+    }
+
     return NextResponse.json({
       message: "Product updated successfully",
       productId: id,
@@ -187,6 +194,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
     revalidatePath("/fr/products");
     revalidatePath("/ar/products");
+
+    // 5. Revalidate category pages for the deleted product
+    if (productToDelete?.category?.slug) {
+      revalidatePath(`/category/${productToDelete.category.slug}`);
+      revalidatePath(`/fr/category/${productToDelete.category.slug}`);
+      revalidatePath(`/ar/category/${productToDelete.category.slug}`);
+    }
 
     return NextResponse.json(
       { message: `Product ${id} deleted successfully` },
