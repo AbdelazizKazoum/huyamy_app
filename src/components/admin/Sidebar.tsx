@@ -10,6 +10,8 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
+import { siteConfig } from "@/config/site"; // Add this import
+import Image from "next/image";
 
 const Sidebar: React.FC<{
   isCollapsed: boolean;
@@ -70,16 +72,26 @@ const Sidebar: React.FC<{
           href={baseAdminPath}
           className="flex flex-col items-center leading-none"
         >
-          <span
-            className={`font-bold text-amber-500 transition-all duration-300 ${
-              isCollapsed ? "text-2xl" : "text-3xl"
-            }`}
-            style={{ fontFamily: "'Cairo', sans-serif" }}
-          >
-            {isCollapsed ? "H" : "Huyamy"}
-          </span>
+          {siteConfig.logo ? (
+            <Image
+              src={siteConfig.logo}
+              alt={siteConfig.name}
+              width={50}
+              height={50}
+              priority
+            />
+          ) : (
+            <span
+              className={`font-bold text-amber-500 transition-all duration-300 ${
+                isCollapsed ? "text-2xl" : "text-3xl"
+              }`}
+              style={{ fontFamily: "'Cairo', sans-serif" }}
+            >
+              {isCollapsed ? siteConfig.name[0] : siteConfig.name}
+            </span>
+          )}
           {!isCollapsed && (
-            <span className="text-xs text-green-800 font-semibold tracking-wider">
+            <span className="text-xs text-primary-800 font-semibold tracking-wider">
               لوحة التحكم
             </span>
           )}
@@ -95,7 +107,7 @@ const Sidebar: React.FC<{
                   isCollapsed ? "justify-center" : ""
                 } ${
                   isActive(item.href)
-                    ? "bg-green-100 text-green-800 font-bold"
+                    ? "bg-primary-100 text-primary-800 font-bold"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
                 title={isCollapsed ? item.label : ""}
@@ -215,7 +227,7 @@ const MobileSidebar: React.FC<{
                       onClick={onClose}
                       className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                         isActive(item.href)
-                          ? "bg-green-100 text-green-800 font-bold"
+                          ? "bg-primary-100 text-primary-800 font-bold"
                           : "text-gray-600 hover:bg-gray-100"
                       }`}
                     >

@@ -69,7 +69,7 @@ const Header: React.FC<{
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 h-16 px-4 lg:px-6 flex items-center justify-between sticky top-0 z-30 backdrop-blur-sm bg-white/80">
+    <header className="bg-white border-b border-gray-200 h-16 px-4 lg:px-6 flex items-center justify-between sticky top-0 z-30 backdrop-blur-sm ">
       {/* Left Section - Menu Toggle */}
       <div className="flex items-center gap-3">
         <button
