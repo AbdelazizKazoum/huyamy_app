@@ -1,6 +1,6 @@
 "use client";
 
-import { Language, Product } from "@/types";
+import { Language, Product, ProductVariant } from "@/types";
 import { ShoppingCart, Loader2 } from "lucide-react";
 import React, { useActionState } from "react";
 import { useFormStatus } from "react-dom";
@@ -21,6 +21,7 @@ interface CheckoutFormProps {
   products?: Product[]; // For multiple products (cart/checkout page)
   product?: Product; // For single product (product detail page)
   quantities?: Record<string, number>; // For cart quantities
+  selectedVariant?: ProductVariant | null; // For single product variant
 }
 
 export const CheckoutForm: React.FC<CheckoutFormProps> = ({
@@ -28,6 +29,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
   products,
   product,
   quantities = {},
+  selectedVariant,
 }) => {
   const [state, formAction] = useActionState(createOrderAction, initialState);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -45,21 +47,30 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
         price: p.price,
         quantity: quantities[p.id] || 1,
         image: p.image,
+        // Note: Cart variant logic would be added here if needed
       }));
     } else if (product) {
       // Single product (from product detail page)
+      const variantDescription = selectedVariant
+        ? ` - ${Object.values(selectedVariant.options).join(" / ")}`
+        : "";
+
       return [
         {
           id: product.id,
-          name: product.name,
-          price: product.price,
+          name: {
+            ar: `${product.name.ar}${variantDescription}`,
+            fr: `${product.name.fr}${variantDescription}`,
+          },
+          price: selectedVariant?.price ?? product.price,
           quantity: 1,
-          image: product.image,
+          image: selectedVariant?.image ?? product.image,
+          variant: selectedVariant?.options ?? null,
         },
       ];
     }
     return [];
-  }, [products, product, quantities]);
+  }, [products, product, quantities, selectedVariant]);
 
   // Effect to handle success state
   useEffect(() => {

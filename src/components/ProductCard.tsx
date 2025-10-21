@@ -56,7 +56,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product, 1);
+
+    // If the product has variants, add the first one by default.
+    // Otherwise, pass null for the variant.
+    const defaultVariant =
+      product.variants && product.variants.length > 0
+        ? product.variants[0]
+        : null;
+
+    addItem(product, 1, defaultVariant);
+
     toast.custom((t) => (
       <AddedToCartToast toastInstance={t} product={product} lang={lang} />
     ));

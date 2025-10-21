@@ -6,6 +6,11 @@ import {
   Search,
   ShoppingCart,
   X,
+  User,
+  LogIn,
+  UserPlus,
+  LayoutDashboard,
+  LogOut,
   ChevronDown,
   LayoutGrid, // --- ADDED: For Categories icon ---
   Globe, // --- ADDED: For Language icon ---
@@ -18,7 +23,9 @@ import CartSidebar from "../CartSidebar";
 import { LanguageSelector } from "../ui";
 import { useCartStore } from "@/store/useCartStore";
 import { siteConfig } from "@/config/site";
-import SearchModal from "@/components/SearchModal";
+import { useAuth } from "@/hooks/useAuth";
+import { useTranslations } from "next-intl";
+import SearchModal from "../SearchModal";
 
 type HeaderProps = Record<string, never>;
 
@@ -28,30 +35,6 @@ interface MenuItem {
   label: LocalizedString;
 }
 
-const menuItems: MenuItem[] = [
-  {
-    href: "/",
-    label: {
-      ar: "الرئيسية",
-      fr: "Accueil",
-    },
-  },
-  {
-    href: "/products",
-    label: {
-      ar: "المتجر",
-      fr: "Produits",
-    },
-  },
-  {
-    href: "/contact",
-    label: {
-      ar: "تواصل معنا",
-      fr: "Contact",
-    },
-  },
-];
-
 const Header: React.FC<HeaderProps> = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
@@ -60,8 +43,13 @@ const Header: React.FC<HeaderProps> = () => {
     useState<boolean>(false);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [isLangLoading, setIsLangLoading] = useState(false);
+  const [isAuthMenuOpen, setIsAuthMenuOpen] = useState(false);
+  const authMenuRef = useRef<HTMLDivElement>(null);
+  const mobileAuthMenuRef = useRef<HTMLDivElement>(null); // This ref is no longer used by the mobile header icon, but might be by renderAuthDropdown logic
 
   const { items: cartItems } = useCartStore();
+  const { isAuthenticated, user, loading, signOut } = useAuth();
+  const t = useTranslations("header");
 
   const currentLocale = useLocale() as Locale;
   const pathname = usePathname();
@@ -69,20 +57,14 @@ const Header: React.FC<HeaderProps> = () => {
   const searchRef = useRef<HTMLDivElement>(null);
 
   const currency = siteConfig.currencies[currentLocale];
+  const logoPath = siteConfig.logo || "/images/huyami_logo.jpeg";
 
-  const searchText = {
-    ar: "بحث",
-    fr: "Rechercher",
-  };
-
-  const categoriesText = { ar: "الفئات", fr: "Catégories" };
-  const languageText = { ar: "اللغة", fr: "Langue" };
-  const currentLangName = { ar: "العربية", fr: "Français" }[currentLocale];
-
-  const searchPlaceholder = {
-    ar: "ابحث عن منتجك المفضل...",
-    fr: "Recherchez votre produit préféré...",
-  };
+  // Update menuItems to use translation keys:
+  const menuItems: MenuItem[] = [
+    { href: "/", label: { ar: t("home"), fr: t("home") } },
+    { href: "/products", label: { ar: t("products"), fr: t("products") } },
+    { href: "/contact", label: { ar: t("contact"), fr: t("contact") } },
+  ];
 
   const handleLanguageChange = async (newLocale: Locale) => {
     setIsLangLoading(true);
@@ -109,8 +91,92 @@ const Header: React.FC<HeaderProps> = () => {
     };
   }, [isSearchOpen]);
 
-  // Get logo path from siteConfig
-  const logoPath = siteConfig.logo || "/images/huyami_logo.jpeg";
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        authMenuRef.current &&
+        !authMenuRef.current.contains(event.target as Node) &&
+        // Ensure mobileAuthMenuRef check is still valid if renderAuthDropdown is used by it
+        (!mobileAuthMenuRef.current ||
+          !mobileAuthMenuRef.current.contains(event.target as Node))
+      ) {
+        setIsAuthMenuOpen(false);
+      }
+    }
+    if (isAuthMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isAuthMenuOpen]);
+
+  const searchButtonClasses =
+    "flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300";
+  const cartButtonClasses =
+    "flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300 relative";
+  const authButtonClasses =
+    "p-2 text-neutral-600 hover:text-primary-800 rounded-full transition-colors duration-300";
+
+  const renderAuthDropdown = () => (
+    <div
+      className={`absolute mt-2 w-56 bg-white border border-neutral-200/75 rounded-lg shadow-lg z-50 animate-fade-in-up overflow-hidden ${
+        currentLocale === "ar" ? "left-0" : "right-0"
+      }`}
+    >
+      {!isAuthenticated ? (
+        <div className="p-2 flex flex-col gap-1">
+          <button
+            className="flex items-center gap-3 w-full px-3 py-2 hover:bg-neutral-100 text-left text-neutral-700 font-medium transition-colors rounded-md"
+            onClick={() => {
+              router.push("/signin");
+              setIsAuthMenuOpen(false);
+            }}
+          >
+            <LogIn size={16} className="text-neutral-500" />
+            <span>{t("signin")}</span>
+          </button>
+          <button
+            className="flex items-center gap-3 w-full px-3 py-2 bg-primary-50 hover:bg-primary-100 text-left text-primary-700 font-medium transition-colors rounded-md"
+            onClick={() => {
+              router.push("/signup");
+              setIsAuthMenuOpen(false);
+            }}
+          >
+            <UserPlus size={16} />
+            <span>{t("signup")}</span>
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col">
+          <div className="px-4 py-3 border-b border-neutral-200/75">
+            <p className="text-sm font-medium text-neutral-900 truncate">
+              {user?.displayName || t("yourName")}
+            </p>
+            <p className="text-xs text-neutral-500 truncate">
+              {user?.email || t("yourEmail")}
+            </p>
+          </div>
+          <div className="p-2 flex flex-col gap-1">
+            <button className="flex items-center gap-3 w-full px-3 py-2 hover:bg-neutral-100 text-left text-neutral-700 font-medium transition-colors rounded-md">
+              <LayoutDashboard size={16} className="text-neutral-500" />
+              <span>{t("profile")}</span>
+            </button>
+            <button
+              className="flex items-center gap-3 w-full px-3 py-2 hover:bg-red-50 text-left text-red-600 font-medium transition-colors rounded-md"
+              onClick={() => {
+                signOut();
+                setIsAuthMenuOpen(false);
+              }}
+            >
+              <LogOut size={16} />
+              <span>{t("logout")}</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -168,19 +234,17 @@ const Header: React.FC<HeaderProps> = () => {
                 />
                 <button
                   onClick={() => setIsSearchOpen((prev) => !prev)}
-                  className="flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300"
+                  className={searchButtonClasses}
                 >
                   <Search
                     size={22}
                     className={currentLocale === "ar" ? "ml-2" : "mr-2"}
                   />
-                  <span className="font-semibold text-sm">
-                    {searchText[currentLocale]}
-                  </span>
+                  <span className="font-semibold text-sm">{t("search")}</span>
                 </button>
                 <button
                   onClick={() => setIsCartOpen(true)}
-                  className="flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300 relative"
+                  className={cartButtonClasses}
                 >
                   <ShoppingCart size={22} />
                   {cartItems.length > 0 && (
@@ -189,6 +253,47 @@ const Header: React.FC<HeaderProps> = () => {
                     </span>
                   )}
                 </button>
+
+                <div className="relative" ref={authMenuRef}>
+                  {loading ? (
+                    <div style={{ width: 40, height: 40 }} />
+                  ) : isAuthenticated ? (
+                    <button
+                      onClick={() => setIsAuthMenuOpen((v) => !v)}
+                      className={authButtonClasses}
+                      aria-label="Open user menu"
+                    >
+                      {user?.displayName ? (
+                        <span className="inline-flex items-center justify-center rounded-full bg-primary-100 text-primary-800 font-bold text-base w-10 h-10 select-none transition-colors duration-200 hover:bg-primary-200">
+                          {user.displayName
+                            .trim()
+                            .split(" ")
+                            .map((word) => word[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase()}
+                        </span>
+                      ) : (
+                        <User size={22} />
+                      )}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setIsAuthMenuOpen((v) => !v)}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-primary-700 text-white rounded-full hover:bg-primary-800 transition-colors duration-300 text-sm font-medium"
+                    >
+                      <User size={18} />
+                      <span>{t("signin")}</span>
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform duration-200 ${
+                          isAuthMenuOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                  )}
+                  {!loading && isAuthMenuOpen && renderAuthDropdown()}
+                </div>
               </div>
 
               {/* Mobile buttons */}
@@ -204,6 +309,9 @@ const Header: React.FC<HeaderProps> = () => {
                     </span>
                   )}
                 </button>
+
+                {/* --- AUTH ICON REMOVED FROM HERE --- */}
+
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
                   className="p-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors"
@@ -256,9 +364,7 @@ const Header: React.FC<HeaderProps> = () => {
                   className="flex flex-col items-center justify-center gap-2 p-4 bg-neutral-100 rounded-lg text-neutral-700 hover:bg-neutral-200 transition-colors"
                 >
                   <LayoutGrid size={24} />
-                  <span className="font-medium text-sm">
-                    {categoriesText[currentLocale]}
-                  </span>
+                  <span className="font-medium text-sm">{t("categories")}</span>
                 </button>
 
                 {/* Search Button (styled like image) */}
@@ -270,9 +376,7 @@ const Header: React.FC<HeaderProps> = () => {
                   className="flex flex-col items-center justify-center gap-2 p-4 bg-neutral-100 rounded-lg text-neutral-700 hover:bg-neutral-200 transition-colors"
                 >
                   <Search size={24} />
-                  <span className="font-medium text-sm">
-                    {searchText[currentLocale]}
-                  </span>
+                  <span className="font-medium text-sm">{t("search")}</span>
                 </button>
               </div>
 
@@ -282,7 +386,7 @@ const Header: React.FC<HeaderProps> = () => {
                   className="text-sm font-medium text-neutral-500 mb-2 px-1"
                   dir={currentLocale === "ar" ? "rtl" : "ltr"}
                 >
-                  {languageText[currentLocale]}
+                  {t("language")}
                 </h3>
                 <button
                   onClick={() => setIsMobileLangMenuOpen(!isMobileLangMenuOpen)}
@@ -290,7 +394,9 @@ const Header: React.FC<HeaderProps> = () => {
                 >
                   <span className="flex items-center gap-3">
                     <Globe size={20} className="text-neutral-500" />
-                    <span className="font-medium">{currentLangName}</span>
+                    <span className="font-medium">
+                      {currentLocale === "ar" ? "العربية" : "Français"}
+                    </span>
                   </span>
                   <ChevronDown
                     size={18}
@@ -327,6 +433,72 @@ const Header: React.FC<HeaderProps> = () => {
                   </div>
                 )}
               </div>
+
+              {/* Account Section (styled like image) */}
+              <div>
+                <h3
+                  className="text-sm font-medium text-neutral-500 mb-2 px-1"
+                  dir={currentLocale === "ar" ? "rtl" : "ltr"}
+                >
+                  {t("account")}
+                </h3>
+                {/* Only render after loading is false */}
+                {!loading &&
+                  (isAuthenticated ? (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-col items-center mb-2">
+                        <span className="font-semibold text-neutral-800">
+                          {user?.displayName || t("yourName")}
+                        </span>
+                        <span className="text-xs text-neutral-500">
+                          {user?.email || t("yourEmail")}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => {
+                          /* TODO: Profile page */
+                        }}
+                        className="flex items-center justify-center gap-3 w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-800 font-medium"
+                      >
+                        <User size={20} />
+                        <span>{t("profile")}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          signOut();
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex items-center justify-center gap-3 w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-red-600 font-medium"
+                      >
+                        <LogOut size={20} />
+                        <span>{t("logout")}</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => {
+                          router.push("/signin");
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-white border border-neutral-300 rounded-lg text-neutral-800 font-medium"
+                      >
+                        <LogIn size={20} />
+                        <span>{t("signin")}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          router.push("/signup");
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-primary-700 border border-primary-700 rounded-lg text-white font-medium"
+                      >
+                        <UserPlus size={20} />
+                        <span>{t("signup")}</span>
+                      </button>
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
           {/* --- END MODIFIED Mobile Menu --- */}
@@ -336,7 +508,7 @@ const Header: React.FC<HeaderProps> = () => {
         <SearchModal
           isOpen={isSearchOpen}
           onClose={() => setIsSearchOpen(false)}
-          placeholder={searchPlaceholder[currentLocale]}
+          currentLocale={currentLocale}
         />
       </div>
     </>

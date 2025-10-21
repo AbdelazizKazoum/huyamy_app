@@ -81,20 +81,35 @@ const CheckoutPage = () => {
 
   const subtotal = useMemo(
     () =>
-      items.reduce((acc, item) => acc + item.product.price * item.quantity, 0),
+      items.reduce((acc, item) => {
+        const price = item.selectedVariant?.price ?? item.product.price;
+        return acc + price * item.quantity;
+      }, 0),
     [items]
   );
 
   const onSubmit = async (data: ShippingFormData) => {
     const orderData: OrderData = {
       shippingInfo: data,
-      products: items.map((item) => ({
-        id: item.product.id,
-        name: item.product.name,
-        price: item.product.price,
-        quantity: item.quantity,
-        image: item.product.image,
-      })),
+      products: items.map((item) => {
+        const variantDescription = item.selectedVariant
+          ? ` - ${Object.values(item.selectedVariant.options).join(" / ")}`
+          : "";
+        const itemPrice = item.selectedVariant?.price ?? item.product.price;
+        const itemImage = item.selectedVariant?.image ?? item.product.image;
+
+        return {
+          id: item.product.id,
+          name: {
+            ar: `${item.product.name.ar}${variantDescription}`,
+            fr: `${item.product.name.fr}${variantDescription}`,
+          },
+          price: itemPrice,
+          quantity: item.quantity,
+          image: itemImage,
+          variant: item.selectedVariant?.options ?? null,
+        };
+      }),
       totalAmount: subtotal,
       locale: locale,
       orderDate: new Date().toISOString(),
@@ -309,32 +324,72 @@ const CheckoutPage = () => {
                   {t("summaryTitle")}
                 </h2>
                 <div className="space-y-4">
-                  {items.map((item, index) => (
-                    <div
-                      key={`checkout-item-${item.product.id}-${index}`} // Use combination of product ID and index
-                      className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200"
-                    >
-                      <Image
-                        src={item.product.image}
-                        alt={item.product.name["ar"]}
-                        width={64}
-                        height={64}
-                        className="w-16 h-16 object-cover rounded-lg border"
-                      />
-                      <div className="flex-grow">
-                        <p className="font-semibold text-slate-800">
-                          {item.product.name["ar"]}
-                        </p>
-                        <p className="text-sm text-slate-500">
-                          {t("quantityLabel")}: {item.quantity}
+                  {items.map((item) => {
+                    const itemPrice =
+                      item.selectedVariant?.price ?? item.product.price;
+                    const itemImage =
+                      item.selectedVariant?.image ?? item.product.image;
+
+                    return (
+                      <div
+                        key={item.cartItemId}
+                        className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200"
+                      >
+                        <Image
+                          src={itemImage}
+                          alt={item.product.name[locale]}
+                          width={64}
+                          height={64}
+                          className="w-16 h-16 object-cover rounded-lg border flex-shrink-0"
+                        />
+                        <div className="flex-grow">
+                          <p className="font-semibold text-slate-800 leading-tight">
+                            {item.product.name[locale]}
+                          </p>
+                          {/* --- Combined Variant & Quantity Display --- */}
+                          <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+                            {item.selectedVariant &&
+                              Object.entries(item.selectedVariant.options).map(
+                                ([optionKey, optionValue]) => {
+                                  const variantOption =
+                                    item.product.variantOptions?.find(
+                                      (opt) => opt.name.fr === optionKey
+                                    );
+                                  const displayName = variantOption
+                                    ? variantOption.name[locale]
+                                    : optionKey;
+
+                                  return (
+                                    <span key={optionKey}>
+                                      {displayName}:{" "}
+                                      <span className="font-medium text-slate-600">
+                                        {optionValue}
+                                      </span>
+                                    </span>
+                                  );
+                                }
+                              )}
+
+                            {/* Separator */}
+                            {item.selectedVariant && (
+                              <span className="text-slate-300">|</span>
+                            )}
+
+                            <span>
+                              {t("quantityLabel")}:{" "}
+                              <span className="font-medium text-slate-600">
+                                {item.quantity}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                        <p className="font-medium text-slate-800 whitespace-nowrap">
+                          {(itemPrice * item.quantity).toFixed(2)}{" "}
+                          {t("currency")}
                         </p>
                       </div>
-                      <p className="font-medium text-slate-800 whitespace-nowrap">
-                        {(item.product.price * item.quantity).toFixed(2)}{" "}
-                        {t("currency")}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <dl className="space-y-3 text-slate-600 border-t border-slate-200 mt-4 pt-4">
                   <div className="flex items-center justify-between font-medium">

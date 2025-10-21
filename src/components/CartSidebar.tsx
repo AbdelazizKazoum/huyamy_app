@@ -38,10 +38,10 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
 
   const subtotal = useMemo(
     () =>
-      selectedItems.reduce(
-        (total, item) => total + item.product.price * item.quantity,
-        0
-      ),
+      selectedItems.reduce((total, item) => {
+        const price = item.selectedVariant?.price ?? item.product.price;
+        return total + price * item.quantity;
+      }, 0),
     [selectedItems]
   );
 
@@ -123,77 +123,114 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                 </div>
 
                 <div className="flex-grow overflow-y-auto p-4 space-y-4">
-                  {items.map((item) => (
-                    <div
-                      key={item.cartItemId} // Use cartItemId as key
-                      className="flex items-start gap-4"
-                    >
-                      <Checkbox
-                        className="mt-1"
-                        checked={item.selected}
-                        onCheckedChange={
-                          () => toggleItemSelected(item.cartItemId) // Use cartItemId here
-                        }
-                      />
-                      <Image
-                        src={item.product.image}
-                        alt={item.product.name[lang || "ar"]}
-                        width={80}
-                        height={80}
-                        className="w-20 h-20 object-cover rounded-md border border-slate-200"
-                      />
-                      <div className="flex-grow">
-                        <h3 className="font-semibold text-slate-800 text-sm leading-tight">
-                          {item.product.name[lang || "ar"]}
-                        </h3>
-                        <p className="text-slate-500 text-xs mt-1">
-                          {item.product.price.toFixed(2)} {currency}
-                        </p>
-                        <div className="flex items-end justify-between mt-3">
-                          <div className="flex items-center border border-slate-200 rounded-md">
-                            <button
-                              onClick={() =>
-                                updateQuantity(
-                                  item.cartItemId, // Use cartItemId here
-                                  item.quantity - 1
-                                )
-                              }
-                              disabled={item.quantity <= 1}
-                              className="p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
-                            >
-                              <Minus size={14} />
-                            </button>
-                            <span className="px-3 font-bold text-slate-800 text-sm">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() =>
-                                updateQuantity(
-                                  item.cartItemId, // Use cartItemId here
-                                  item.quantity + 1
-                                )
-                              }
-                              className="p-1.5 text-slate-500 hover:bg-slate-100"
-                            >
-                              <Plus size={14} />
-                            </button>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-green-700 text-sm">
-                              {(item.product.price * item.quantity).toFixed(2)}{" "}
-                              {currency}
-                            </span>
-                            <button
-                              onClick={() => removeItem(item.cartItemId)} // Use cartItemId here
-                              className="p-1 text-slate-400 hover:text-red-600"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                  {items.map((item) => {
+                    const itemPrice =
+                      item.selectedVariant?.price ?? item.product.price;
+                    const itemImage =
+                      item.selectedVariant?.image ?? item.product.image;
+                    const productName =
+                      item.product.name[lang] ||
+                      item.product.name.ar ||
+                      "Product";
+                    return (
+                      <div
+                        key={item.cartItemId}
+                        className="flex items-start gap-4"
+                      >
+                        <Checkbox
+                          className="mt-1"
+                          checked={item.selected}
+                          onCheckedChange={() =>
+                            toggleItemSelected(item.cartItemId)
+                          }
+                        />
+                        <Image
+                          src={itemImage}
+                          alt={productName}
+                          width={80}
+                          height={80}
+                          className="w-20 h-20 object-cover rounded-md border border-slate-200"
+                        />
+                        <div className="flex-grow">
+                          <h3 className="font-semibold text-slate-800 text-sm leading-tight">
+                            {productName}
+                          </h3>
+                          {/* Variant Options */}
+                          {item.selectedVariant && (
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                              {Object.entries(item.selectedVariant.options).map(
+                                ([optionKey, optionValue]) => {
+                                  const variantOption =
+                                    item.product.variantOptions?.find(
+                                      (opt) => opt.name.fr === optionKey
+                                    );
+                                  const displayName = variantOption
+                                    ? variantOption.name[lang]
+                                    : optionKey;
+                                  return (
+                                    <span
+                                      key={optionKey}
+                                      className="text-xs text-slate-500"
+                                    >
+                                      {displayName}:{" "}
+                                      <span className="font-medium text-slate-600">
+                                        {optionValue}
+                                      </span>
+                                    </span>
+                                  );
+                                }
+                              )}
+                            </div>
+                          )}
+                          <p className="text-slate-500 text-xs mt-1">
+                            {itemPrice.toFixed(2)} {currency}
+                          </p>
+                          <div className="flex items-end justify-between mt-3">
+                            <div className="flex items-center border border-slate-200 rounded-md">
+                              <button
+                                onClick={() =>
+                                  updateQuantity(
+                                    item.cartItemId,
+                                    item.quantity - 1
+                                  )
+                                }
+                                disabled={item.quantity <= 1}
+                                className="p-1.5 text-slate-500 hover:bg-slate-100 disabled:opacity-50"
+                              >
+                                <Minus size={14} />
+                              </button>
+                              <span className="px-3 font-bold text-slate-800 text-sm">
+                                {item.quantity}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  updateQuantity(
+                                    item.cartItemId,
+                                    item.quantity + 1
+                                  )
+                                }
+                                className="p-1.5 text-slate-500 hover:bg-slate-100"
+                              >
+                                <Plus size={14} />
+                              </button>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-green-700 text-sm">
+                                {(itemPrice * item.quantity).toFixed(2)}{" "}
+                                {currency}
+                              </span>
+                              <button
+                                onClick={() => removeItem(item.cartItemId)}
+                                className="p-1 text-slate-400 hover:text-red-600"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="p-4 border-t border-slate-200 bg-white">

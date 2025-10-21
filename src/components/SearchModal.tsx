@@ -5,13 +5,13 @@ import { Search, X } from "lucide-react";
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
-  placeholder: string;
+  currentLocale: string;
 }
 
 const SearchModal: React.FC<SearchModalProps> = ({
   isOpen,
   onClose,
-  placeholder,
+  currentLocale,
 }) => {
   const searchRef = useRef<HTMLDivElement>(null);
   const [searchValue, setSearchValue] = useState("");
@@ -54,7 +54,11 @@ const SearchModal: React.FC<SearchModalProps> = ({
           >
             <input
               type="text"
-              placeholder={placeholder}
+              placeholder={
+                currentLocale === "ar"
+                  ? "ابحث عن منتجك المفضل..."
+                  : "Recherchez votre produit préféré..."
+              }
               autoFocus
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}

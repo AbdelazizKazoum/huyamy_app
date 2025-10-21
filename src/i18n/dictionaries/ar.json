@@ -242,5 +242,21 @@
     "invalid-email": "البريد الإلكتروني غير صالح.",
     "invalidEmail": "البريد الإلكتروني غير صالح",
     "passwordTooShort": "كلمة المرور قصيرة جدًا"
+  },
+  "header": {
+    "home": "الرئيسية",
+    "products": "المتجر",
+    "contact": "تواصل معنا",
+    "categories": "الفئات",
+    "search": "بحث",
+    "language": "اللغة",
+    "account": "الحساب",
+    "signin": "تسجيل الدخول",
+    "signup": "إنشاء حساب",
+    "profile": "الملف الشخصي",
+    "logout": "تسجيل الخروج",
+    "cart": "السلة",
+    "yourName": "اسمك",
+    "yourEmail": "your.email@example.com"
   }
 }
