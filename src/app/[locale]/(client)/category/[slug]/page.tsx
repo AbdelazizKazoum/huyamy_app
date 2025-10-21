@@ -3,7 +3,7 @@ import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Product, Category, Locale } from "@/types";
-import { CACHE_CONFIG } from "@/lib/cache/tags";
+import { CACHE_CONFIG, CACHE_TAGS } from "@/lib/cache/tags";
 import ProductsClient from "@/app/[locale]/(client)/products/components/ProductsClient";
 import ProductsLoadingSkeleton from "@/app/[locale]/(client)/products/components/ProductsLoadingSkeleton";
 import { getCategories } from "@/lib/services/categoryService";
@@ -50,8 +50,8 @@ const getCachedProductsByCategory = (slug: string) =>
     },
     [`products-by-category-${slug}`],
     {
-      revalidate: CACHE_CONFIG.PRODUCTS.revalidate,
-      tags: [...CACHE_CONFIG.PRODUCTS.tags, `category:${slug}`],
+      revalidate: CACHE_CONFIG.CATEGORIES.revalidate,
+      tags: [CACHE_TAGS.CATEGORIES, `category:${slug}`],
     }
   )();
 
