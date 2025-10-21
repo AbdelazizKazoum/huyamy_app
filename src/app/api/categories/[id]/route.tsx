@@ -58,6 +58,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     revalidatePath("/fr/products");
     revalidatePath("/ar/products");
 
+    // Revalidate the category pages for both languages
+    // revalidatePath(`/category/${updateData.slug}`);
+    revalidatePath(`/fr/category/${updateData.slug}`);
+    revalidatePath(`/ar/category/${updateData.slug}`);
+
     return NextResponse.json({ message: "Category updated successfully" });
   } catch (error) {
     console.error(`Failed to update category:`, error);
@@ -95,6 +100,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Revalidate the products pages
     revalidatePath("/fr/products");
     revalidatePath("/ar/products");
+
+    // Revalidate the category pages for both languages
+    if (categoryToDelete?.slug) {
+      // revalidatePath(`/category/${categoryToDelete.slug}`);
+      revalidatePath(`/fr/category/${categoryToDelete.slug}`);
+      revalidatePath(`/ar/category/${categoryToDelete.slug}`);
+    }
 
     return NextResponse.json({ message: "Category deleted successfully" });
   } catch (error) {
