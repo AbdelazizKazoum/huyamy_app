@@ -94,6 +94,7 @@ export async function POST(request: Request) {
 
     // 5. Revalidate category pages for the new product
     if (finalProduct.category?.slug) {
+      revalidatePath(`/category/${finalProduct.category.slug}`);
       revalidatePath(`/fr/category/${finalProduct.category.slug}`);
       revalidatePath(`/ar/category/${finalProduct.category.slug}`);
     }

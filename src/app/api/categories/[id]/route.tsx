@@ -59,7 +59,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     revalidatePath("/ar/products");
 
     // Revalidate the category pages for both languages
-    // revalidatePath(`/category/${updateData.slug}`);
+    revalidatePath(`/category/${updateData.slug}`);
     revalidatePath(`/fr/category/${updateData.slug}`);
     revalidatePath(`/ar/category/${updateData.slug}`);
 
