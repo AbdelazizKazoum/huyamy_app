@@ -74,8 +74,8 @@ export const siteConfig: SiteConfig = {
   },
   url: "https://huyamybio.com",
   baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://huyamybio.com",
-  logo: "/images/huyami_logo.jpeg",
-  ogImage: "/images/huyami_logo.jpeg", // Default OG image
+  logo: "/images/logo.png",
+  ogImage: "/images/logo.png", // Default OG image
   keywords: {
     ar: [
       "زيت الأرغان",
@@ -131,7 +131,7 @@ export const siteConfig: SiteConfig = {
   location: "Dr boughanim assadss ouled teima", // or "Agadir, Morocco" or any string
   locationCoordinates: {
     lat: 30.427755,
-    lng: -9.598107,
+    lng: -9.020992,
   },
   manifest: "/manifest.json",
   verification: {

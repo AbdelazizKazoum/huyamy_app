@@ -46,7 +46,7 @@ const HeroSection: React.FC = () => {
       >
         <a href="#" className="block">
           <Image
-            src="/images/banner.jpeg"
+            src="/images/banner4.jpg"
             alt={t("promoAlt")}
             width={1600}
             height={450}

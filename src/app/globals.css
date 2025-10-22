@@ -1,31 +1,31 @@
 @import "tailwindcss";
 
 @theme {
-  /* Primary Brand Colors - Green Palette */
-  --color-primary-50: #f0fdf4; /* Very light green for subtle backgrounds */
-  --color-primary-100: #dcfce7; /* Light green for subtle highlights */
-  --color-primary-200: #bbf7d0; /* Light green */
-  --color-primary-300: #86efac; /* Medium light green */
-  --color-primary-400: #4ade80; /* Medium green */
-  --color-primary-500: #22c55e; /* Standard green */
-  --color-primary-600: #16a34a; /* Medium dark green */
-  --color-primary-700: #15803d; /* Dark green - main brand color */
-  --color-primary-800: #166534; /* Very dark green - primary buttons */
-  --color-primary-900: #14532d; /* Darkest green - text and accents */
+  /* Primary Brand Colors - Sky Blue Palette (Inspired by banner) */
+  --color-primary-50: #f0f9ff; /* Very light blue */
+  --color-primary-100: #e0f2fe; /* Light blue */
+  --color-primary-200: #bae6fd; /* Light blue */
+  --color-primary-300: #7dd3fc; /* Medium light blue */
+  --color-primary-400: #38bdf8; /* Medium blue */
+  --color-primary-500: #0ea5e9; /* Standard blue (sky) */
+  --color-primary-600: #0284c7; /* Medium dark blue (brushstroke) */
+  --color-primary-700: #0369a1; /* Dark blue - main brand color */
+  --color-primary-800: #075985; /* Very dark blue - primary buttons */
+  --color-primary-900: #0c4a6e; /* Darkest blue - text and accents */
 
-  /* Secondary Brand Colors - Amber Palette */
-  --color-secondary-50: #fffbeb; /* Very light amber background */
-  --color-secondary-100: #fef3c7; /* Light amber background */
-  --color-secondary-200: #fde68a; /* Light amber */
-  --color-secondary-300: #fcd34d; /* Medium light amber */
-  --color-secondary-400: #fbbf24; /* Medium amber - logo color */
-  --color-secondary-500: #f59e0b; /* Standard amber - badges/highlights */
-  --color-secondary-600: #d97706; /* Medium dark amber */
-  --color-secondary-700: #b45309; /* Dark amber */
-  --color-secondary-800: #92400e; /* Very dark amber */
-  --color-secondary-900: #78350f; /* Darkest amber */
+  /* Secondary Brand Colors - Sand/Tan Palette (Inspired by banner) */
+  --color-secondary-50: #fffbeb; /* Very light sand background */
+  --color-secondary-100: #fef3c7; /* Light sand background */
+  --color-secondary-200: #fde68a; /* Light sand */
+  --color-secondary-300: #fcd34d; /* Medium light sand */
+  --color-secondary-400: #fbbf24; /* Medium sand */
+  --color-secondary-500: #f59e0b; /* Standard sand - badges/highlights */
+  --color-secondary-600: #d97706; /* Medium dark sand */
+  --color-secondary-700: #b45309; /* Dark sand */
+  --color-secondary-800: #92400e; /* Very dark sand */
+  --color-secondary-900: #78350f; /* Darkest sand */
 
-  /* Neutral Colors - Gray Palette */
+  /* Neutral Colors - Gray/Black Palette (For frames, text) */
   --color-neutral-50: #f9fafb; /* Very light background */
   --color-neutral-100: #f3f4f6; /* Light background */
   --color-neutral-200: #e5e7eb; /* Light borders */
@@ -39,9 +39,13 @@
 
   /* Background Colors */
   --color-background-primary: #ffffff; /* Main white background */
-  --color-background-secondary: #f7f6f2; /* Warm off-white background */
+  --color-background-secondary: var(
+    --color-secondary-50
+  ); /* Warm off-white (light sand) */
   --color-background-tertiary: #f5f5f4; /* Stone background */
-  --color-background-accent: #fffbeb; /* Light amber background */
+  --color-background-accent: var(
+    --color-primary-50
+  ); /* Light blue background */
 
   /* Text Colors */
   --color-text-primary: var(--color-neutral-800); /* Main dark text */
@@ -51,20 +55,22 @@
   --color-text-inverse: #ffffff; /* White text on dark backgrounds */
 
   /* Brand Specific Colors */
-  --color-brand-primary: var(--color-primary-800); /* Main brand green */
-  --color-brand-secondary: var(--color-secondary-500); /* Brand amber */
-  --color-brand-accent: var(--color-primary-700); /* Accent green */
+  --color-brand-primary: var(--color-primary-700); /* Main brand blue */
+  --color-brand-secondary: var(--color-secondary-500); /* Brand sand/amber */
+  --color-brand-accent: var(--color-primary-600); /* Accent blue */
 
   /* Interactive Colors */
-  --color-hover-primary: var(--color-primary-900); /* Green hover state */
-  --color-hover-secondary: var(--color-secondary-600); /* Amber hover state */
+  --color-hover-primary: var(--color-primary-900); /* Blue hover state */
+  --color-hover-secondary: var(
+    --color-secondary-600
+  ); /* Sand/amber hover state */
   --color-focus: var(--color-primary-700); /* Focus ring color */
 
   /* Status Colors */
-  --color-success: var(--color-primary-600); /* Success green */
-  --color-warning: var(--color-secondary-500); /* Warning amber */
+  --color-success: #16a34a; /* Standard green (decoupled from primary) */
+  --color-warning: var(--color-secondary-500); /* Warning amber/sand */
   --color-error: #dc2626; /* Error red */
-  --color-info: #2563eb; /* Info blue */
+  --color-info: var(--color-primary-600); /* Info blue (brand-aligned) */
 
   /* Utility Colors */
   --color-white: #ffffff;
