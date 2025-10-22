@@ -2,13 +2,19 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { siteConfig } from "@/config/site"; // Import site config
+import { siteConfig } from "@/config/site";
+
+const LOCALSTORAGE_KEY = "hideInstallPromptUntil";
 
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [showInstall, setShowInstall] = useState(false);
 
   useEffect(() => {
+    // Check if the prompt should be hidden
+    const hideUntil = localStorage.getItem(LOCALSTORAGE_KEY);
+    if (hideUntil && Date.now() < Number(hideUntil)) return;
+
     const handler = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -32,7 +38,12 @@ export default function InstallPrompt() {
     }
   };
 
-  const handleClose = () => setShowInstall(false);
+  const handleClose = () => {
+    // Hide for 1 hour
+    const oneHour = 60 * 60 * 1000;
+    localStorage.setItem(LOCALSTORAGE_KEY, String(Date.now() + oneHour));
+    setShowInstall(false);
+  };
 
   if (!showInstall) return null;
 
@@ -109,7 +120,7 @@ export default function InstallPrompt() {
         <button
           onClick={handleInstallClick}
           style={{
-            background: "#059669",
+            background: "#7403b6",
             color: "#fff",
             border: "none",
             borderRadius: 8,
