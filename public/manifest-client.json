@@ -1,6 +1,6 @@
 {
-  "name": "Huyamy Store",
-  "short_name": "Huyamy",
+  "name": "dalia Store",
+  "short_name": "dalia",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -9,12 +9,12 @@
   "description": "اكتشف أفضل المنتجات المغربية الطبيعية في هيوامي. توصيل مجاني.",
   "icons": [
     {
-      "src": "/images/huyami_logo.jpeg",
+      "src": "/images/logo2.png",
       "sizes": "192x192",
       "type": "image/jpeg"
     },
     {
-      "src": "/images/huyami_logo.jpeg",
+      "src": "/images/logo2.png",
       "sizes": "512x512",
       "type": "image/jpeg"
     }
