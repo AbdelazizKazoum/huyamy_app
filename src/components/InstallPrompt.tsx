@@ -2,6 +2,7 @@
 "use client";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { siteConfig } from "@/config/site"; // Import site config
 
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -89,8 +90,8 @@ export default function InstallPrompt() {
           }}
         >
           <Image
-            src="/images/huyami_logo.jpeg"
-            alt="Huyamy Logo"
+            src={siteConfig.logo}
+            alt={`${siteConfig.name} Logo`}
             width={64}
             height={64}
             style={{
@@ -100,7 +101,7 @@ export default function InstallPrompt() {
           />
         </div>
         <h2 style={{ fontWeight: 700, fontSize: "1.3rem", marginBottom: 8 }}>
-          تثبيت تطبيق هيوامي
+          تثبيت تطبيق {siteConfig.name}
         </h2>
         <p style={{ color: "#444", marginBottom: 20, fontSize: "1rem" }}>
           احصل على تجربة أفضل من خلال تثبيت التطبيق على هاتفك!
