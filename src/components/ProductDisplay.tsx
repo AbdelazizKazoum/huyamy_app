@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Language, Product, ProductVariant } from "@/types";
+import { Language, Product, ProductVariant, Section } from "@/types";
 import { Star } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { features } from "@/data/features";
@@ -15,6 +15,7 @@ import ProductVariantSelector from "./ProductVariantSelector";
 interface ProductDisplayProps {
   product: Product;
   locale: Language;
+  alsoChooseSections?: Section[]; // <-- Add this prop
 }
 
 const findVariant = (
@@ -31,7 +32,11 @@ const findVariant = (
   );
 };
 
-const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, locale }) => {
+const ProductDisplay: React.FC<ProductDisplayProps> = ({
+  product,
+  locale,
+  alsoChooseSections = [], // <-- Default to empty array
+}) => {
   const currency = siteConfig.currencies[locale];
 
   // Initialize selected options with the first value of each option type
@@ -178,6 +183,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, locale }) => {
                     product={product}
                     lang={locale}
                     selectedVariant={selectedVariant}
+                    alsoChooseSections={alsoChooseSections} // <-- Pass here
                   />
                 )}
               </div>

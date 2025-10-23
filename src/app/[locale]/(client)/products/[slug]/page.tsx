@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import React from "react";
-import { Language, Product } from "@/types";
+import { Language, Product, Section } from "@/types";
 import { unstable_cache } from "next/cache";
 import { getProductBySlug } from "@/lib/services/productService";
 import { CACHE_CONFIG } from "@/lib/cache/tags";
 import { siteConfig } from "@/config/site";
 import ProductDisplay from "@/components/ProductDisplay"; // <-- Import the new display component
+import { getSectionsByType } from "@/lib/services/sectionService";
 
 type Props = {
   params: Promise<{ locale: Language; slug: string }>;
@@ -37,6 +39,20 @@ const serializeProduct = (product: any): Product => {
       : product.category,
   };
 };
+
+// Example: Serialize section timestamps
+function serializeSection(section: any): Section {
+  return {
+    ...section,
+    createdAt: section.createdAt?.toDate?.()
+      ? section.createdAt.toDate().toISOString()
+      : section.createdAt,
+    updatedAt: section.updatedAt?.toDate?.()
+      ? section.updatedAt.toDate().toISOString()
+      : section.updatedAt,
+    // Add similar logic for nested objects if needed
+  };
+}
 
 // Cache the product fetching function
 const getCachedProductBySlug = unstable_cache(
@@ -348,6 +364,10 @@ export default async function ProductDetailsPage({ params }: Props) {
     notFound();
   }
 
+  // Get "also-choose" section with ISR
+  const rawSections = await getSectionsByType("also-choose");
+  const alsoChooseSections = rawSections.map(serializeSection);
+
   return (
     <>
       {/* Structured Data */}
@@ -358,10 +378,15 @@ export default async function ProductDetailsPage({ params }: Props) {
       />
       <BreadcrumbStructuredData product={product} locale={locale} />
 
-      {/* Render the client component with the fetched data */}
-      <ProductDisplay product={product} locale={locale} />
+      {/* Pass alsoChooseSections to ProductDisplay */}
+      <ProductDisplay
+        product={product}
+        locale={locale}
+        alsoChooseSections={alsoChooseSections}
+      />
     </>
   );
 }
+
 // Enable ISR for this page
-// export const revalidate = CACHE_CONFIG.PRODUCT_DETAIL.revalidate;
+export const revalidate = CACHE_CONFIG.PRODUCT_DETAIL.revalidate;

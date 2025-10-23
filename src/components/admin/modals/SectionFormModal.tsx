@@ -39,6 +39,7 @@ const sectionTypeOptions: {
     value: "featured",
     label: { ar: "منتجات موصى بها", fr: "Produits Recommandés" },
   },
+  { value: "also-choose", label: { ar: "اختر أيضًا", fr: "Choisissez aussi" } }, // <-- Added option
 ];
 
 const SectionFormModal: React.FC<SectionFormModalProps> = ({

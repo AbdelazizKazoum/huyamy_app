@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Product, Language, ProductVariant } from "@/types";
+import { Product, Language, ProductVariant, Section } from "@/types";
 import { useCartStore } from "@/store/useCartStore";
 import { useTranslations } from "next-intl";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
@@ -11,12 +11,14 @@ interface AddToCartFormProps {
   product: Product;
   lang: Language;
   selectedVariant: ProductVariant | null;
+  alsoChooseSections?: Section[]; // <-- Add this prop
 }
 
 const AddToCartForm: React.FC<AddToCartFormProps> = ({
   product,
   lang,
   selectedVariant,
+  alsoChooseSections = [], // <-- Default to empty array
 }) => {
   const [quantity, setQuantity] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,7 +38,7 @@ const AddToCartForm: React.FC<AddToCartFormProps> = ({
     addItem(product, quantity, selectedVariant);
     setIsModalOpen(true);
 
-    setTimeout(() => {3+3
+    setTimeout(() => {
       setIsSubmitting(false);
     }, 1000);
   };
@@ -218,7 +220,8 @@ const AddToCartForm: React.FC<AddToCartFormProps> = ({
         product={modalProductDetails}
         quantity={quantity}
         lang={lang}
-        selectedVariant={selectedVariant} // Pass the variant
+        selectedVariant={selectedVariant}
+        alsoChooseSections={alsoChooseSections} // <-- Pass here
       />
     </>
   );
