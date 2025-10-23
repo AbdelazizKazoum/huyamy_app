@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { Product, Locale, ProductVariant, Section } from "@/types";
 import { CheckCircle, ShoppingCart, X } from "lucide-react";
 import Image from "next/image";
-// REMOVED: useCartStore is no longer needed here
 import { Link } from "@/i18n/config";
 import { AlsoChooseSection } from "./AlsoChooseSection";
 
@@ -15,7 +14,7 @@ interface AddedToCartModalProps {
   quantity: number;
   lang: Locale;
   selectedVariant?: ProductVariant | null;
-  alsoChooseSections?: Section[]; // <-- Add this prop
+  alsoChooseSections?: Section[];
 }
 
 const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
@@ -29,22 +28,20 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
 }) => {
   const t = useTranslations();
 
-  // Log alsoChooseSections to the console
-  console.log("alsoChooseSections:", alsoChooseSections);
+  // Determine if RTL (Arabic)
+  const isRTL = lang === "ar";
 
   // Calculate subtotal based ONLY on the product just added
   const subtotal = product.price * quantity;
-
-  // Determine direction for RTL/LTR
-  const isRTL = lang === "ar";
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className={`fixed inset-0 z-50 flex ${
-          isRTL ? "justify-start" : "justify-end"
-        } items-center`}
+        // FIX 1: Use `justify-end` always.
+        // The `dir` prop below will automatically make `justify-end`
+        // mean "right" in LTR and "left" in RTL.
+        className="fixed inset-0 z-50 flex items-center justify-end"
         onClose={onClose}
         dir={isRTL ? "rtl" : "ltr"}
       >
@@ -61,29 +58,36 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
           <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
         </Transition.Child>
 
-        {/* Modal panel with smooth slide-in from right */}
+        {/* Modal panel with smooth slide-in from right (LTR) or left (RTL) */}
         <Transition.Child
           as={Fragment}
           enter="transition-transform duration-300"
+          // FIX 2: Use `-translate-x-full` for RTL (slide from -100%)
           enterFrom={
             isRTL ? "-translate-x-full opacity-0" : "translate-x-full opacity-0"
           }
           enterTo="translate-x-0 opacity-100"
           leave="transition-transform duration-200"
           leaveFrom="translate-x-0 opacity-100"
+          // FIX 3: Use `-translate-x-full` for RTL (slide to -100%)
           leaveTo={
             isRTL ? "-translate-x-full opacity-0" : "translate-x-full opacity-0"
           }
         >
           <Dialog.Panel
-            className={`w-full max-w-lg h-full overflow-y-auto transform rounded-${
-              isRTL ? "r" : "l"
-            }-2xl bg-white p-6 shadow-xl transition-all relative`}
-            dir={isRTL ? "rtl" : "ltr"}
+            className={`w-full max-w-lg h-full overflow-y-auto transform ${
+              // This logic for rounding was already correct:
+              // LTR (right modal) -> round left corners
+              // RTL (left modal) -> round right corners
+              isRTL ? "rounded-r-2xl" : "rounded-l-2xl"
+            } bg-white p-6 shadow-xl transition-all relative`}
           >
             <button
               onClick={onClose}
               className={`absolute top-4 p-1 text-slate-400 hover:text-slate-800 ${
+                // This logic for the close button was already correct:
+                // LTR (right modal) -> button on the right
+                // RTL (left modal) -> button on the left
                 isRTL ? "left-4" : "right-4"
               }`}
             >
@@ -103,6 +107,7 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
               </p>
             </div>
 
+            {/* This div correctly uses ltr/rtl variants, which respect dir="rtl" */}
             <div className="mt-6 p-4 bg-slate-50 rounded-lg flex items-center gap-4 border border-slate-200 ltr:text-left rtl:text-right">
               <Image
                 src={product.image}
@@ -113,12 +118,10 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
               />
               <div className="flex-grow">
                 <p className="font-bold text-slate-800">{product.name[lang]}</p>
-                {/* Show variant options inline with quantity */}
                 <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-500">
                   {selectedVariant &&
                     Object.entries(selectedVariant.options).map(
                       ([optionKey, value]) => {
-                        // Find the option object from product.variantOptions
                         const optionObj = product.variantOptions?.find(
                           (opt) =>
                             opt.name.fr === optionKey ||
@@ -131,7 +134,6 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
                             className="flex items-center gap-1"
                           >
                             <span className="font-semibold">{optionName}:</span>
-                            {/* If it's a color, show a color swatch */}
                             {optionName.toLowerCase() === "couleur" ||
                             optionName.toLowerCase() === "اللون" ? (
                               <span
@@ -146,7 +148,6 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
                         );
                       }
                     )}
-                  {/* Quantity inline */}
                   <span className="flex items-center gap-1">
                     <span className="font-semibold">{t("cart.quantity")}:</span>
                     <span className="text-slate-700">{quantity}</span>
@@ -158,7 +159,6 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
               </div>
             </div>
 
-            {/* Updated to show only the subtotal of the added item */}
             <div className="mt-6 border-t border-slate-200 pt-4">
               <p className="text-center text-slate-600">
                 <span>
@@ -188,7 +188,6 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
               </Link>
             </div>
 
-            {/* Show the AlsoChooseSection component if available */}
             {alsoChooseSections?.[0] && (
               <AlsoChooseSection section={alsoChooseSections[0]} lang={lang} />
             )}
