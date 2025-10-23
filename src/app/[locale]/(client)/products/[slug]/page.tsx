@@ -15,7 +15,6 @@ type Props = {
 };
 
 // Serialize product data to remove Firestore objects
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const serializeProduct = (product: any): Product => {
   return {
     ...product,
@@ -70,6 +69,19 @@ const getCachedProductBySlug = unstable_cache(
     // but for this use case, slug-specific tags are better handled
     // by revalidateTag.
     // The slug-specific tag is added below for clarity.
+    tags: CACHE_CONFIG.PRODUCT_DETAIL.tags,
+  }
+);
+
+// Cache the "also-choose" sections fetching function
+const getCachedSectionsByType = unstable_cache(
+  async (type: string) => {
+    const rawSections = await getSectionsByType(type);
+    return rawSections.map(serializeSection);
+  },
+  ["also-choose-sections"], // Cache key
+  {
+    revalidate: CACHE_CONFIG.PRODUCT_DETAIL.revalidate,
     tags: CACHE_CONFIG.PRODUCT_DETAIL.tags,
   }
 );
@@ -365,8 +377,7 @@ export default async function ProductDetailsPage({ params }: Props) {
   }
 
   // Get "also-choose" section with ISR
-  const rawSections = await getSectionsByType("also-choose");
-  const alsoChooseSections = rawSections.map(serializeSection);
+  const alsoChooseSections = await getCachedSectionsByType("also-choose");
 
   return (
     <>
@@ -387,6 +398,3 @@ export default async function ProductDetailsPage({ params }: Props) {
     </>
   );
 }
-
-// Enable ISR for this page
-export const revalidate = CACHE_CONFIG.PRODUCT_DETAIL.revalidate;
