@@ -10,6 +10,7 @@ import { ShoppingCart } from "lucide-react";
 import toast from "react-hot-toast";
 import AddedToCartToast from "./AddedToCartToast";
 import { siteConfig } from "@/config/site";
+import { useState } from "react";
 
 interface ProductCardProps {
   product: Product;
@@ -24,6 +25,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const t = useTranslations("products");
   const { addItem } = useCartStore();
+  const [displayImage, setDisplayImage] = useState<string>(product.image);
+  const [activeColor, setActiveColor] = useState<string | null>(null);
+
   const finalCurrency = currency || siteConfig.currencies[lang];
   const originalPriceNum = product.originalPrice || 0;
   let discountPercentage = 0;
@@ -57,8 +61,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
     e.preventDefault();
     e.stopPropagation();
 
-    // If the product has variants, add the first one by default.
-    // Otherwise, pass null for the variant.
     const defaultVariant =
       product.variants && product.variants.length > 0
         ? product.variants[0]
@@ -71,9 +73,41 @@ const ProductCard: React.FC<ProductCardProps> = ({
     ));
   };
 
+  const colorOptionKey = lang === "ar" ? "اللون" : "Couleur";
+  const colorOption = product.variantOptions?.find(
+    (opt) => opt.name[lang] === colorOptionKey
+  );
+  const colorValues = colorOption?.values || [];
+
+  const handleColorClick = (e: React.MouseEvent, color: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setActiveColor(color);
+
+    const variant = product.variants?.find(
+      (v) => v.options[colorOptionKey] === color
+    );
+
+    // Using '(variant as any)' in case 'images' is not in your base type
+    const variantImage = (variant as any)?.images?.[0];
+
+    if (variantImage) {
+      setDisplayImage(variantImage);
+    } else {
+      setDisplayImage(product.image);
+    }
+  };
+
+  // Resets image and color when mouse leaves the entire card
+  const handleCardMouseLeave = () => {
+    setDisplayImage(product.image);
+    setActiveColor(null);
+  };
+
   return (
     <Link href={`/products/${product.slug}`} className="block">
       <article
+        onMouseLeave={handleCardMouseLeave}
         className="group bg-white rounded-lg shadow-sm border border-neutral-200/60 overflow-hidden flex flex-col h-full transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer"
         itemScope
         itemType="https://schema.org/Product"
@@ -82,7 +116,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
           2
         )} ${finalCurrency}`}
       >
-        {/* Product URL for SEO */}
         <meta
           itemProp="url"
           content={`${siteConfig.url}/products/${productSlug}`}
@@ -91,13 +124,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Product Image with Enhanced SEO */}
         <div
-          className="relative overflow-hidden"
+          className="relative overflow-hidden" // This 'relative' is the anchor
           itemProp="image"
           itemScope
           itemType="https://schema.org/ImageObject"
         >
           <Image
-            src={product.image}
+            src={displayImage}
             alt={seoAltText}
             width={400}
             height={224}
@@ -109,19 +142,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <meta itemProp="width" content="400" />
           <meta itemProp="height" content="224" />
 
-          {/* Add to Cart Icon Button - Centered at the bottom of the image */}
-          <button
-            onClick={handleAddToCart}
-            aria-label={t("addToCart")}
-            className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-sm text-primary-800 p-3 rounded-full shadow-md transition-transform duration-300 hover:scale-110 hover:bg-white"
-          >
-            <ShoppingCart size={20} />
-          </button>
-
           {/* Product Status Badges */}
           {product.isNew && (
             <span
-              className="absolute top-3 left-3 bg-secondary-500 text-white text-xs font-semibold px-3 py-1 rounded-full"
+              className="absolute top-3 left-3 bg-secondary-500 text-white text-xs font-semibold px-3 py-1 rounded-full z-10"
               aria-label={lang === "ar" ? "منتج جديد" : "Nouveau produit"}
             >
               {lang === "ar" ? "جديد" : "Nouveau"}
@@ -129,7 +153,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           )}
           {discountPercentage > 0 && (
             <span
-              className="absolute top-3 right-3 bg-secondary-500 text-white text-sm font-extrabold px-4 py-1.5 rounded-full shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6"
+              className="absolute top-3 right-3 bg-secondary-500 text-white text-sm font-extrabold px-4 py-1.5 rounded-full shadow-lg transform transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6 z-10"
               aria-label={
                 lang === "ar"
                   ? `خصم ${discountPercentage} بالمئة`
@@ -141,16 +165,52 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 : `-${discountPercentage}%`}
             </span>
           )}
+
+          {/* --- UPDATED: Color Swatches Overlay --- */}
+          {colorValues.length > 0 && (
+            <div
+              className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex flex-row justify-center items-center gap-2 px-2 py-1.5 transition-opacity duration-300"
+              aria-label="Available colors"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              {colorValues.map((color) => (
+                <button
+                  key={color}
+                  onClick={(e) => handleColorClick(e, color)}
+                  aria-label={`Select color ${color}`}
+                  title={color}
+                  className={`w-6 h-6 rounded-full border-2 transition-all duration-200
+          ring-1 ring-neutral-300 ring-offset-1
+          ${
+            activeColor === color ? "ring-primary-500 ring-2 ring-offset-2" : ""
+          }
+          ${
+            color.toLowerCase() === "white"
+              ? "border-neutral-300"
+              : "border-neutral-400"
+          }
+          shadow-md hover:scale-105`}
+                  style={{
+                    backgroundColor: color,
+                  }}
+                />
+              ))}
+            </div>
+          )}
+          {/* --- End Color Swatches --- */}
         </div>
 
         {/* Product Information */}
         <div className="p-4 text-center flex flex-col flex-grow">
-          {/* Product Name with proper text handling */}
+          {/* Product Name */}
           <div className="h-14 flex items-center justify-center mb-2">
             <h3
-              className="text-lg font-semibold text-neutral-800 leading-tight px-1"
+              className="text-lg font-semibold text-neutral-800 leading-tight px-1 transition-all duration-300 group-hover:underline group-hover:decoration-primary-500 group-hover:underline-offset-4"
               itemProp="name"
-              title={product.name[lang || "ar"]} // Tooltip shows full text on hover
+              title={product.name[lang || "ar"]}
               style={{
                 display: "-webkit-box",
                 WebkitBoxOrient: "vertical",
@@ -160,14 +220,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 wordBreak: "break-word",
                 hyphens: "auto",
                 lineHeight: "1.4",
-                maxHeight: "3.5rem", // 2 lines * 1.75rem line height
+                maxHeight: "3.5rem",
               }}
             >
               {product.name[lang || "ar"]}
             </h3>
           </div>
 
-          {/* Hidden description for SEO */}
           <meta
             itemProp="description"
             content={
@@ -175,7 +234,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
             }
           />
 
-          {/* Brand Information */}
           <div
             itemProp="brand"
             itemScope
@@ -185,9 +243,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <meta itemProp="name" content={siteConfig.brandName} />
           </div>
 
-          {/* Price Information with Schema */}
+          {/* Price Information */}
           <div
-            className="flex items-baseline justify-center gap-2 mb-4"
+            className="flex items-baseline justify-center gap-2 mb-4 mt-auto pt-2"
             itemProp="offers"
             itemScope
             itemType="https://schema.org/Offer"
@@ -219,10 +277,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
           {/* Buy Now Button */}
           <ButtonPrimary
-            className="w-full mt-auto"
+            className="w-full"
             aria-label={`${t("buyNow")} - ${product.name[lang || "ar"]}`}
+            onClick={handleAddToCart}
           >
-            {t("buyNow")}
+            {t("addToCart")}
           </ButtonPrimary>
         </div>
       </article>
