@@ -36,7 +36,7 @@ const AddToCartForm: React.FC<AddToCartFormProps> = ({
     addItem(product, quantity, selectedVariant);
     setIsModalOpen(true);
 
-    setTimeout(() => {
+    setTimeout(() => {3+3
       setIsSubmitting(false);
     }, 1000);
   };
