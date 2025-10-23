@@ -71,7 +71,7 @@ const HeroSection: React.FC = () => {
                 key={feature.id}
                 //@ts-expect-error: framer-motion type mismatch for variants prop on this element
                 variants={cardItemVariants}
-                className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-row md:flex-col items-center text-left md:text-center"
+                className="bg-white p-6 rounded-xl shadow-md   transition-all duration-300 flex flex-row md:flex-col items-center text-left md:text-center"
               >
                 <div
                   className={`flex-shrink-0 ${
