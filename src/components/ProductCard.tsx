@@ -97,17 +97,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
     }
   };
 
-  // Resets image and color when mouse leaves the entire card
   const handleCardMouseLeave = () => {
-    setDisplayImage(product.image);
     setActiveColor(null);
+    setDisplayImage(product.image);
   };
 
   return (
     <Link href={`/products/${product.slug}`} className="block">
       <article
-        onMouseLeave={handleCardMouseLeave}
         className="group bg-white rounded-lg shadow-sm border border-neutral-200/60 overflow-hidden flex flex-col h-full transform transition-all duration-300 hover:shadow-xl hover:-translate-y-2 cursor-pointer"
+        onMouseLeave={handleCardMouseLeave}
         itemScope
         itemType="https://schema.org/Product"
         role="article"
@@ -175,28 +174,25 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 e.stopPropagation();
               }}
             >
-              {colorValues.map((color) => (
-                <button
-                  key={color}
-                  onClick={(e) => handleColorClick(e, color)}
-                  aria-label={`Select color ${color}`}
-                  title={color}
-                  className={`w-6 h-6 rounded-full border-2 transition-all duration-200
-          ring-1 ring-neutral-300 ring-offset-1
-          ${
-            activeColor === color ? "ring-primary-500 ring-2 ring-offset-2" : ""
-          }
-          ${
-            color.toLowerCase() === "white"
-              ? "border-neutral-300"
-              : "border-neutral-400"
-          }
-          shadow-md hover:scale-105`}
-                  style={{
-                    backgroundColor: color,
-                  }}
-                />
-              ))}
+              {colorValues.map((color) => {
+                const isActive = activeColor === color;
+                return (
+                  <button
+                    key={color}
+                    onClick={(e) => handleColorClick(e, color)}
+                    aria-label={`Select color ${color}`}
+                    title={color}
+                    style={{ backgroundColor: color }}
+                    className={`w-6 h-6 rounded-full border transition-all duration-200
+            ${
+              isActive
+                ? "border-primary-500 ring-2 ring-primary-400 ring-offset-2 scale-110"
+                : "border-neutral-200 ring-1 ring-neutral-200 ring-offset-2"
+            }
+            shadow-sm hover:scale-105`}
+                  />
+                );
+              })}
             </div>
           )}
           {/* --- End Color Swatches --- */}
