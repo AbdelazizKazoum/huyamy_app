@@ -44,16 +44,8 @@ const AddToCartForm: React.FC<AddToCartFormProps> = ({
   // Determine the correct product details for the modal
   const modalProductDetails = {
     ...product,
-    name: selectedVariant
-      ? {
-          ar: `${product.name.ar} - ${Object.values(
-            selectedVariant.options
-          ).join(" / ")}`,
-          fr: `${product.name.fr} - ${Object.values(
-            selectedVariant.options
-          ).join(" / ")}`,
-        }
-      : product.name,
+    // Just use the product name, don't append variant options
+    name: product.name,
     price: selectedVariant?.price ?? product.price,
     image: selectedVariant?.image ?? product.image,
   };
@@ -226,6 +218,7 @@ const AddToCartForm: React.FC<AddToCartFormProps> = ({
         product={modalProductDetails}
         quantity={quantity}
         lang={lang}
+        selectedVariant={selectedVariant} // Pass the variant
       />
     </>
   );

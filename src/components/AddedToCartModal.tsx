@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useTranslations } from "next-intl";
-import { Product, Locale } from "@/types";
+import { Product, Locale, ProductVariant } from "@/types";
 import { CheckCircle, ShoppingCart, X } from "lucide-react";
 import Image from "next/image";
 // REMOVED: useCartStore is no longer needed here
@@ -13,6 +13,7 @@ interface AddedToCartModalProps {
   product: Product;
   quantity: number;
   lang: Locale;
+  selectedVariant?: ProductVariant | null; // Add this prop
 }
 
 const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
@@ -21,6 +22,7 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
   product,
   quantity,
   lang,
+  selectedVariant, // Receive the variant
 }) => {
   const t = useTranslations();
 
@@ -93,12 +95,50 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
                     <p className="font-bold text-slate-800">
                       {product.name[lang]}
                     </p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {t("cart.quantity")}:{" "}
-                      <span className="font-semibold text-slate-700">
-                        {quantity}
+                    {/* Show variant options inline with quantity */}
+                    <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-slate-500">
+                      {selectedVariant &&
+                        Object.entries(selectedVariant.options).map(
+                          ([optionKey, value]) => {
+                            // Find the option object from product.variantOptions
+                            const optionObj = product.variantOptions?.find(
+                              (opt) =>
+                                opt.name.fr === optionKey ||
+                                opt.name.ar === optionKey
+                            );
+                            const optionName =
+                              optionObj?.name[lang] || optionKey;
+                            return (
+                              <span
+                                key={optionKey}
+                                className="flex items-center gap-1"
+                              >
+                                <span className="font-semibold">
+                                  {optionName}:
+                                </span>
+                                {/* If it's a color, show a color swatch */}
+                                {optionName.toLowerCase() === "couleur" ||
+                                optionName.toLowerCase() === "اللون" ? (
+                                  <span
+                                    className="inline-block w-4 h-4 rounded-full border border-slate-300"
+                                    style={{ backgroundColor: value }}
+                                    title={value}
+                                  />
+                                ) : (
+                                  <span>{value}</span>
+                                )}
+                              </span>
+                            );
+                          }
+                        )}
+                      {/* Quantity inline */}
+                      <span className="flex items-center gap-1">
+                        <span className="font-semibold">
+                          {t("cart.quantity")}:
+                        </span>
+                        <span className="text-slate-700">{quantity}</span>
                       </span>
-                    </p>
+                    </div>
                     <p className="mt-1 font-semibold text-primary-800">
                       {product.price.toFixed(2)} {t("cart.currency")}
                     </p>
