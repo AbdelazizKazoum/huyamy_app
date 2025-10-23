@@ -120,7 +120,7 @@ export default function InstallPrompt() {
         <button
           onClick={handleInstallClick}
           style={{
-            background: "#7403b6",
+            background: "#2563eb",
             color: "#fff",
             border: "none",
             borderRadius: 8,
