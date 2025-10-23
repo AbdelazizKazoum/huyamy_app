@@ -162,20 +162,35 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                                 ([optionKey, optionValue]) => {
                                   const variantOption =
                                     item.product.variantOptions?.find(
-                                      (opt) => opt.name.fr === optionKey
+                                      (opt) =>
+                                        opt.name.fr === optionKey ||
+                                        opt.name.ar === optionKey
                                     );
                                   const displayName = variantOption
                                     ? variantOption.name[lang]
                                     : optionKey;
+                                  const isColorOption =
+                                    displayName.toLowerCase() === "couleur" ||
+                                    displayName.toLowerCase() === "اللون";
                                   return (
                                     <span
                                       key={optionKey}
-                                      className="text-xs text-slate-500"
+                                      className="text-xs text-slate-500 flex items-center gap-1"
                                     >
-                                      {displayName}:{" "}
-                                      <span className="font-medium text-slate-600">
-                                        {optionValue}
-                                      </span>
+                                      {displayName}:
+                                      {isColorOption ? (
+                                        <span
+                                          className="inline-block w-4 h-4 rounded-full border border-slate-300"
+                                          style={{
+                                            backgroundColor: optionValue,
+                                          }}
+                                          title={optionValue}
+                                        />
+                                      ) : (
+                                        <span className="font-medium text-slate-600">
+                                          {optionValue}
+                                        </span>
+                                      )}
                                     </span>
                                   );
                                 }

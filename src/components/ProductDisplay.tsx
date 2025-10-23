@@ -61,8 +61,10 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, locale }) => {
         <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Product Gallery */}
-            <div>
-              <ProductImageGallery product={product} lang={locale} />
+            <div className="relative">
+              <div className="lg:sticky lg:top-24">
+                <ProductImageGallery product={product} lang={locale} />
+              </div>
             </div>
 
             {/* Product Details & Form */}
