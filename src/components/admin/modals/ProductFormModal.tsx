@@ -14,15 +14,17 @@ import {
   VariantOption,
   ProductVariant,
 } from "@/types";
-import { PlusCircle, Trash2, UploadCloud, X } from "lucide-react";
+import { PlusCircle, Trash2, UploadCloud, X, Palette } from "lucide-react"; // Added Palette
 import Image from "next/image";
 import FormInput from "../ui/FormInput";
 import FormTextarea from "../ui/FormTextarea";
-import CustomSelect from "../ui/CustomSelect"; // <-- IMPORT THE NEW COMPONENT
+import CustomSelect from "../ui/CustomSelect";
 import FormToggle from "../ui/FormToggle";
 import SubmitButton from "../ui/SubmitButton";
 import CancelButton from "../ui/CancelButton";
+import ColorPickerModal from "./ColorPickerModal";
 
+// ... (rest of the PREDEFINED_OPTIONS, generateCombinations, and interface)
 // --- Predefined list of common variant options with placeholders ---
 const PREDEFINED_OPTIONS = [
   { ar: "الحجم", fr: "Taille", placeholder: "مثال: S, M, L, XL" },
@@ -108,12 +110,19 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [optionValueInputs, setOptionValueInputs] = useState<{
     [key: number]: string;
   }>({});
-  // New state to track which options are custom
   const [customOptionFlags, setCustomOptionFlags] = useState<{
     [key: number]: boolean;
   }>({});
 
-  // --- State Initialization Effect ---
+  // --- NEW: Color Picker State ---
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const [currentColorPickerIndex, setCurrentColorPickerIndex] = useState<
+    number | null
+  >(null);
+  const [pickerColor, setPickerColor] = useState("#ffffff");
+  // --- END NEW ---
+
+  // ... (State Initialization Effect)
   useEffect(() => {
     if (product) {
       // ... existing state population
@@ -189,7 +198,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     setErrors({});
   }, [product, isOpen]);
 
-  // --- Variant Generation Effect ---
+  // ... (Variant Generation Effect)
   useEffect(() => {
     if (!hasVariants) return;
 
@@ -215,6 +224,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   }, [variantOptions, hasVariants]);
 
   // --- Variant UI Handlers ---
+  // ... (addVariantOption, removeVariantOption, handleOptionNameChange, updateCustomOptionName)
   const addVariantOption = () => {
     setVariantOptions([
       ...variantOptions,
@@ -290,6 +300,25 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       )
     );
   };
+
+  // --- NEW: Color Picker Submit Handler ---
+  const handleColorPickerSubmit = () => {
+    if (currentColorPickerIndex === null) return;
+
+    const value = pickerColor; // Get color from picker state
+    const newOptions = [...variantOptions];
+
+    // Add the new color value if it doesn't already exist
+    if (!newOptions[currentColorPickerIndex].values.includes(value)) {
+      newOptions[currentColorPickerIndex].values.push(value);
+      setVariantOptions(newOptions);
+    }
+
+    // Close the picker and reset state
+    setIsColorPickerOpen(false);
+    setCurrentColorPickerIndex(null);
+  };
+  // --- END NEW ---
 
   // --- Existing Handlers (handleMainImageChange, etc.) ---
   // ... all existing handlers remain here ...
@@ -383,7 +412,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   };
 
   const validate = (): boolean => {
-    // ... existing validation logic ...
     const newErrors: Partial<Record<string, string>> = {};
 
     if (!nameAr.trim()) newErrors.nameAr = "اسم المنتج بالعربية مطلوب.";
@@ -392,21 +420,16 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       newErrors.descriptionAr = "وصف المنتج بالعربية مطلوب.";
     if (!descriptionFr.trim())
       newErrors.descriptionFr = "وصف المنتج بالفرنسية مطلوب.";
-    if (!price || Number(price) <= 0)
+    // Only validate price if there are no variants
+    if (!hasVariants && (!price || Number(price) <= 0))
       newErrors.price = "السعر يجب أن يكون رقمًا موجبًا.";
-    // Validate that a category has been selected
     if (!selectedCategoryJSON) newErrors.categoryId = "يجب اختيار فئة.";
-
-    // Main image is required only for new products.
     if (!product && !mainImage) {
       newErrors.mainImage = "الصورة الرئيسية مطلوبة لمنتج جديد.";
     }
-
-    // Ensure at least one purchase option is enabled
     if (!allowDirectPurchase && !allowAddToCart) {
       newErrors.purchaseOptions = "يجب تفعيل خيار شراء واحد على الأقل.";
     }
-    // --- New Variant Validation ---
     if (hasVariants) {
       if (variantOptions.some((o) => !o.name.ar.trim() || !o.name.fr.trim())) {
         newErrors.variants = "يجب تسمية جميع خيارات المنتج باللغتين.";
@@ -423,6 +446,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
+  // ... (handleSubmit)
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!validate() || isSubmitting) {
@@ -517,6 +541,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         onSubmit={handleSubmit}
         className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col"
       >
+        {/* ... (Modal Header) */}
         <div className="flex justify-between items-center p-4 border-b border-neutral-200">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
           <button
@@ -528,9 +553,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             <X size={24} />
           </button>
         </div>
+
         <div className="overflow-y-auto p-6 space-y-6">
           <fieldset disabled={isSubmitting} className="space-y-6">
-            {/* --- Existing Form Fields --- */}
+            {/* ... (Existing Form Fields - Name, Desc, Price, etc.) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-6">
@@ -552,40 +578,94 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   required
                 />
                 <div className="grid grid-cols-2 gap-4">
-                  <FormInput
-                    label="السعر الأساسي (د.م.)"
-                    id="price"
-                    type="number"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    error={errors.price}
-                    required
-                    disabled={hasVariants}
-                  />
-                  <FormInput
-                    label="السعر الأصلي (اختياري)"
-                    id="originalPrice"
-                    type="number"
-                    value={originalPrice}
-                    onChange={(e) => setOriginalPrice(e.target.value)}
-                    disabled={hasVariants}
-                  />
+                  {!hasVariants && (
+                    <>
+                      <FormInput
+                        label="السعر الأساسي (د.م.)"
+                        id="price"
+                        type="number"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        error={errors.price}
+                        required
+                      />
+                      <FormInput
+                        label="السعر الأصلي (اختياري)"
+                        id="originalPrice"
+                        type="number"
+                        value={originalPrice}
+                        onChange={(e) => setOriginalPrice(e.target.value)}
+                      />
+                    </>
+                  )}
+                  {hasVariants && (
+                    <>
+                      {/* When variants, show category and keywords side by side */}
+                      <CustomSelect
+                        label="الفئة"
+                        value={selectedCategoryJSON}
+                        onChange={(value) => setSelectedCategoryJSON(value)}
+                        error={errors.categoryId}
+                      >
+                        <option value="" disabled>
+                          -- اختر فئة --
+                        </option>
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={JSON.stringify(cat)}>
+                            {cat.name[lang]}
+                          </option>
+                        ))}
+                      </CustomSelect>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          الكلمات المفتاحية (افصل بينها بفاصلة ,)
+                        </label>
+                        <div className="flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md focus-within:ring-1 focus-within:ring-green-700">
+                          {keywords.map((kw, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-1 bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full"
+                            >
+                              {kw}
+                              <button
+                                type="button"
+                                onClick={() => removeKeyword(kw)}
+                                className="text-green-600 hover:text-green-800"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                          <input
+                            type="text"
+                            value={keywordsInput}
+                            onChange={handleKeywordsChange}
+                            onKeyDown={handleKeywordKeyDown}
+                            className="flex-grow bg-transparent focus:outline-none"
+                            placeholder="أضف كلمة مفتاحية..."
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
-                <CustomSelect
-                  label="الفئة"
-                  value={selectedCategoryJSON}
-                  onChange={(value) => setSelectedCategoryJSON(value)}
-                  error={errors.categoryId}
-                >
-                  <option value="" disabled>
-                    -- اختر فئة --
-                  </option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={JSON.stringify(cat)}>
-                      {cat.name[lang]}
+                {!hasVariants && (
+                  <CustomSelect
+                    label="الفئة"
+                    value={selectedCategoryJSON}
+                    onChange={(value) => setSelectedCategoryJSON(value)}
+                    error={errors.categoryId}
+                  >
+                    <option value="" disabled>
+                      -- اختر فئة --
                     </option>
-                  ))}
-                </CustomSelect>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={JSON.stringify(cat)}>
+                        {cat.name[lang]}
+                      </option>
+                    ))}
+                  </CustomSelect>
+                )}
                 <FormToggle
                   label="منتج جديد؟"
                   checked={isNew}
@@ -634,39 +714,41 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   error={errors.descriptionFr}
                   required
                 />
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    الكلمات المفتاحية (افصل بينها بفاصلة ,)
-                  </label>
-                  <div className="flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md focus-within:ring-1 focus-within:ring-green-700">
-                    {keywords.map((kw, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-1 bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full"
-                      >
-                        {kw}
-                        <button
-                          type="button"
-                          onClick={() => removeKeyword(kw)}
-                          className="text-green-600 hover:text-green-800"
+                {/* Only show keywords field here if not variants */}
+                {!hasVariants && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      الكلمات المفتاحية (افصل بينها بفاصلة ,)
+                    </label>
+                    <div className="flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md focus-within:ring-1 focus-within:ring-green-700">
+                      {keywords.map((kw, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-1 bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full"
                         >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
-                    <input
-                      type="text"
-                      value={keywordsInput}
-                      onChange={handleKeywordsChange}
-                      onKeyDown={handleKeywordKeyDown}
-                      className="flex-grow bg-transparent focus:outline-none"
-                      placeholder="أضف كلمة مفتاحية..."
-                    />
+                          {kw}
+                          <button
+                            type="button"
+                            onClick={() => removeKeyword(kw)}
+                            className="text-green-600 hover:text-green-800"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                      <input
+                        type="text"
+                        value={keywordsInput}
+                        onChange={handleKeywordsChange}
+                        onKeyDown={handleKeywordKeyDown}
+                        className="flex-grow bg-transparent focus:outline-none"
+                        placeholder="أضف كلمة مفتاحية..."
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
-
             {/* --- Variants Section --- */}
             <div className="space-y-4 pt-6 border-t border-gray-200">
               <FormToggle
@@ -685,6 +767,11 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       const predefined = PREDEFINED_OPTIONS.find(
                         (p) => p.fr === option.name.fr
                       );
+                      // --- NEW: Check if this is the color option ---
+                      const isColorOption =
+                        option.name.fr.toLowerCase() === "couleur";
+                      // --- END NEW ---
+
                       const placeholderText =
                         predefined?.placeholder || "أضف قيمة واضغط Enter";
 
@@ -693,6 +780,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                           key={index}
                           className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm transition-all hover:border-green-300"
                         >
+                          {/* ... (Select Option dropdown and Custom Option inputs) */}
                           <div className="flex items-start gap-3 mb-3">
                             <div className="flex-grow space-y-4">
                               <CustomSelect
@@ -761,42 +849,110 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             قيم الخيار (اضغط Enter للإضافة)
                           </label>
-                          <div className="flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md bg-white focus-within:ring-1 focus-within:ring-green-600 focus-within:border-green-600">
-                            {option.values.map((val, vIndex) => (
-                              <div
-                                key={vIndex}
-                                className="flex items-center gap-1.5 bg-sky-100 text-sky-800 text-sm font-medium px-2.5 py-1 rounded-full"
-                              >
-                                {val}
-                                <button
-                                  type="button"
-                                  onClick={() => removeOptionValue(index, val)}
-                                  className="text-sky-600 hover:text-sky-900"
-                                  aria-label={`Remove ${val}`}
-                                >
-                                  <X size={14} />
-                                </button>
+                          {/* --- NEW: Conditional render for Color Input --- */}
+                          {isColorOption ? (
+                            <div className="flex items-center gap-2">
+                              {/* Input field wrapper */}
+                              <div className="flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md bg-white focus-within:ring-1 focus-within:ring-green-600 focus-within:border-green-600 flex-grow">
+                                {option.values.map((val, vIndex) => (
+                                  <div
+                                    key={vIndex}
+                                    className="flex items-center gap-1.5 bg-sky-100 text-sky-800 text-sm font-medium pl-1.5 pr-2.5 py-1 rounded-full"
+                                  >
+                                    {/* Color Swatch */}
+                                    <span
+                                      className="block w-3 h-3 rounded-full border border-gray-400"
+                                      style={{ backgroundColor: val }}
+                                    ></span>
+                                    {val}
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        removeOptionValue(index, val)
+                                      }
+                                      className="text-sky-600 hover:text-sky-900"
+                                      aria-label={`Remove ${val}`}
+                                    >
+                                      <X size={14} />
+                                    </button>
+                                  </div>
+                                ))}
+                                <input
+                                  type="text"
+                                  value={optionValueInputs[index] || ""}
+                                  onChange={(e) =>
+                                    setOptionValueInputs({
+                                      ...optionValueInputs,
+                                      [index]: e.target.value,
+                                    })
+                                  }
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      e.preventDefault();
+                                      addOptionValue(index);
+                                    }
+                                  }}
+                                  className="flex-grow bg-transparent focus:outline-none min-w-[120px]"
+                                  placeholder="أدخل لون (اسم أو #hex)"
+                                />
                               </div>
-                            ))}
-                            <input
-                              type="text"
-                              value={optionValueInputs[index] || ""}
-                              onChange={(e) =>
-                                setOptionValueInputs({
-                                  ...optionValueInputs,
-                                  [index]: e.target.value,
-                                })
-                              }
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  addOptionValue(index);
+                              {/* Color Picker Button */}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCurrentColorPickerIndex(index);
+                                  const currentColor = optionValueInputs[index];
+                                  setPickerColor(currentColor || "#ffffff");
+                                  setIsColorPickerOpen(true);
+                                }}
+                                className="p-2.5 bg-gray-100 text-gray-700 rounded-md border border-gray-300 hover:bg-gray-200 transition-colors"
+                                aria-label="Open color picker"
+                              >
+                                <Palette size={20} />
+                              </button>
+                            </div>
+                          ) : (
+                            // --- ELSE: Render the original input ---
+                            <div className="flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md bg-white focus-within:ring-1 focus-within:ring-green-600 focus-within:border-green-600">
+                              {option.values.map((val, vIndex) => (
+                                <div
+                                  key={vIndex}
+                                  className="flex items-center gap-1.5 bg-sky-100 text-sky-800 text-sm font-medium px-2.5 py-1 rounded-full"
+                                >
+                                  {val}
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      removeOptionValue(index, val)
+                                    }
+                                    className="text-sky-600 hover:text-sky-900"
+                                    aria-label={`Remove ${val}`}
+                                  >
+                                    <X size={14} />
+                                  </button>
+                                </div>
+                              ))}
+                              <input
+                                type="text"
+                                value={optionValueInputs[index] || ""}
+                                onChange={(e) =>
+                                  setOptionValueInputs({
+                                    ...optionValueInputs,
+                                    [index]: e.target.value,
+                                  })
                                 }
-                              }}
-                              className="flex-grow bg-transparent focus:outline-none min-w-[120px]"
-                              placeholder={placeholderText}
-                            />
-                          </div>
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    addOptionValue(index);
+                                  }
+                                }}
+                                className="flex-grow bg-transparent focus:outline-none min-w-[120px]"
+                                placeholder={placeholderText}
+                              />
+                            </div>
+                          )}
+                          {/* --- END NEW --- */}
                         </div>
                       );
                     })}
@@ -876,6 +1032,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
 
             {/* --- Image Uploads Section --- */}
+            {/* ... (Existing Image Uploads Markup) ... */}
             <div className="space-y-8 pt-6 border-t border-gray-200">
               {/* Row 1: Main and Sub Images */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1019,6 +1176,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
           </fieldset>
         </div>
+
+        {/* ... (Modal Footer) */}
         <div className="flex justify-end items-center gap-4 p-4 border-t border-neutral-200 bg-gray-50 rounded-b-lg">
           <CancelButton onClick={onClose} isSubmitting={isSubmitting}>
             إلغاء
@@ -1028,6 +1187,16 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
           </SubmitButton>
         </div>
       </form>
+
+      {/* --- NEW: Color Picker Modal --- */}
+      <ColorPickerModal
+        isOpen={isColorPickerOpen}
+        color={pickerColor}
+        onChange={setPickerColor}
+        onCancel={() => setIsColorPickerOpen(false)}
+        onSubmit={handleColorPickerSubmit}
+      />
+      {/* --- END NEW --- */}
     </div>
   );
 };

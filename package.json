@@ -21,6 +21,7 @@
     "next": "15.5.4",
     "next-intl": "^4.3.9",
     "react": "19.1.0",
+    "react-color": "^2.19.3",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.65.0",
     "react-hot-toast": "^2.6.0",
