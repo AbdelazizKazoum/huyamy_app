@@ -1,20 +1,14 @@
 "use client";
 
-import React, {
-  ChangeEvent,
-  FormEvent,
-  useEffect,
-  useState,
-  useCallback,
-} from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import {
   Category,
   Language,
   Product,
   VariantOption,
-  ProductVariant,
+  ProductVariant, // Make sure this type in @/types is updated to have images: string[]
 } from "@/types";
-import { PlusCircle, Trash2, UploadCloud, X, Palette } from "lucide-react"; // Added Palette
+import { PlusCircle, Trash2, UploadCloud, X, Palette } from "lucide-react";
 import Image from "next/image";
 import FormInput from "../ui/FormInput";
 import FormTextarea from "../ui/FormTextarea";
@@ -24,9 +18,9 @@ import SubmitButton from "../ui/SubmitButton";
 import CancelButton from "../ui/CancelButton";
 import ColorPickerModal from "./ColorPickerModal";
 
-// ... (rest of the PREDEFINED_OPTIONS, generateCombinations, and interface)
 // --- Predefined list of common variant options with placeholders ---
 const PREDEFINED_OPTIONS = [
+  // ... (no changes)
   { ar: "الحجم", fr: "Taille", placeholder: "مثال: S, M, L, XL" },
   { ar: "اللون", fr: "Couleur", placeholder: "مثال: أحمر, أزرق, أخضر" },
   { ar: "الوزن", fr: "Poids", placeholder: "مثال: 1kg, 500g, 250g" },
@@ -36,6 +30,7 @@ const PREDEFINED_OPTIONS = [
 
 // --- Helper function to generate variant combinations ---
 const generateCombinations = (
+  // ... (no changes)
   options: VariantOption[]
 ): { [key: string]: string }[] => {
   if (options.length === 0 || options.some((o) => o.values.length === 0)) {
@@ -48,7 +43,6 @@ const generateCombinations = (
     const newCombinations: { [key: string]: string }[] = [];
     for (const combination of combinations) {
       for (const value of option.values) {
-        // Use the French name as the key for consistency
         newCombinations.push({ ...combination, [option.name.fr]: value });
       }
     }
@@ -59,6 +53,7 @@ const generateCombinations = (
 };
 
 interface ProductFormModalProps {
+  // ... (no changes)
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (productData: FormData) => void;
@@ -78,6 +73,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   isSubmitting = false,
 }) => {
   // --- Existing State ---
+  // ... (all other state is unchanged)
   const [nameAr, setNameAr] = useState("");
   const [nameFr, setNameFr] = useState("");
   const [descriptionAr, setDescriptionAr] = useState("");
@@ -103,7 +99,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [deletedCertificationImageUrls, setDeletedCertificationImageUrls] =
     useState<string[]>([]);
 
-  // --- New Variant State ---
+  // --- Variant State ---
+  // ... (no changes)
   const [hasVariants, setHasVariants] = useState(false);
   const [variantOptions, setVariantOptions] = useState<VariantOption[]>([]);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
@@ -114,18 +111,39 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     [key: number]: boolean;
   }>({});
 
-  // --- NEW: Color Picker State ---
+  // --- Color Picker State ---
+  // ... (no changes)
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const [currentColorPickerIndex, setCurrentColorPickerIndex] = useState<
     number | null
   >(null);
   const [pickerColor, setPickerColor] = useState("#ffffff");
-  // --- END NEW ---
 
-  // ... (State Initialization Effect)
+  // --- MODIFIED: Per-Variant Image State ---
+  /**
+   * Stores new File objects for variant images, keyed by variant.id
+   * e.g., { 'variant-id-123': [File1, File2] }
+   */
+  const [newVariantImages, setNewVariantImages] = useState<{
+    [variantId: string]: File[];
+  }>({});
+  /**
+   * Stores existing image URLs to be deleted, e.g., ['http://.../img1.jpg']
+   */
+  const [deletedVariantImageUrls, setDeletedVariantImageUrls] = useState<
+    string[]
+  >([]);
+  // --- END MODIFIED ---
+
+  // --- State Initialization Effect ---
   useEffect(() => {
+    // --- NEW: Reset variant image state on modal open/product change ---
+    setNewVariantImages({});
+    setDeletedVariantImageUrls([]);
+    // --- END NEW ---
+
     if (product) {
-      // ... existing state population
+      // ... (all other population is unchanged)
       setNameAr(product.name.ar);
       setNameFr(product.name.fr);
       setDescriptionAr(product.description.ar);
@@ -153,7 +171,12 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         !!product.variantOptions && product.variantOptions.length > 0;
       setHasVariants(productHasVariants);
       setVariantOptions(product.variantOptions || []);
-      setVariants(product.variants || []);
+      // --- MODIFIED: Ensure images is always an array ---
+      setVariants(
+        (product.variants || []).map((v) => ({ ...v, images: v.images || [] }))
+      );
+      // --- END MODIFIED ---
+
       // Initialize custom flags for existing product
       const initialCustomFlags: { [key: number]: boolean } = {};
       (product.variantOptions || []).forEach((opt, index) => {
@@ -167,7 +190,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setCustomOptionFlags(initialCustomFlags);
     } else {
       // Reset form for new product
-      // ... existing state reset
+      // ... (all other reset is unchanged)
       setNameAr("");
       setNameFr("");
       setDescriptionAr("");
@@ -198,7 +221,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     setErrors({});
   }, [product, isOpen]);
 
-  // ... (Variant Generation Effect)
+  // --- Variant Generation Effect ---
   useEffect(() => {
     if (!hasVariants) return;
 
@@ -213,18 +236,20 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
           ) && Object.keys(v.options).length === Object.keys(combo).length
       );
       return {
-        id: existingVariant?.id || comboId,
+        id: existingVariant?.id || comboId, // IMPORTANT: Preserves existing ID
         price: existingVariant?.price || 0,
         originalPrice: existingVariant?.originalPrice,
-        image: existingVariant?.image,
+        // --- MODIFIED: Use images array ---
+        images: existingVariant?.images || [], // This preserves the existing images array
+        // --- END MODIFIED ---
         options: combo,
       };
     });
     setVariants(newVariants);
-  }, [variantOptions, hasVariants]);
+  }, [variantOptions, hasVariants]); // Note: 'variants' is NOT in dependency array
 
   // --- Variant UI Handlers ---
-  // ... (addVariantOption, removeVariantOption, handleOptionNameChange, updateCustomOptionName)
+  // ... (all other handlers are unchanged)
   const addVariantOption = () => {
     setVariantOptions([
       ...variantOptions,
@@ -234,7 +259,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   const removeVariantOption = (index: number) => {
     setVariantOptions(variantOptions.filter((_, i) => i !== index));
-    // Also clean up the custom flag state
     const newFlags = { ...customOptionFlags };
     delete newFlags[index];
     setCustomOptionFlags(newFlags);
@@ -244,7 +268,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     const newOptions = [...variantOptions];
     if (value === "custom") {
       setCustomOptionFlags({ ...customOptionFlags, [index]: true });
-      // Clear the name when switching to custom
       newOptions[index].name = { ar: "", fr: "" };
     } else {
       setCustomOptionFlags({ ...customOptionFlags, [index]: false });
@@ -301,27 +324,105 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     );
   };
 
-  // --- NEW: Color Picker Submit Handler ---
+  // --- Color Picker Submit Handler ---
+  // ... (no changes)
   const handleColorPickerSubmit = () => {
     if (currentColorPickerIndex === null) return;
 
-    const value = pickerColor; // Get color from picker state
+    const value = pickerColor;
     const newOptions = [...variantOptions];
 
-    // Add the new color value if it doesn't already exist
     if (!newOptions[currentColorPickerIndex].values.includes(value)) {
       newOptions[currentColorPickerIndex].values.push(value);
       setVariantOptions(newOptions);
     }
 
-    // Close the picker and reset state
     setIsColorPickerOpen(false);
     setCurrentColorPickerIndex(null);
   };
-  // --- END NEW ---
+
+  // --- MODIFIED: Per-Variant Image Handlers (Plural) ---
+  const handleVariantImagesChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    variantId: string
+  ) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      const newPreviewUrls = newFiles.map((file) => URL.createObjectURL(file));
+
+      // Update the variant's images preview array
+      setVariants((prevVariants) =>
+        prevVariants.map((v) =>
+          v.id === variantId
+            ? { ...v, images: [...(v.images || []), ...newPreviewUrls] }
+            : v
+        )
+      );
+
+      // Store the new file objects, mapped by variantId
+      setNewVariantImages((prev) => {
+        const existingFiles = prev[variantId] || [];
+        return {
+          ...prev,
+          [variantId]: [...existingFiles, ...newFiles],
+        };
+      });
+    }
+  };
+
+  const removeVariantImage = (variantId: string, imageUrlToRemove: string) => {
+    const variant = variants.find((v) => v.id === variantId);
+    if (!variant) return;
+
+    if (imageUrlToRemove.startsWith("blob:")) {
+      // It's a new file. We need to find its index among the *blobs*
+      // to remove the correct File object from newVariantImages.
+
+      // Get all blob URLs for *this variant* in their current order
+      const blobImages = (variant.images || []).filter((img) =>
+        img.startsWith("blob:")
+      );
+      // Find the specific index of the blob we're removing
+      const blobIndexToRemove = blobImages.findIndex(
+        (img) => img === imageUrlToRemove
+      );
+
+      if (blobIndexToRemove !== -1) {
+        setNewVariantImages((prev) => {
+          const variantFiles = prev[variantId] || [];
+          // Remove the file at that specific index
+          const updatedFiles = variantFiles.filter(
+            (_, i) => i !== blobIndexToRemove
+          );
+          return {
+            ...prev,
+            [variantId]: updatedFiles,
+          };
+        });
+      }
+    } else {
+      // It's an existing image (http:), mark it for deletion
+      setDeletedVariantImageUrls((prev) => [...prev, imageUrlToRemove]);
+    }
+
+    // In either case, remove the preview from the 'variants' state
+    setVariants((prevVariants) =>
+      prevVariants.map((v) =>
+        v.id === variantId
+          ? {
+              ...v,
+              images: (v.images || []).filter(
+                (img) => img !== imageUrlToRemove
+              ),
+            }
+          : v
+      )
+    );
+  };
+  // --- END MODIFIED ---
 
   // --- Existing Handlers (handleMainImageChange, etc.) ---
-  // ... all existing handlers remain here ...
+  // ... (all other handlers are unchanged)
   const handleMainImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -353,10 +454,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   };
 
   const removeSubImage = (index: number, previewUrl: string) => {
-    // Check if the preview URL is a blob URL (a new file) or an existing http URL
     if (previewUrl.startsWith("blob:")) {
-      // This is a new file that hasn't been uploaded yet.
-      // We need to find which file corresponds to this blob URL.
       const fileIndexToRemove = subImagePreviews
         .slice(subImagePreviews.length - subImages.length)
         .findIndex((p) => p === previewUrl);
@@ -365,12 +463,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         setSubImages((prev) => prev.filter((_, i) => i !== fileIndexToRemove));
       }
     } else {
-      // This is an existing image URL from the database.
-      // Add it to the list of images to be deleted on the backend.
       setDeletedSubImageUrls((prev) => [...prev, previewUrl]);
     }
-
-    // In both cases, remove the preview from the UI.
     setSubImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -412,6 +506,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   };
 
   const validate = (): boolean => {
+    // ... (no changes)
     const newErrors: Partial<Record<string, string>> = {};
 
     if (!nameAr.trim()) newErrors.nameAr = "اسم المنتج بالعربية مطلوب.";
@@ -420,7 +515,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       newErrors.descriptionAr = "وصف المنتج بالعربية مطلوب.";
     if (!descriptionFr.trim())
       newErrors.descriptionFr = "وصف المنتج بالفرنسية مطلوب.";
-    // Only validate price if there are no variants
     if (!hasVariants && (!price || Number(price) <= 0))
       newErrors.price = "السعر يجب أن يكون رقمًا موجبًا.";
     if (!selectedCategoryJSON) newErrors.categoryId = "يجب اختيار فئة.";
@@ -446,7 +540,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  // ... (handleSubmit)
+  // --- Handle Form Submit ---
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!validate() || isSubmitting) {
@@ -457,7 +551,20 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       ? (JSON.parse(selectedCategoryJSON) as Category)
       : null;
 
+    // --- MODIFIED: Clean variants array for submission ---
+    const cleanedVariants = hasVariants
+      ? variants.map((v) => {
+          // Filter out blob: URLs, keep existing http: URLs
+          const keptImages = (v.images || []).filter(
+            (img) => !img.startsWith("blob:")
+          );
+          return { ...v, images: keptImages };
+        })
+      : [];
+    // --- END MODIFIED ---
+
     const productData = {
+      // ... (other data is unchanged)
       name: { ar: nameAr, fr: nameFr },
       description: { ar: descriptionAr, fr: descriptionFr },
       price: Number(price),
@@ -468,64 +575,98 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       keywords,
       allowDirectPurchase,
       allowAddToCart,
-      // --- Add Variant Data ---
       variantOptions: hasVariants ? variantOptions : [],
-      variants: hasVariants ? variants : [],
+      variants: cleanedVariants, // --- USE CLEANED VARIANTS ---
     };
 
     const formData = new FormData();
     formData.append("productData", JSON.stringify(productData));
+
     // Append deleted image URLs for the backend to process
     if (deletedSubImageUrls.length > 0) {
+      // ... (no changes)
       formData.append(
         "deletedSubImageUrls",
         JSON.stringify(deletedSubImageUrls)
       );
     }
     if (deletedCertificationImageUrls.length > 0) {
+      // ... (no changes)
       formData.append(
         "deletedCertificationImageUrls",
         JSON.stringify(deletedCertificationImageUrls)
       );
     }
+    // --- MODIFIED: Append Deleted Variant Image URLs ---
+    if (deletedVariantImageUrls.length > 0) {
+      formData.append(
+        "deletedVariantImageUrls",
+        JSON.stringify(deletedVariantImageUrls)
+      );
+    }
+    // --- END MODIFIED ---
 
-    // Append product ID separately for updates, as it's crucial for backend routing/logic.
+    // Append product ID for updates
     if (product) {
+      // ... (no changes)
       formData.append("id", product.id);
     }
 
-    // 3. Append image files separately.
+    // Append image files
     if (mainImage) {
+      // ... (no changes)
       formData.append("mainImage", mainImage);
     }
     subImages.forEach((file) => {
+      // ... (no changes)
       formData.append("subImages", file);
     });
     certificationImages.forEach((file) => {
+      // ... (no changes)
       formData.append("certificationImages", file);
     });
 
+    // --- MODIFIED: Append Variant Images ---
+    // The backend will receive an array of files for each 'variantId' key
+    Object.entries(newVariantImages).forEach(([variantId, files]) => {
+      files.forEach((file) => {
+        formData.append(variantId, file);
+      });
+    });
+    // --- END MODIFIED ---
+
     // --- For Debugging ---
-    // Log the JSON data and file data separately for clarity.
     console.log("--- Submitting Product Data (JSON) ---");
     console.log(JSON.parse(formData.get("productData") as string));
 
     console.log("--- Submitting Files ---");
     if (mainImage) {
+      // ... (no changes)
       console.log(
         `mainImage: File { name: "${mainImage.name}", size: ${mainImage.size} }`
       );
     }
     subImages.forEach((file, index) => {
+      // ... (no changes)
       console.log(
         `subImages[${index}]: File { name: "${file.name}", size: ${file.size} }`
       );
     });
     certificationImages.forEach((file, index) => {
+      // ... (no changes)
       console.log(
         `certificationImages[${index}]: File { name: "${file.name}", size: ${file.size} }`
       );
     });
+    // --- MODIFIED: Log variant files ---
+    Object.entries(newVariantImages).forEach(([variantId, files]) => {
+      files.forEach((file, index) => {
+        console.log(
+          `variantImage[${variantId}][${index}]: File { name: "${file.name}", size: ${file.size} }`
+        );
+      });
+    });
+    // --- END MODIFIED ---
     console.log("--------------------------");
 
     onSubmit(formData);
@@ -541,7 +682,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         onSubmit={handleSubmit}
         className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col"
       >
-        {/* ... (Modal Header) */}
+        {/* --- Modal Header --- */}
+        {/* ... (no changes) */}
         <div className="flex justify-between items-center p-4 border-b border-neutral-200">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
           <button
@@ -554,9 +696,11 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
           </button>
         </div>
 
+        {/* --- Modal Body --- */}
         <div className="overflow-y-auto p-6 space-y-6">
           <fieldset disabled={isSubmitting} className="space-y-6">
-            {/* ... (Existing Form Fields - Name, Desc, Price, etc.) */}
+            {/* --- Existing Form Fields --- */}
+            {/* ... (no changes to this section) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-6">
@@ -749,6 +893,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 )}
               </div>
             </div>
+
             {/* --- Variants Section --- */}
             <div className="space-y-4 pt-6 border-t border-gray-200">
               <FormToggle
@@ -759,6 +904,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
               {hasVariants && (
                 <div className="p-5 border border-slate-200 rounded-lg bg-slate-50 space-y-8">
                   {/* 1. Variant Options Definition */}
+                  {/* ... (no changes to this section) */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-gray-800">
                       خيارات المنتج
@@ -767,11 +913,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       const predefined = PREDEFINED_OPTIONS.find(
                         (p) => p.fr === option.name.fr
                       );
-                      // --- NEW: Check if this is the color option ---
                       const isColorOption =
                         option.name.fr.toLowerCase() === "couleur";
-                      // --- END NEW ---
-
                       const placeholderText =
                         predefined?.placeholder || "أضف قيمة واضغط Enter";
 
@@ -849,7 +992,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             قيم الخيار (اضغط Enter للإضافة)
                           </label>
-                          {/* --- NEW: Conditional render for Color Input --- */}
+                          {/* --- Conditional render for Color Input --- */}
                           {isColorOption ? (
                             <div className="flex items-center gap-2">
                               {/* Input field wrapper */}
@@ -859,7 +1002,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                     key={vIndex}
                                     className="flex items-center gap-1.5 bg-sky-100 text-sky-800 text-sm font-medium pl-1.5 pr-2.5 py-1 rounded-full"
                                   >
-                                    {/* Color Swatch */}
                                     <span
                                       className="block w-3 h-3 rounded-full border border-gray-400"
                                       style={{ backgroundColor: val }}
@@ -952,7 +1094,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                               />
                             </div>
                           )}
-                          {/* --- END NEW --- */}
                         </div>
                       );
                     })}
@@ -977,42 +1118,115 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                           <div className="inline-block min-w-full py-2 align-middle">
                             <div className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white overflow-hidden shadow-sm">
                               {variants.map((variant, index) => (
+                                // --- MODIFIED: Grid layout for 3 columns ---
                                 <div
                                   key={variant.id}
-                                  className={`grid grid-cols-2 md:grid-cols-3 gap-4 items-center p-3 ${
+                                  className={`p-4 ${
                                     index % 2 !== 0 ? "bg-slate-50" : ""
                                   }`}
                                 >
-                                  <div className="font-medium text-slate-800 col-span-2 md:col-span-1">
-                                    {Object.values(variant.options).join(" / ")}
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <FormInput
-                                      label="السعر"
-                                      type="number"
-                                      value={variant.price}
-                                      onChange={(e) =>
-                                        updateVariantPrice(
-                                          variant.id,
-                                          "price",
-                                          e.target.value
-                                        )
-                                      }
-                                      placeholder="0.00"
-                                    />
-                                    <FormInput
-                                      label="السعر الأصلي"
-                                      type="number"
-                                      value={variant.originalPrice || ""}
-                                      onChange={(e) =>
-                                        updateVariantPrice(
-                                          variant.id,
-                                          "originalPrice",
-                                          e.target.value
-                                        )
-                                      }
-                                      placeholder="0.00"
-                                    />
+                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+                                    {/* Col 1: Name */}
+                                    <div className="font-medium text-slate-800 pt-2">
+                                      {Object.values(variant.options).join(
+                                        " / "
+                                      )}
+                                    </div>
+
+                                    {/* Col 2: Price Inputs */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                      <FormInput
+                                        label="السعر"
+                                        type="number"
+                                        value={variant.price}
+                                        onChange={(e) =>
+                                          updateVariantPrice(
+                                            variant.id,
+                                            "price",
+                                            e.target.value
+                                          )
+                                        }
+                                        placeholder="0.00"
+                                      />
+                                      <FormInput
+                                        label="السعر الأصلي"
+                                        type="number"
+                                        value={variant.originalPrice || ""}
+                                        onChange={(e) =>
+                                          updateVariantPrice(
+                                            variant.id,
+                                            "originalPrice",
+                                            e.target.value
+                                          )
+                                        }
+                                        placeholder="0.00"
+                                      />
+                                    </div>
+
+                                    {/* Col 3: MODIFIED - Multi-Image Uploader */}
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        صور المتغير
+                                      </label>
+                                      {/* This markup is copied from your subImages uploader */}
+                                      <div className="grid grid-cols-3 gap-2">
+                                        {(variant.images || []).map(
+                                          (src, imgIndex) => (
+                                            <div
+                                              key={imgIndex}
+                                              className="relative group"
+                                            >
+                                              <Image
+                                                src={src}
+                                                alt={`variant ${index} image ${imgIndex}`}
+                                                width={100}
+                                                height={100}
+                                                className="h-20 w-full object-cover rounded-md"
+                                              />
+                                              <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  removeVariantImage(
+                                                    variant.id,
+                                                    src
+                                                  );
+                                                }}
+                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                              >
+                                                <X size={12} />
+                                              </button>
+                                            </div>
+                                          )
+                                        )}
+                                        <label
+                                          htmlFor={`variant-images-upload-${variant.id}`}
+                                          className="flex flex-col items-center justify-center w-full h-20 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:bg-gray-50"
+                                        >
+                                          <PlusCircle
+                                            size={20}
+                                            className="text-gray-400"
+                                          />
+                                          <span className="text-xs text-gray-500 mt-1">
+                                            إضافة
+                                          </span>
+                                          <input
+                                            id={`variant-images-upload-${variant.id}`}
+                                            type="file"
+                                            multiple
+                                            className="sr-only"
+                                            onChange={(e) =>
+                                              handleVariantImagesChange(
+                                                e,
+                                                variant.id
+                                              )
+                                            }
+                                            accept="image/*"
+                                          />
+                                        </label>
+                                      </div>
+                                    </div>
+                                    {/* --- END MODIFIED --- */}
                                   </div>
                                 </div>
                               ))}
@@ -1032,7 +1246,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
 
             {/* --- Image Uploads Section --- */}
-            {/* ... (Existing Image Uploads Markup) ... */}
+            {/* ... (no changes to this section) */}
             <div className="space-y-8 pt-6 border-t border-gray-200">
               {/* Row 1: Main and Sub Images */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1096,7 +1310,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {subImagePreviews.map((src, index) => (
-                      <div key={index} className="relative">
+                      <div key={index} className="relative group">
                         <Image
                           src={src}
                           alt={`sub-image ${index}`}
@@ -1107,7 +1321,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         <button
                           type="button"
                           onClick={() => removeSubImage(index, src)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5"
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <X size={12} />
                         </button>
@@ -1139,7 +1353,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {certificationImagePreviews.map((src, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative group">
                       <Image
                         src={src}
                         alt={`certification-image ${index}`}
@@ -1150,7 +1364,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       <button
                         type="button"
                         onClick={() => removeCertificationImage(index, src)}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5"
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X size={12} />
                       </button>
@@ -1177,7 +1391,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
           </fieldset>
         </div>
 
-        {/* ... (Modal Footer) */}
+        {/* --- Modal Footer --- */}
+        {/* ... (no changes) */}
         <div className="flex justify-end items-center gap-4 p-4 border-t border-neutral-200 bg-gray-50 rounded-b-lg">
           <CancelButton onClick={onClose} isSubmitting={isSubmitting}>
             إلغاء
@@ -1188,7 +1403,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         </div>
       </form>
 
-      {/* --- NEW: Color Picker Modal --- */}
+      {/* --- Color Picker Modal --- */}
+      {/* ... (no changes) */}
       <ColorPickerModal
         isOpen={isColorPickerOpen}
         color={pickerColor}
@@ -1196,7 +1412,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         onCancel={() => setIsColorPickerOpen(false)}
         onSubmit={handleColorPickerSubmit}
       />
-      {/* --- END NEW --- */}
     </div>
   );
 };

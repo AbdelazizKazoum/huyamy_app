@@ -127,7 +127,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                     const itemPrice =
                       item.selectedVariant?.price ?? item.product.price;
                     const itemImage =
-                      item.selectedVariant?.image ?? item.product.image;
+                      item.selectedVariant?.images?.[0] ?? item.product.image;
                     const productName =
                       item.product.name[lang] ||
                       item.product.name.ar ||

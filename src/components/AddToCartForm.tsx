@@ -47,7 +47,7 @@ const AddToCartForm: React.FC<AddToCartFormProps> = ({
     // Just use the product name, don't append variant options
     name: product.name,
     price: selectedVariant?.price ?? product.price,
-    image: selectedVariant?.image ?? product.image,
+    image: selectedVariant?.images?.[0] ?? product.image,
   };
 
   return (

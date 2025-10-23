@@ -9,7 +9,7 @@ import { revalidateTag, revalidatePath } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 
 import { generateSlug } from "@/lib/utils";
-import { Product } from "@/types";
+import { Product, ProductVariant } from "@/types"; // Import ProductVariant
 import {
   deleteImageFromR2,
   deleteImagesFromR2,
@@ -36,24 +36,36 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Await the params since they're now a Promise in Next.js 15
     const { id } = await params;
     const formData = await request.formData();
+
+    // --- 1. Get All Form Data ---
     const productDataString = formData.get("productData") as string;
     const mainImageFile = formData.get("mainImage") as File | null;
     const newSubImageFiles = formData.getAll("subImages") as File[];
     const newCertificationImageFiles = formData.getAll(
       "certificationImages"
     ) as File[];
+
+    // Get all lists of deleted URLs
     const deletedUrlsString = formData.get("deletedSubImageUrls") as
       | string
       | null;
     const deletedCertUrlsString = formData.get(
       "deletedCertificationImageUrls"
     ) as string | null;
+    // --- NEW: Get deleted variant image URLs ---
+    const deletedVariantUrlsString = formData.get("deletedVariantImageUrls") as
+      | string
+      | null;
 
     const deletedSubImageUrls: string[] = deletedUrlsString
       ? JSON.parse(deletedUrlsString)
       : [];
     const deletedCertificationImageUrls: string[] = deletedCertUrlsString
       ? JSON.parse(deletedCertUrlsString)
+      : [];
+    // --- NEW: Parse deleted variant image URLs ---
+    const deletedVariantImageUrls: string[] = deletedVariantUrlsString
+      ? JSON.parse(deletedVariantUrlsString)
       : [];
 
     if (!productDataString) {
@@ -63,17 +75,21 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
+    // --- 2. Prepare Base Update Data ---
     const productData = JSON.parse(productDataString);
     const updateData: Partial<Product> = {
       ...productData,
       slug: generateSlug(productData.name.fr),
+      updatedAt: new Date(), // Will be replaced by server timestamp
     };
 
+    // --- 3. Get Old Product Data ---
     const oldProduct = await getProductById(id);
     if (!oldProduct) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
+    // --- 4. Handle Main Image Upload/Update ---
     if (mainImageFile) {
       if (oldProduct.image) {
         await deleteImageFromR2(oldProduct.image).catch(console.error);
@@ -81,15 +97,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       updateData.image = await uploadImageToR2(mainImageFile);
     }
 
-    if (deletedSubImageUrls.length > 0) {
-      await deleteImagesFromR2(deletedSubImageUrls).catch(console.error);
-    }
-    if (deletedCertificationImageUrls.length > 0) {
-      await deleteImagesFromR2(deletedCertificationImageUrls).catch(
-        console.error
-      );
+    // --- 5. Handle All Image Deletions ---
+    const allImagesToDelete = [
+      ...deletedSubImageUrls,
+      ...deletedCertificationImageUrls,
+      ...deletedVariantImageUrls, // Add variant images to deletion list
+    ];
+
+    if (allImagesToDelete.length > 0) {
+      await deleteImagesFromR2(allImagesToDelete).catch(console.error);
     }
 
+    // --- 6. Handle Sub & Certification Image Uploads ---
     const newSubImageUrls =
       newSubImageFiles.length > 0
         ? await uploadImagesToR2(newSubImageFiles)
@@ -99,7 +118,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         ? await uploadImagesToR2(newCertificationImageFiles)
         : [];
 
-    // 4. Construct the final image arrays
+    // Construct final image arrays
     const remainingSubImages =
       oldProduct.subImages?.filter(
         (url) => !deletedSubImageUrls.includes(url)
@@ -115,23 +134,61 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       ...newCertificationImageUrls,
     ];
 
-    // 5. Update product in Firestore
+    // --- 7. NEW: Handle Variant Image Uploads & Updates ---
+    if (productData.variants && productData.variants.length > 0) {
+      updateData.variants = await Promise.all(
+        productData.variants.map(async (variant: ProductVariant) => {
+          // Get new files for this specific variant
+          const newVariantImageFiles = formData.getAll(variant.id) as File[];
+          const newVariantImageUrls =
+            newVariantImageFiles.length > 0
+              ? await uploadImagesToR2(newVariantImageFiles)
+              : [];
+
+          // Find the old variant's images from the product we fetched
+          const oldVariant = oldProduct.variants?.find(
+            (v) => v.id === variant.id
+          );
+          const oldVariantImages = oldVariant?.images || [];
+
+          // Filter out any deleted images
+          const remainingVariantImages = oldVariantImages.filter(
+            (url) => !deletedVariantImageUrls.includes(url)
+          );
+
+          // Combine remaining and new images
+          const finalVariantImages = [
+            ...remainingVariantImages,
+            ...newVariantImageUrls,
+          ];
+
+          return {
+            ...variant,
+            images: finalVariantImages,
+          };
+        })
+      );
+
+      // Recalculate main price based on new variant prices
+      const prices = updateData.variants.map((v) => v.price);
+      updateData.price = Math.min(...prices);
+    } else {
+      // No variants, so just use the base price from the form
+      updateData.variants = [];
+      updateData.price = productData.price; // Use the base price from form
+    }
+    // --- END NEW ---
+
+    // 8. Update product in Firestore
     await updateProduct(id, updateData);
 
-    // 6. Revalidate the paths for the updated product and the main products page
+    // 9. Revalidate the paths for the updated product and the main products page
     if (updateData.slug) {
       revalidatePath(`/fr/products/${updateData.slug}`);
       revalidatePath(`/ar/products/${updateData.slug}`);
     }
     revalidatePath("/fr/products");
     revalidatePath("/ar/products");
-
-    // 5. Revalidate category pages for the UPDATED product
-    // if (updateData.category?.slug) {
-    //   revalidatePath(`/category/${updateData.category.slug}`);
-    //   revalidatePath(`/fr/category/${updateData.category.slug}`);
-    //   revalidatePath(`/ar/category/${updateData.category.slug}`);
-    // }
 
     // Revalidate all category pages using the categories tag
     revalidateTag(CACHE_TAGS.CATEGORIES);
@@ -173,6 +230,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (productToDelete) {
       const imagesToDelete: string[] = [];
+
+      // Add main image
       if (productToDelete.image) {
         imagesToDelete.push(productToDelete.image);
       }
@@ -180,13 +239,28 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       if (productToDelete.subImages && productToDelete.subImages.length > 0) {
         imagesToDelete.push(...productToDelete.subImages);
       }
+      // Add certification images
       if (
         productToDelete.certificationImages &&
         productToDelete.certificationImages.length > 0
       ) {
         imagesToDelete.push(...productToDelete.certificationImages);
       }
-      await deleteImagesFromR2(imagesToDelete);
+
+      // --- NEW: Add all variant images to deletion list ---
+      if (productToDelete.variants && productToDelete.variants.length > 0) {
+        productToDelete.variants.forEach((variant) => {
+          if (variant.images && variant.images.length > 0) {
+            imagesToDelete.push(...variant.images);
+          }
+        });
+      }
+      // --- END NEW ---
+
+      // Delete all collected images from R2
+      if (imagesToDelete.length > 0) {
+        await deleteImagesFromR2(imagesToDelete).catch(console.error);
+      }
     }
 
     await deleteProduct(id);
@@ -198,13 +272,6 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
     revalidatePath("/fr/products");
     revalidatePath("/ar/products");
-
-    // 5. Revalidate category pages for the deleted product
-    // if (productToDelete?.category?.slug) {
-    //   revalidatePath(`/category/${productToDelete.category.slug}`);
-    //   revalidatePath(`/fr/category/${productToDelete.category.slug}`);
-    //   revalidatePath(`/ar/category/${productToDelete.category.slug}`);
-    // }
 
     // Revalidate all category pages using the categories tag
     revalidateTag(CACHE_TAGS.CATEGORIES);

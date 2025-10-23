@@ -18,7 +18,7 @@ export type ProductVariant = {
   id: string; // A unique ID for this variant, e.g., "prod1-size-s-color-red"
   price: number;
   originalPrice?: number;
-  image?: string; // Optional: A specific image for this variant
+  images?: string[]; // Optional: A specific image for this variant
   // A map of the selected options for this variant.
   // Example: { "Size": "S", "Color": "Red" }
   options: {

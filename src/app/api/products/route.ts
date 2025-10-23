@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createProduct, getAllProducts } from "@/lib/services/productService";
 import { generateSlug } from "@/lib/utils";
-import { Product } from "@/types";
-import { uploadImagesToR2, uploadImageToR2 } from "@/lib/services/R2Service";
+import { Product, ProductVariant } from "@/types"; // Make sure ProductVariant has images: string[]
+import {
+  uploadImagesToR2,
+  uploadImageToR2,
+  // deleteImagesFromR2, // You will need this for your PUT (update) function
+} from "@/lib/services/R2Service";
 import { requireAdmin } from "@/lib/utils/requireAdmin";
 import { revalidatePath } from "next/cache";
 
@@ -64,7 +68,7 @@ export async function POST(request: Request) {
 
     const productData = JSON.parse(productDataString);
 
-    // 1. Upload images to R2 and get their URLs
+    // 1. Upload main, sub, and certification images
     const mainImageUrl = await uploadImageToR2(mainImageFile);
     const subImageUrls =
       subImageFiles.length > 0 ? await uploadImagesToR2(subImageFiles) : [];
@@ -73,6 +77,29 @@ export async function POST(request: Request) {
         ? await uploadImagesToR2(certificationImageFiles)
         : [];
 
+    // --- NEW: Handle Variant Images ---
+    let updatedVariants: ProductVariant[] = [];
+    if (productData.variants && productData.variants.length > 0) {
+      updatedVariants = await Promise.all(
+        productData.variants.map(async (variant: ProductVariant) => {
+          // Get all files sent with the variant's ID as the key
+          const variantImageFiles = formData.getAll(variant.id) as File[];
+          let newImageUrls: string[] = [];
+
+          if (variantImageFiles.length > 0) {
+            newImageUrls = await uploadImagesToR2(variantImageFiles);
+          }
+
+          // Return a new variant object with the R2 URLs
+          return {
+            ...variant,
+            images: newImageUrls, // This replaces the empty array from the client
+          };
+        })
+      );
+    }
+    // --- END NEW ---
+
     // 2. Prepare the final product object for the database
     const finalProduct: Omit<Product, "id"> = {
       ...productData,
@@ -80,8 +107,9 @@ export async function POST(request: Request) {
       image: mainImageUrl,
       subImages: subImageUrls,
       certificationImages: certificationImageUrls,
+      variants: updatedVariants, // Use the new array with image URLs
       createdAt: new Date(), // Placeholder, will be replaced by server timestamp
-      updatedAt: new Date(), // Placeholder, will be replaced by server timestamp
+      updatedAt: new Date(), // Placeholder, will of course be replaced
     };
 
     // If variants exist, ensure the base price is set to the lowest variant price

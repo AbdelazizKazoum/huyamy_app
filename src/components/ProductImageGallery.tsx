@@ -1,22 +1,41 @@
 "use client";
-import { Product } from "@/types";
-import { Language } from "firebase/ai";
+import { Product, ProductVariant, Language } from "@/types";
 import Image from "next/image";
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 
-const ProductImageGallery: React.FC<{ product: Product; lang: Language }> = ({
-  product,
-  lang,
-}) => {
-  const [mainImage, setMainImage] = useState(product.image);
+const ProductImageGallery: React.FC<{
+  product: Product;
+  lang: Language;
+  selectedVariant?: ProductVariant | null;
+}> = ({ product, lang, selectedVariant }) => {
+  // Determine which image set to use: variant images (if present) OR product images
+  const variantHasImages =
+    selectedVariant &&
+    selectedVariant.images &&
+    selectedVariant.images.length > 0;
+
+  const images = variantHasImages
+    ? selectedVariant!.images!
+    : [product.image, ...product.subImages];
+
+  const [mainImage, setMainImage] = useState(images[0]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalIndex, setModalIndex] = useState(0);
 
-  // Split subImages
-  const firstTwo = product.subImages.slice(0, 2);
-  const rest = product.subImages.slice(2);
-  const allImages = [product.image, ...product.subImages];
+  // Keep mainImage in sync when product or selectedVariant changes
+  useEffect(() => {
+    const newImages = variantHasImages
+      ? selectedVariant!.images!
+      : [product.image, ...product.subImages];
+    setMainImage(newImages[0]);
+    setModalIndex(0);
+  }, [product, selectedVariant]);
+
+  // Split subImages (only used when showing product images)
+  const firstTwo = images.slice(1, 3);
+  const rest = images.slice(3);
+  const allImages = images;
 
   const goPrev = () => {
     setModalIndex((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
@@ -39,7 +58,7 @@ const ProductImageGallery: React.FC<{ product: Product; lang: Language }> = ({
         />
       </div>
 
-      {/* First Two Sub Images */}
+      {/* First Two Sub Images (uses images array; if variant images are used these are the next two variant images) */}
       <div className="grid grid-cols-2 gap-2">
         {firstTwo.map((img, index) => (
           <button

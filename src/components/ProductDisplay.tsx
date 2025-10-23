@@ -55,6 +55,29 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, locale }) => {
   const displayOriginalPrice =
     selectedVariant?.originalPrice ?? product.originalPrice;
 
+  // --- NEW: Logic to determine which images to show ---
+  // Check if the selected variant has its own images
+  const hasVariantImages =
+    selectedVariant &&
+    selectedVariant.images &&
+    selectedVariant.images.length > 0;
+
+  // Create a product-like object to pass to the gallery.
+  // This ensures we don't have to change ProductImageGallery's props.
+  // It will use variant images if they exist, otherwise it falls back
+  // to the main product images.
+  const galleryProduct = {
+    ...product,
+    // Ensure `image` is always a string (never `undefined`) to satisfy Product type
+    image: hasVariantImages
+      ? selectedVariant!.images?.[0] ?? product.image ?? ""
+      : product.image ?? "",
+    subImages: hasVariantImages
+      ? selectedVariant!.images?.slice(1) ?? []
+      : product.subImages ?? [],
+  };
+  // --- END NEW ---
+
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="bg-white">
       <main className="py-12">
@@ -63,7 +86,12 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product, locale }) => {
             {/* Product Gallery */}
             <div className="relative">
               <div className="lg:sticky lg:top-24">
-                <ProductImageGallery product={product} lang={locale} />
+                {/* --- MODIFIED: Pass the new galleryProduct object AND selectedVariant --- */}
+                <ProductImageGallery
+                  product={galleryProduct}
+                  lang={locale}
+                  selectedVariant={selectedVariant}
+                />
               </div>
             </div>
 
