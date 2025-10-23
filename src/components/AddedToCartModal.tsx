@@ -35,12 +35,18 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
   // Calculate subtotal based ONLY on the product just added
   const subtotal = product.price * quantity;
 
+  // Determine direction for RTL/LTR
+  const isRTL = lang === "ar";
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="fixed inset-0 z-50 flex justify-end items-center"
+        className={`fixed inset-0 z-50 flex ${
+          isRTL ? "justify-start" : "justify-end"
+        } items-center`}
         onClose={onClose}
+        dir={isRTL ? "rtl" : "ltr"}
       >
         {/* Overlay with fade-in transition */}
         <Transition.Child
@@ -59,16 +65,27 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
         <Transition.Child
           as={Fragment}
           enter="transition-transform duration-300"
-          enterFrom="translate-x-full opacity-0"
+          enterFrom={
+            isRTL ? "-translate-x-full opacity-0" : "translate-x-full opacity-0"
+          }
           enterTo="translate-x-0 opacity-100"
           leave="transition-transform duration-200"
           leaveFrom="translate-x-0 opacity-100"
-          leaveTo="translate-x-full opacity-0"
+          leaveTo={
+            isRTL ? "-translate-x-full opacity-0" : "translate-x-full opacity-0"
+          }
         >
-          <Dialog.Panel className="w-full max-w-lg h-full overflow-y-auto transform rounded-l-2xl bg-white p-6 shadow-xl transition-all relative">
+          <Dialog.Panel
+            className={`w-full max-w-lg h-full overflow-y-auto transform rounded-${
+              isRTL ? "r" : "l"
+            }-2xl bg-white p-6 shadow-xl transition-all relative`}
+            dir={isRTL ? "rtl" : "ltr"}
+          >
             <button
               onClick={onClose}
-              className="absolute top-4 p-1 text-slate-400 hover:text-slate-800 ltr:right-4 rtl:left-4"
+              className={`absolute top-4 p-1 text-slate-400 hover:text-slate-800 ${
+                isRTL ? "left-4" : "right-4"
+              }`}
             >
               <X size={24} />
             </button>
