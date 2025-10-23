@@ -6,7 +6,6 @@ import { ButtonPrimary } from "./ui";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/config";
 import { useCartStore } from "@/store/useCartStore";
-import { ShoppingCart } from "lucide-react";
 import toast from "react-hot-toast";
 import AddedToCartToast from "./AddedToCartToast";
 import { siteConfig } from "@/config/site";
@@ -89,7 +88,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     );
 
     // Using '(variant as any)' in case 'images' is not in your base type
-    const variantImage = (variant as any)?.images?.[0];
+    const variantImage = variant?.images?.[0];
 
     if (variantImage) {
       setDisplayImage(variantImage);
