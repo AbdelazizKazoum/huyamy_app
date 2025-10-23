@@ -96,7 +96,8 @@ const CheckoutPage = () => {
           ? ` - ${Object.values(item.selectedVariant.options).join(" / ")}`
           : "";
         const itemPrice = item.selectedVariant?.price ?? item.product.price;
-        const itemImage = item.selectedVariant?.image ?? item.product.image;
+        const itemImage =
+          item.selectedVariant?.images?.[0] ?? item.product.image;
 
         return {
           id: item.product.id,
@@ -328,7 +329,7 @@ const CheckoutPage = () => {
                     const itemPrice =
                       item.selectedVariant?.price ?? item.product.price;
                     const itemImage =
-                      item.selectedVariant?.image ?? item.product.image;
+                      item.selectedVariant?.images?.[0] ?? item.product.image;
 
                     return (
                       <div

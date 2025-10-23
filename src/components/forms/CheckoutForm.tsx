@@ -1,9 +1,7 @@
 "use client";
 
 import { Language, Product, ProductVariant } from "@/types";
-import { ShoppingCart, Loader2 } from "lucide-react";
 import React, { useActionState } from "react";
-import { useFormStatus } from "react-dom";
 import { useEffect, useRef, useState } from "react";
 import { createOrderAction } from "@/lib/actions/order";
 import { useTranslations, useLocale } from "next-intl";
@@ -64,7 +62,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
           },
           price: selectedVariant?.price ?? product.price,
           quantity: 1,
-          image: selectedVariant?.image ?? product.image,
+          image: selectedVariant?.images?.[0] ?? product.image,
           variant: selectedVariant?.options ?? null,
         },
       ];
