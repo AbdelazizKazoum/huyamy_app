@@ -6,7 +6,7 @@ import {
   getProductById,
 } from "@/lib/services/productService";
 import { revalidateTag, revalidatePath } from "next/cache";
-import { CACHE_TAGS } from "@/lib/cache/tags";
+import { CACHE_TAGS, MASTER_CACHE_TAGS } from "@/lib/cache/tags";
 
 import { generateSlug } from "@/lib/utils";
 import { Product, ProductVariant } from "@/types"; // Import ProductVariant
@@ -193,6 +193,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Revalidate all category pages using the categories tag
     revalidateTag(CACHE_TAGS.CATEGORIES);
 
+    // Revalidate the landing page cache tag
+    revalidateTag(MASTER_CACHE_TAGS.LANDING_PAGE);
+
     return NextResponse.json({
       message: "Product updated successfully",
       productId: id,
@@ -275,6 +278,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     // Revalidate all category pages using the categories tag
     revalidateTag(CACHE_TAGS.CATEGORIES);
+
+    // Revalidate the landing page cache tag
+    revalidateTag(MASTER_CACHE_TAGS.LANDING_PAGE);
 
     return NextResponse.json(
       { message: `Product ${id} deleted successfully` },
