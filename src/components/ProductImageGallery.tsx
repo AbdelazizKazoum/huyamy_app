@@ -28,12 +28,13 @@ const ProductImageGallery: React.FC<{ product: Product; lang: Language }> = ({
   return (
     <div className="flex flex-col gap-4">
       {/* Main Image */}
-      <div className="w-full h-96 bg-gray-100 rounded-lg overflow-hidden relative border border-white/60  group">
+      <div className="w-full bg-gray-100 rounded-lg overflow-hidden relative border border-white/60 group flex justify-center items-center">
         <Image
           src={mainImage}
           alt={product.name[lang as keyof typeof product.name]}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          width={800} // or your preferred max width
+          height={600} // or your preferred max height, or remove for auto
+          className="object-contain transition-transform duration-300 group-hover:scale-105 w-full h-auto"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           priority
         />
