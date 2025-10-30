@@ -17,6 +17,8 @@ import FormToggle from "../ui/FormToggle";
 import SubmitButton from "../ui/SubmitButton";
 import CancelButton from "../ui/CancelButton";
 import ColorPickerModal from "./ColorPickerModal";
+import ProductSelector from "../ProductSelector"; // Import the ProductSelector
+import { useProductStore } from "@/store/useProductStore"; // Import the store
 
 // --- Predefined list of common variant options with placeholders ---
 const PREDEFINED_OPTIONS = [
@@ -135,11 +137,32 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   >([]);
   // --- END MODIFIED ---
 
+  // --- NEW: Product Sections State ---
+  const [hasRelatedProducts, setHasRelatedProducts] = useState(false);
+  const [selectedRelatedProducts, setSelectedRelatedProducts] = useState<
+    Product[]
+  >([]);
+  const [hasCustomSection, setHasCustomSection] = useState(false);
+  const [customSectionNameAr, setCustomSectionNameAr] = useState("");
+  const [customSectionNameFr, setCustomSectionNameFr] = useState("");
+  const [selectedCustomProducts, setSelectedCustomProducts] = useState<
+    Product[]
+  >([]);
+  // --- END NEW ---
+
+  // --- NEW: Get products from store for filtering ---
+  const { products: allProducts } = useProductStore();
+  // --- END NEW ---
+
   // --- State Initialization Effect ---
   useEffect(() => {
-    // --- NEW: Reset variant image state on modal open/product change ---
-    setNewVariantImages({});
-    setDeletedVariantImageUrls([]);
+    // --- NEW: Reset section state on modal open/product change ---
+    setHasRelatedProducts(false);
+    setSelectedRelatedProducts([]);
+    setHasCustomSection(false);
+    setCustomSectionNameAr("");
+    setCustomSectionNameFr("");
+    setSelectedCustomProducts([]);
     // --- END NEW ---
 
     if (product) {
@@ -188,6 +211,22 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         }
       });
       setCustomOptionFlags(initialCustomFlags);
+
+      // --- NEW: Populate sections if product has them ---
+      if (
+        product.relatedProducts &&
+        product.relatedProducts.products.length > 0
+      ) {
+        setHasRelatedProducts(true);
+        setSelectedRelatedProducts(product.relatedProducts.products);
+      }
+      if (product.customSection) {
+        setHasCustomSection(true);
+        setCustomSectionNameAr(product.customSection.name.ar || "");
+        setCustomSectionNameFr(product.customSection.name.fr || "");
+        setSelectedCustomProducts(product.customSection.products || []);
+      }
+      // --- END NEW ---
     } else {
       // Reset form for new product
       // ... (all other reset is unchanged)
@@ -299,7 +338,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     const newOptions = [...variantOptions];
     if (!newOptions[optionIndex].values.includes(value)) {
       newOptions[optionIndex].values.push(value);
-      setVariantOptions(newOptions);
     }
     setOptionValueInputs({ ...optionValueInputs, [optionIndex]: "" });
   };
@@ -334,7 +372,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
     if (!newOptions[currentColorPickerIndex].values.includes(value)) {
       newOptions[currentColorPickerIndex].values.push(value);
-      setVariantOptions(newOptions);
     }
 
     setIsColorPickerOpen(false);
@@ -420,6 +457,30 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     );
   };
   // --- END MODIFIED ---
+
+  // --- NEW: Product Section Handlers ---
+  const addRelatedProduct = (product: Product) => {
+    if (!selectedRelatedProducts.some((p) => p.id === product.id)) {
+      setSelectedRelatedProducts((prev) => [...prev, product]);
+    }
+  };
+
+  const removeRelatedProduct = (productId: string) => {
+    setSelectedRelatedProducts((prev) =>
+      prev.filter((p) => p.id !== productId)
+    );
+  };
+
+  const addCustomProduct = (product: Product) => {
+    if (!selectedCustomProducts.some((p) => p.id === product.id)) {
+      setSelectedCustomProducts((prev) => [...prev, product]);
+    }
+  };
+
+  const removeCustomProduct = (productId: string) => {
+    setSelectedCustomProducts((prev) => prev.filter((p) => p.id !== productId));
+  };
+  // --- END NEW ---
 
   // --- Existing Handlers (handleMainImageChange, etc.) ---
   // ... (all other handlers are unchanged)
@@ -535,6 +596,14 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         newErrors.variants = "يجب أن يكون سعر كل متغير أكبر من صفر.";
       }
     }
+    // --- NEW: Validate custom section ---
+    if (
+      hasCustomSection &&
+      (!customSectionNameAr.trim() || !customSectionNameFr.trim())
+    ) {
+      newErrors.customSection = "يجب تسمية القسم المخصص باللغتين.";
+    }
+    // --- END NEW ---
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -577,6 +646,21 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       allowAddToCart,
       variantOptions: hasVariants ? variantOptions : [],
       variants: cleanedVariants, // --- USE CLEANED VARIANTS ---
+      // --- NEW: Add sections data ---
+      relatedProducts: hasRelatedProducts
+        ? {
+            ids: selectedRelatedProducts.map((p) => p.id),
+            products: selectedRelatedProducts,
+          }
+        : null,
+      customSection: hasCustomSection
+        ? {
+            name: { ar: customSectionNameAr, fr: customSectionNameFr },
+            ids: selectedCustomProducts.map((p) => p.id),
+            products: selectedCustomProducts,
+          }
+        : null,
+      // --- END NEW ---
     };
 
     const formData = new FormData();
@@ -676,6 +760,15 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   const title = product ? "تعديل المنتج" : "إضافة منتج جديد";
 
+  // --- NEW: Filtered available products for selectors ---
+  const availableProductsForSelectors = allProducts.filter(
+    (p) =>
+      (!product || p.id !== product.id) && // Exclude current product if editing
+      !selectedRelatedProducts.some((sp) => sp.id === p.id) &&
+      !selectedCustomProducts.some((sp) => sp.id === p.id)
+  );
+  // --- END NEW ---
+
   return (
     <div className="fixed inset-0 bg-gray-900/50 z-50 flex justify-center items-center p-4">
       <form
@@ -768,7 +861,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                           {keywords.map((kw, index) => (
                             <div
                               key={index}
-                              className="flex items-center gap-1 bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full"
+                              className="flex items-center gap-1.5 bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full"
                             >
                               {kw}
                               <button
@@ -868,7 +961,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       {keywords.map((kw, index) => (
                         <div
                           key={index}
-                          className="flex items-center gap-1 bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full"
+                          className="flex items-center gap-1.5 bg-green-100 text-green-800 text-sm font-medium px-2 py-1 rounded-full"
                         >
                           {kw}
                           <button
@@ -904,7 +997,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
               {hasVariants && (
                 <div className="p-5 border border-slate-200 rounded-lg bg-slate-50 space-y-8">
                   {/* 1. Variant Options Definition */}
-                  {/* ... (no changes to this section) */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-gray-800">
                       خيارات المنتج
@@ -1244,6 +1336,122 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 </div>
               )}
             </div>
+
+            {/* --- NEW: Product Sections --- */}
+            <div className="space-y-6 pt-6 border-t border-gray-200">
+              {/* Related Products Section */}
+              <div className="space-y-4">
+                <FormToggle
+                  label="إضافة قسم المنتجات ذات الصلة"
+                  checked={hasRelatedProducts}
+                  onChange={(e) => setHasRelatedProducts(e.target.checked)}
+                />
+                {hasRelatedProducts && (
+                  <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                      المنتجات ذات الصلة
+                    </h4>
+                    <ProductSelector
+                      availableProducts={availableProductsForSelectors}
+                      onProductSelect={addRelatedProduct}
+                      lang={lang}
+                      label="اختر المنتجات ذات الصلة"
+                    />
+                    <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {selectedRelatedProducts.map((p) => (
+                        <div
+                          key={p.id}
+                          className="relative border border-gray-200 bg-white rounded-lg p-2 flex flex-col items-center text-center shadow-sm"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => removeRelatedProduct(p.id)}
+                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5"
+                          >
+                            <X size={14} />
+                          </button>
+                          <Image
+                            src={p.image}
+                            alt={p.name[lang]}
+                            width={80}
+                            height={80}
+                            className="w-20 h-20 object-cover rounded-md"
+                          />
+                          <span className="mt-2 text-xs font-medium text-gray-700">
+                            {p.name[lang]}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Custom Section */}
+              <div className="space-y-4">
+                <FormToggle
+                  label="إضافة قسم مخصص"
+                  checked={hasCustomSection}
+                  onChange={(e) => setHasCustomSection(e.target.checked)}
+                />
+                {hasCustomSection && (
+                  <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <h4 className="text-lg font-semibold text-gray-800 mb-4">
+                      القسم المخصص
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <FormInput
+                        label="اسم القسم (العربية)"
+                        value={customSectionNameAr}
+                        onChange={(e) => setCustomSectionNameAr(e.target.value)}
+                        error={errors.customSection}
+                        required
+                      />
+                      <FormInput
+                        label="Nom de la section (Français)"
+                        value={customSectionNameFr}
+                        onChange={(e) => setCustomSectionNameFr(e.target.value)}
+                        error={errors.customSection}
+                        required
+                      />
+                    </div>
+                    <ProductSelector
+                      availableProducts={availableProductsForSelectors}
+                      onProductSelect={addCustomProduct}
+                      lang={lang}
+                      label="اختر المنتجات لهذا القسم"
+                    />
+                    <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {selectedCustomProducts.map((p) => (
+                        <div
+                          key={p.id}
+                          className="relative border border-gray-200 bg-white rounded-lg p-2 flex flex-col items-center text-center shadow-sm"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => removeCustomProduct(p.id)}
+                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5"
+                          >
+                            <X size={14} />
+                          </button>
+                          <Image
+                            src={p.image}
+                            alt={p.name[lang]}
+                            width={80}
+                            height={80}
+                            className="w-20 h-20 object-cover rounded-md"
+                          />
+                          <span className="mt-2 text-xs font-medium text-gray-700">
+                            {p.name[lang]}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* --- END NEW --- */}
 
             {/* --- Image Uploads Section --- */}
             {/* ... (no changes to this section) */}

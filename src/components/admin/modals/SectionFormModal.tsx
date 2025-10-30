@@ -8,7 +8,7 @@ import {
   useRef,
   useMemo,
 } from "react";
-import { Section, SectionType, Language } from "@/types";
+import { Section, SectionType, Language, Product } from "@/types";
 import { PackageSearch, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
 import FormInput from "../ui/FormInput";
@@ -24,7 +24,6 @@ interface SectionFormModalProps {
   onClose: () => void;
   onSubmit: (formData: FormData) => void;
   section: Section | null;
-  // products prop is no longer needed, it will be fetched from the store
   lang: Language;
   isSubmitting?: boolean;
 }
@@ -50,8 +49,8 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
   lang,
   isSubmitting = false,
 }) => {
-  // Fetch products from the product store
-  const { products, fetchProducts } = useProductStore();
+  // Fetch products from the product store (no longer needed to call fetchProducts here, as ProductSelector handles it)
+  const { products } = useProductStore();
 
   // Section-level state
   const [type, setType] = useState<string>("landing-page"); // Default to landing-page
@@ -65,7 +64,7 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
   const [ctaTextAr, setCtaTextAr] = useState("");
   const [ctaTextFr, setCtaTextFr] = useState("");
   const [ctaUrl, setCtaUrl] = useState("");
-  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]); // Changed to store full Product objects
 
   // Image state
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -75,11 +74,6 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
 
   useEffect(() => {
-    // Fetch products if the modal is open and they haven't been fetched yet
-    if (isOpen && products.length === 0) {
-      fetchProducts();
-    }
-
     if (section) {
       setType(section.type);
       setIsActive(section.isActive ?? true);
@@ -90,7 +84,8 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
       setCtaTextAr(section.data.ctaText?.ar || "");
       setCtaTextFr(section.data.ctaText?.fr || "");
       setCtaUrl(section.data.ctaUrl || "");
-      setSelectedProductIds(section.data.ctaProductIds || []);
+      // Assuming section.data.ctaProducts contains full objects; if not, derive from ids
+      setSelectedProducts(section.data.ctaProducts || []);
       setImageFile(null);
       setImagePreview(section.data.imageUrl || null);
     } else {
@@ -104,31 +99,28 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
       setCtaTextAr("");
       setCtaTextFr("");
       setCtaUrl("");
-      setSelectedProductIds([]);
+      setSelectedProducts([]);
       setImageFile(null);
       setImagePreview(null);
     }
     setErrors({});
-  }, [section, isOpen, products.length, fetchProducts]);
+  }, [section, isOpen]);
 
-  // Memoize lists for performance
-  const selectedProducts = useMemo(
-    () => products.filter((p) => selectedProductIds.includes(p.id)),
-    [products, selectedProductIds]
-  );
+  // Memoize available products (exclude already selected ones)
   const availableProducts = useMemo(
-    () => products.filter((p) => !selectedProductIds.includes(p.id)),
-    [products, selectedProductIds]
+    () =>
+      products.filter((p) => !selectedProducts.some((sp) => sp.id === p.id)),
+    [products, selectedProducts]
   );
 
-  const addProductToSection = (productId: string) => {
-    if (productId && !selectedProductIds.includes(productId)) {
-      setSelectedProductIds((prev) => [...prev, productId]);
+  const addProductToSection = (product: Product) => {
+    if (!selectedProducts.some((p) => p.id === product.id)) {
+      setSelectedProducts((prev) => [...prev, product]);
     }
   };
 
   const removeProductFromSection = (productId: string) => {
-    setSelectedProductIds((prev) => prev.filter((id) => id !== productId));
+    setSelectedProducts((prev) => prev.filter((p) => p.id !== productId));
   };
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -151,8 +143,8 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
         subtitle: { ar: subtitleAr, fr: subtitleFr },
         ctaText: { ar: ctaTextAr, fr: ctaTextFr },
         ctaUrl,
-        ctaProductIds: selectedProductIds,
-        ctaProducts: selectedProducts,
+        ctaProductIds: selectedProducts.map((p) => p.id), // Derive IDs for submission
+        ctaProducts: selectedProducts, // Include full objects if needed by backend
       },
     };
 

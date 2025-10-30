@@ -54,4 +54,15 @@ export type Product = {
 
   // Lists all purchasable combinations of the options.
   variants?: ProductVariant[];
+
+  // --- NEW: Product Sections ---
+  relatedProducts?: {
+    ids: string[];
+    products: Product[];
+  };
+  customSection?: {
+    name: LocalizedString;
+    ids: string[];
+    products: Product[];
+  };
 };
