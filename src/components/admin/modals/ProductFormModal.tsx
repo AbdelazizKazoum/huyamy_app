@@ -142,11 +142,16 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [selectedRelatedProducts, setSelectedRelatedProducts] = useState<
     Product[]
   >([]);
-  const [hasCustomSection, setHasCustomSection] = useState(false);
-  const [customSectionNameAr, setCustomSectionNameAr] = useState("");
-  const [customSectionNameFr, setCustomSectionNameFr] = useState("");
-  const [selectedCustomProducts, setSelectedCustomProducts] = useState<
-    Product[]
+  const [hasCustomSections, setHasCustomSections] = useState(false);
+  const [customSections, setCustomSections] = useState<
+    {
+      nameAr: string;
+      nameFr: string;
+      type: "products" | "description";
+      selectedProducts: Product[];
+      descriptionAr: string;
+      descriptionFr: string;
+    }[]
   >([]);
   // --- END NEW ---
 
@@ -159,10 +164,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     // --- NEW: Reset section state on modal open/product change ---
     setHasRelatedProducts(false);
     setSelectedRelatedProducts([]);
-    setHasCustomSection(false);
-    setCustomSectionNameAr("");
-    setCustomSectionNameFr("");
-    setSelectedCustomProducts([]);
+    setHasCustomSections(false);
+    setCustomSections([]);
     // --- END NEW ---
 
     if (product) {
@@ -220,11 +223,18 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         setHasRelatedProducts(true);
         setSelectedRelatedProducts(product.relatedProducts.products);
       }
-      if (product.customSection) {
-        setHasCustomSection(true);
-        setCustomSectionNameAr(product.customSection.name.ar || "");
-        setCustomSectionNameFr(product.customSection.name.fr || "");
-        setSelectedCustomProducts(product.customSection.products || []);
+      if (product.customSections && product.customSections.length > 0) {
+        setHasCustomSections(true);
+        setCustomSections(
+          product.customSections.map((section) => ({
+            nameAr: section.name.ar || "",
+            nameFr: section.name.fr || "",
+            type: section.type,
+            selectedProducts: section.products || [],
+            descriptionAr: section.description?.ar || "",
+            descriptionFr: section.description?.fr || "",
+          }))
+        );
       }
       // --- END NEW ---
     } else {
@@ -471,14 +481,69 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     );
   };
 
-  const addCustomProduct = (product: Product) => {
-    if (!selectedCustomProducts.some((p) => p.id === product.id)) {
-      setSelectedCustomProducts((prev) => [...prev, product]);
-    }
+  const addCustomSection = () => {
+    setCustomSections((prev) => [
+      ...prev,
+      {
+        nameAr: "",
+        nameFr: "",
+        type: "products",
+        selectedProducts: [],
+        descriptionAr: "",
+        descriptionFr: "",
+      },
+    ]);
   };
 
-  const removeCustomProduct = (productId: string) => {
-    setSelectedCustomProducts((prev) => prev.filter((p) => p.id !== productId));
+  const removeCustomSection = (index: number) => {
+    setCustomSections((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateCustomSection = (
+    index: number,
+    field: string,
+    value: string | "products" | "description"
+  ) => {
+    setCustomSections((prev) =>
+      prev.map((section, i) =>
+        i === index ? { ...section, [field]: value } : section
+      )
+    );
+  };
+
+  const addProductToSection = (sectionIndex: number, product: Product) => {
+    setCustomSections((prev) =>
+      prev.map((section, i) =>
+        i === sectionIndex
+          ? {
+              ...section,
+              selectedProducts: section.selectedProducts.some(
+                (p) => p.id === product.id
+              )
+                ? section.selectedProducts
+                : [...section.selectedProducts, product],
+            }
+          : section
+      )
+    );
+  };
+
+  const removeProductFromSection = (
+    sectionIndex: number,
+    productId: string
+  ) => {
+    setCustomSections((prev) =>
+      prev.map((section, i) =>
+        i === sectionIndex
+          ? {
+              ...section,
+              selectedProducts: section.selectedProducts.filter(
+                (p) => p.id !== productId
+              ),
+            }
+          : section
+      )
+    );
   };
   // --- END NEW ---
 
@@ -596,12 +661,23 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         newErrors.variants = "يجب أن يكون سعر كل متغير أكبر من صفر.";
       }
     }
-    // --- NEW: Validate custom section ---
-    if (
-      hasCustomSection &&
-      (!customSectionNameAr.trim() || !customSectionNameFr.trim())
-    ) {
-      newErrors.customSection = "يجب تسمية القسم المخصص باللغتين.";
+    // --- NEW: Validate custom sections ---
+    if (hasCustomSections) {
+      customSections.forEach((section, index) => {
+        if (!section.nameAr.trim() || !section.nameFr.trim()) {
+          newErrors[`customSection${index}`] = `يجب تسمية القسم ${
+            index + 1
+          } باللغتين.`;
+        }
+        if (
+          section.type === "description" &&
+          (!section.descriptionAr.trim() || !section.descriptionFr.trim())
+        ) {
+          newErrors[`customSection${index}`] = `يجب إضافة وصف للقسم ${
+            index + 1
+          } باللغتين.`;
+        }
+      });
     }
     // --- END NEW ---
 
@@ -653,12 +729,21 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             products: selectedRelatedProducts,
           }
         : null,
-      customSection: hasCustomSection
-        ? {
-            name: { ar: customSectionNameAr, fr: customSectionNameFr },
-            ids: selectedCustomProducts.map((p) => p.id),
-            products: selectedCustomProducts,
-          }
+      customSections: hasCustomSections
+        ? customSections.map((section) => ({
+            name: { ar: section.nameAr, fr: section.nameFr },
+            type: section.type,
+            ...(section.type === "products" && {
+              ids: section.selectedProducts.map((p) => p.id),
+              products: section.selectedProducts,
+            }),
+            ...(section.type === "description" && {
+              description: {
+                ar: section.descriptionAr,
+                fr: section.descriptionFr,
+              },
+            }),
+          }))
         : null,
       // --- END NEW ---
     };
@@ -765,7 +850,9 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     (p) =>
       (!product || p.id !== product.id) && // Exclude current product if editing
       !selectedRelatedProducts.some((sp) => sp.id === p.id) &&
-      !selectedCustomProducts.some((sp) => sp.id === p.id)
+      !customSections.some((section) =>
+        section.selectedProducts.some((sp) => sp.id === p.id)
+      )
   );
   // --- END NEW ---
 
@@ -1387,66 +1474,160 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 )}
               </div>
 
-              {/* Custom Section */}
+              {/* Custom Sections */}
               <div className="space-y-4">
                 <FormToggle
-                  label="إضافة قسم مخصص"
-                  checked={hasCustomSection}
-                  onChange={(e) => setHasCustomSection(e.target.checked)}
+                  label="إضافة أقسام مخصصة"
+                  checked={hasCustomSections}
+                  onChange={(e) => setHasCustomSections(e.target.checked)}
                 />
-                {hasCustomSection && (
-                  <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">
-                      القسم المخصص
-                    </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <FormInput
-                        label="اسم القسم (العربية)"
-                        value={customSectionNameAr}
-                        onChange={(e) => setCustomSectionNameAr(e.target.value)}
-                        error={errors.customSection}
-                        required
-                      />
-                      <FormInput
-                        label="Nom de la section (Français)"
-                        value={customSectionNameFr}
-                        onChange={(e) => setCustomSectionNameFr(e.target.value)}
-                        error={errors.customSection}
-                        required
-                      />
-                    </div>
-                    <ProductSelector
-                      availableProducts={availableProductsForSelectors}
-                      onProductSelect={addCustomProduct}
-                      lang={lang}
-                      label="اختر المنتجات لهذا القسم"
-                    />
-                    <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {selectedCustomProducts.map((p) => (
-                        <div
-                          key={p.id}
-                          className="relative border border-gray-200 bg-white rounded-lg p-2 flex flex-col items-center text-center shadow-sm"
-                        >
+                {hasCustomSections && (
+                  <div className="space-y-4">
+                    {customSections.map((section, index) => (
+                      <div
+                        key={index}
+                        className="p-4 border border-gray-200 rounded-lg bg-gray-50"
+                      >
+                        <div className="flex justify-between items-center mb-4">
+                          <h4 className="text-lg font-semibold text-gray-800">
+                            القسم المخصص {index + 1}
+                          </h4>
                           <button
                             type="button"
-                            onClick={() => removeCustomProduct(p.id)}
-                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5"
+                            onClick={() => removeCustomSection(index)}
+                            className="p-2 text-red-500 hover:bg-red-100 hover:text-red-600 rounded-full transition-colors"
+                            aria-label="Remove section"
                           >
-                            <X size={14} />
+                            <Trash2 size={18} />
                           </button>
-                          <Image
-                            src={p.image}
-                            alt={p.name[lang]}
-                            width={80}
-                            height={80}
-                            className="w-20 h-20 object-cover rounded-md"
-                          />
-                          <span className="mt-2 text-xs font-medium text-gray-700">
-                            {p.name[lang]}
-                          </span>
                         </div>
-                      ))}
-                    </div>
+                        {/* Rest of the section content */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <FormInput
+                            label="اسم القسم (العربية)"
+                            value={section.nameAr}
+                            onChange={(e) =>
+                              updateCustomSection(
+                                index,
+                                "nameAr",
+                                e.target.value
+                              )
+                            }
+                            error={errors[`customSection${index}`]}
+                            required
+                          />
+                          <FormInput
+                            label="Nom de la section (Français)"
+                            value={section.nameFr}
+                            onChange={(e) =>
+                              updateCustomSection(
+                                index,
+                                "nameFr",
+                                e.target.value
+                              )
+                            }
+                            error={errors[`customSection${index}`]}
+                            required
+                          />
+                        </div>
+                        <div className="mb-4">
+                          <CustomSelect
+                            label="نوع القسم"
+                            value={section.type}
+                            onChange={(value) =>
+                              updateCustomSection(
+                                index,
+                                "type",
+                                value as "products" | "description"
+                              )
+                            }
+                          >
+                            <option value="products">منتجات</option>
+                            <option value="description">وصف</option>
+                          </CustomSelect>
+                        </div>
+                        {section.type === "products" && (
+                          <>
+                            <ProductSelector
+                              availableProducts={availableProductsForSelectors}
+                              onProductSelect={(product) =>
+                                addProductToSection(index, product)
+                              }
+                              lang={lang}
+                              label="اختر المنتجات لهذا القسم"
+                            />
+                            <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                              {section.selectedProducts.map((p) => (
+                                <div
+                                  key={p.id}
+                                  className="relative border border-gray-200 bg-white rounded-lg p-3 flex flex-col items-center text-center shadow-sm hover:shadow-md transition-shadow"
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      removeProductFromSection(index, p.id)
+                                    }
+                                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors"
+                                  >
+                                    <X size={12} />
+                                  </button>
+                                  <Image
+                                    src={p.image}
+                                    alt={p.name[lang]}
+                                    width={80}
+                                    height={80}
+                                    className="w-20 h-20 object-cover rounded-md mb-2"
+                                  />
+                                  <span className="text-xs font-medium text-gray-700">
+                                    {p.name[lang]}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                        {section.type === "description" && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormTextarea
+                              label="الوصف (العربية)"
+                              value={section.descriptionAr}
+                              onChange={(e) =>
+                                updateCustomSection(
+                                  index,
+                                  "descriptionAr",
+                                  e.target.value
+                                )
+                              }
+                              rows={4}
+                              error={errors[`customSection${index}`]}
+                              required
+                            />
+                            <FormTextarea
+                              label="Description (Français)"
+                              value={section.descriptionFr}
+                              onChange={(e) =>
+                                updateCustomSection(
+                                  index,
+                                  "descriptionFr",
+                                  e.target.value
+                                )
+                              }
+                              rows={4}
+                              error={errors[`customSection${index}`]}
+                              required
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addCustomSection}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-green-300 rounded-lg text-sm font-semibold text-green-600 hover:bg-green-50 hover:border-green-400 transition-all"
+                    >
+                      <PlusCircle size={18} />
+                      إضافة قسم مخصص جديد
+                    </button>
                   </div>
                 )}
               </div>
