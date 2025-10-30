@@ -54,10 +54,10 @@ export const AlsoChooseSection: React.FC<AlsoChooseSectionProps> = ({
   };
 
   return (
-    <section className="w-full px-2 py-6">
+    <section className="w-full px-2">
       <div className="max-w-2xl mx-auto">
         <h2 className="text-xl font-bold text-center mb-4 text-primary-900">
-          {title?.[lang] || title?.fr || "اختر أيضًا"}
+          {title?.[lang] || title?.fr || ""}
         </h2>
         <div className="relative">
           <button

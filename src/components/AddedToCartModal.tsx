@@ -170,7 +170,7 @@ const AddedToCartModal: React.FC<AddedToCartModalProps> = ({
               </p>
             </div>
 
-            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-3 pb-6">
               <button
                 type="button"
                 className="inline-flex justify-center rounded-md border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none"

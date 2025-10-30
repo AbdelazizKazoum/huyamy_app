@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Language, Product, ProductVariant, Section } from "@/types";
-import { Star } from "lucide-react";
+import { Star, ChevronDown, ChevronUp } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { features } from "@/data/features";
 import ProductImageGallery from "./ProductImageGallery";
@@ -11,6 +11,7 @@ import CheckoutForm from "./forms/CheckoutForm";
 import AddToCartForm from "./AddToCartForm";
 import CertificationGallery from "./CertificationGallery";
 import ProductVariantSelector from "./ProductVariantSelector";
+import { AlsoChooseSection } from "./AlsoChooseSection";
 
 interface ProductDisplayProps {
   product: Product;
@@ -35,8 +36,9 @@ const findVariant = (
 const ProductDisplay: React.FC<ProductDisplayProps> = ({
   product,
   locale,
-  alsoChooseSections = [], // <-- Default to empty array
+  alsoChooseSections = [],
 }) => {
+  console.log("🚀 ~ ProductDisplay ~ product:", product);
   const currency = siteConfig.currencies[locale];
 
   // Initialize selected options with the first value of each option type
@@ -61,19 +63,13 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({
     selectedVariant?.originalPrice ?? product.originalPrice;
 
   // --- NEW: Logic to determine which images to show ---
-  // Check if the selected variant has its own images
   const hasVariantImages =
     selectedVariant &&
     selectedVariant.images &&
     selectedVariant.images.length > 0;
 
-  // Create a product-like object to pass to the gallery.
-  // This ensures we don't have to change ProductImageGallery's props.
-  // It will use variant images if they exist, otherwise it falls back
-  // to the main product images.
   const galleryProduct = {
     ...product,
-    // Ensure `image` is always a string (never `undefined`) to satisfy Product type
     image: hasVariantImages
       ? selectedVariant!.images?.[0] ?? product.image ?? ""
       : product.image ?? "",
@@ -83,6 +79,15 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({
   };
   // --- END NEW ---
 
+  // --- Accordion State for custom sections ---
+  const [openSections, setOpenSections] = useState<Record<number, boolean>>({});
+
+  const toggleSection = (index: number) => {
+    setOpenSections((prev) => ({ ...prev, [index]: !prev[index] }));
+  };
+
+  const customSections = product.customSections || [];
+
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"} className="bg-white">
       <main className="py-12">
@@ -91,7 +96,6 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({
             {/* Product Gallery */}
             <div className="relative">
               <div className="lg:sticky lg:top-24">
-                {/* --- MODIFIED: Pass the new galleryProduct object AND selectedVariant --- */}
                 <ProductImageGallery
                   product={galleryProduct}
                   lang={locale}
@@ -159,6 +163,106 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({
                 </p>
               </div>
 
+              {/* --- NEW: Custom Sections as Accordions (under description) --- */}
+              {customSections.length > 0 && (
+                <div className="mt-6 border-t border-gray-200">
+                  {customSections.map((section, idx) => {
+                    const name =
+                      section.name?.[locale] ?? section.name?.fr ?? "";
+                    const isOpen = !!openSections[idx];
+
+                    return (
+                      <div
+                        key={idx}
+                        className="border-b border-gray-200 last:border-b-0"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => toggleSection(idx)}
+                          className="w-full flex items-center justify-between gap-4 px-4 py-5 focus:outline-none"
+                          aria-expanded={isOpen}
+                        >
+                          <div className="flex items-center gap-3">
+                            <h3
+                              className={`text-lg font-semibold transition-colors ${
+                                isOpen ? "text-primary-800" : "text-gray-800"
+                              }`}
+                            >
+                              {name ||
+                                (locale === "ar"
+                                  ? `القسم ${idx + 1}`
+                                  : `Section ${idx + 1}`)}
+                            </h3>
+                            {section.type === "products" && (
+                              <span className="text-xs text-primary-800 bg-primary-100 px-2.5 py-0.5 rounded-full">
+                                {section.products?.length ?? 0}{" "}
+                                {locale === "ar" ? "منتج" : "products"}
+                              </span>
+                            )}
+                          </div>
+
+                          <span
+                            className={`text-primary-700 transition-transform duration-300 ${
+                              isOpen ? "rotate-180" : "rotate-0"
+                            }`}
+                          >
+                            <ChevronDown size={20} />
+                          </span>
+                        </button>
+
+                        <div
+                          className={`grid transition-all duration-300 ease-in-out ${
+                            isOpen
+                              ? "grid-rows-[1fr] opacity-100"
+                              : "grid-rows-[0fr] opacity-0"
+                          }`}
+                        >
+                          <div className="overflow-hidden">
+                            <div className="px-4 pb-5 pt-2">
+                              {/* Content */}
+                              {section.type === "description" ? (
+                                <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed">
+                                  <p>
+                                    {section.description?.[locale] ||
+                                      (locale === "ar"
+                                        ? "لا يوجد وصف."
+                                        : "No description.")}
+                                  </p>
+                                </div>
+                              ) : (
+                                <div>
+                                  {section.products &&
+                                  section.products.length > 0 ? (
+                                    <AlsoChooseSection
+                                      section={
+                                        {
+                                          data: {
+                                            // title: section.name || {},
+                                            ctaProducts: section.products,
+                                          },
+                                        } as Section
+                                      }
+                                      lang={locale}
+                                    />
+                                  ) : (
+                                    <p className="text-sm text-gray-500">
+                                      {locale === "ar"
+                                        ? "لا توجد منتجات في هذا القسم."
+                                        : "No products in this section."}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {/* --- END NEW --- */}
+
               {/* Variant Selector */}
               <div className="pt-4">
                 <ProductVariantSelector
@@ -183,7 +287,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({
                     product={product}
                     lang={locale}
                     selectedVariant={selectedVariant}
-                    alsoChooseSections={alsoChooseSections} // <-- Pass here
+                    alsoChooseSections={alsoChooseSections}
                   />
                 )}
               </div>
