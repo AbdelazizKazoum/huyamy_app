@@ -21,7 +21,7 @@ const FormInput: React.FC<FormInputProps> = ({
       </label>
       <input
         id={id}
-        className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-700 focus:border-green-700 ${
+        className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-primary-700 focus:border-primary-700 ${
           error ? "border-red-500" : "border-gray-300"
         }`}
         {...props}

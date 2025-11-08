@@ -14,13 +14,10 @@ type SiteConfig = {
     [key in Language]: string;
   };
   url: string;
-  baseUrl: string;
   logo: string;
-  ogImage: string;
   keywords: {
     [key in Language]: string[];
   };
-  themeColor: string;
   contact: {
     email: string;
     whatsapp: string;
@@ -38,15 +35,11 @@ type SiteConfig = {
     locales: Language[];
     defaultLocale: Language;
   };
-  authors: { name: string; url?: string }[];
-  creator: string;
-  publisher: string;
   location: string;
   locationCoordinates?: {
     lat: number;
     lng: number;
   };
-  manifest: string;
   verification: {
     google?: string;
   };
@@ -73,9 +66,7 @@ export const siteConfig: SiteConfig = {
     fr: "Lunettes de soleil, médicales et sport",
   },
   url: "https://mpyglass.com",
-  baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://mpyglass.com",
   logo: "/images/logo.png",
-  ogImage: "/images/logo.png",
   keywords: {
     ar: [
       "نظارات شمسية",
@@ -112,7 +103,6 @@ export const siteConfig: SiteConfig = {
       "accessoires lunettes",
     ],
   },
-  themeColor: "#2563eb",
   contact: {
     email: "contact@shawnoptical.com",
     whatsapp: "+212600000000",
@@ -130,15 +120,15 @@ export const siteConfig: SiteConfig = {
     locales: ["ar", "fr"],
     defaultLocale: "ar",
   },
-  authors: [{ name: "Shawn Optical" }],
-  creator: "Shawn Optical",
-  publisher: "Shawn Optical",
+  // authors: [{ name: "Shawn Optical" }],
+  // creator: "Shawn Optical",
+  // publisher: "Shawn Optical",
   location: "Casablanca, Morocco",
   locationCoordinates: {
     lat: 33.57311,
     lng: -7.589843,
   },
-  manifest: "/manifest.json",
+  // manifest: "/manifest.json",
   verification: {
     google: "your-google-verification-code",
   },
