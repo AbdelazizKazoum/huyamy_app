@@ -9,12 +9,12 @@
   "description": "اكتشف أفضل تشكيلة من النظارات الشمسية، الطبية، الرياضية وأكثر في MY GLASS. جودة عالية وأسعار مناسبة.",
   "icons": [
     {
-      "src": "/images/logo.png",
+      "src": "/images/logo-syrcle.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/images/logo.png",
+      "src": "/images/logo-syrcle.png",
       "sizes": "512x512",
       "type": "image/png"
     }
