@@ -161,7 +161,7 @@ export default function SettingsPage() {
 
     setConfig((prev) => {
       const newState = JSON.parse(JSON.stringify(prev)); // Deep copy
-      let currentLevel = newState;
+      let currentLevel: any = newState;
 
       for (let i = 0; i < keys.length - 1; i++) {
         currentLevel = currentLevel[keys[i]];
@@ -192,12 +192,10 @@ export default function SettingsPage() {
     const { name, value } = e.target;
     const key = name.split(".")[0] as keyof PageSiteConfig;
 
-    setConfig((prev) => ({
+    setConfig((prev: any) => ({
       ...prev,
       [key]: {
-        ...(typeof prev[key] === "object" && prev[key] !== null
-          ? prev[key]
-          : {}),
+        ...prev[key],
         [langTab]: value,
       },
     }));
