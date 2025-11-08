@@ -1,12 +1,12 @@
 {
-  "name": "Shawn Optical Admin",
+  "name": "MY GLASS Admin",
   "short_name": "Admin",
   "start_url": "/admin",
   "scope": "/admin",
   "display": "standalone",
   "background_color": "#222831",
   "theme_color": "#222831",
-  "description": "لوحة تحكم إدارة Shawn Optical.",
+  "description": "لوحة تحكم إدارة MY GLASS.",
   "icons": [
     {
       "src": "/images/logo.png",

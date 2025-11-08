@@ -57,23 +57,23 @@ type SiteConfig = {
 };
 
 export const siteConfig: SiteConfig = {
-  name: "Shawn Optical",
-  brandName: "Shawn Optical",
+  name: "MY GLASS",
+  brandName: "MY GLASS",
   title: {
-    ar: "شون أوبتيكال - نظارات شمسية، طبية، رياضية وأكثر",
-    fr: "Shawn Optical - Lunettes de soleil, médicales, sport et plus",
+    ar: "MY GLASS - نظارات شمسية، طبية، رياضية وأكثر",
+    fr: "MY GLASS - Lunettes de soleil, médicales, sport et plus",
   },
-  titleTemplate: "%s | Shawn Optical - Lunettes de soleil, médicales & sport",
+  titleTemplate: "%s | MY GLASS - Lunettes de soleil, médicales & sport",
   description: {
-    ar: "اكتشف أفضل تشكيلة من النظارات الشمسية، الطبية، الرياضية وأكثر في شون أوبتيكال. جودة عالية وأسعار مناسبة.",
-    fr: "Découvrez la meilleure sélection de lunettes de soleil, médicales, sport et plus chez Shawn Optical. Qualité supérieure et prix abordables.",
+    ar: "اكتشف أفضل تشكيلة من النظارات الشمسية، الطبية، الرياضية وأكثر في MY GLASS. جودة عالية وأسعار مناسبة.",
+    fr: "Découvrez la meilleure sélection de lunettes de soleil, médicales, sport et plus chez MY GLASS. Qualité supérieure et prix abordables.",
   },
   niche: {
     ar: "نظارات شمسية وطبية ورياضية",
     fr: "Lunettes de soleil, médicales et sport",
   },
-  url: "https://shawnoptical.com",
-  baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://shawnoptical.com",
+  url: "https://mpyglass.com",
+  baseUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://mpyglass.com",
   logo: "/images/logo.png",
   ogImage: "/images/logo.png",
   keywords: {
@@ -122,9 +122,9 @@ export const siteConfig: SiteConfig = {
     twitter: "@shawnoptical",
   },
   socialLinks: {
-    facebook: "https://facebook.com/shawnoptical",
-    instagram: "https://instagram.com/shawnoptical",
-    twitter: "https://twitter.com/shawnoptical",
+    facebook: "https://facebook.com/myglass",
+    instagram: "https://instagram.com/myglass",
+    twitter: "https://twitter.com/myglass",
   },
   i18n: {
     locales: ["ar", "fr"],

@@ -1,12 +1,12 @@
 {
-  "name": "Shawn Optical",
-  "short_name": "Shawn Optical",
+  "name": "MY GLASS",
+  "short_name": "MY GLASS",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
-  "description": "اكتشف أفضل تشكيلة من النظارات الشمسية، الطبية، الرياضية وأكثر في Shawn Optical. جودة عالية وأسعار مناسبة.",
+  "description": "اكتشف أفضل تشكيلة من النظارات الشمسية، الطبية، الرياضية وأكثر في MY GLASS. جودة عالية وأسعار مناسبة.",
   "icons": [
     {
       "src": "/images/logo.png",
