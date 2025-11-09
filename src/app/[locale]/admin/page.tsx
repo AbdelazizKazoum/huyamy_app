@@ -1,18 +1,10 @@
 "use client";
 
 import React from "react";
+import { useTranslations, useLocale } from "next-intl";
 
 // --- Feature list for the Pro version ---
-const proFeatures: string[] = [
-  "عرض الدخل الشهري والسنوي",
-  "عدد المنتجات المباعة والطلبات",
-  "إحصائيات الزوار والمبيعات",
-  "تقارير مفصلة عن أداء المتجر",
-  "تسجيل دخول العملاء وحفظ سلة المشتريات على الخادم ليتمكن العميل من الوصول إليها من أي جهاز",
-  "إمكانية إضافة أي عدد من المتغيرات للمنتجات مثل الألوان، المقاسات، الوزن، السعة، أو إنشاء متغيرات خاصة بك",
-  "إدارة المخزون وتتبع الكميات المتوفرة لكل منتج",
-  "الحصول على إشعارات عبر البريد الإلكتروني أو الرسائل القصيرة عند إجراء طلب جديد",
-];
+// Removed the hardcoded array; now using translations.
 
 // --- SVG Icon Components ---
 // Using components for icons makes the main return statement cleaner.
@@ -70,12 +62,33 @@ const ArrowLeftIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+const ArrowRightIcon: React.FC<{ className?: string }> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M5 12h14" />
+    <path d="m12 5 7 7-7 7" />
+  </svg>
+);
+
 const DashboardUpgradePage: React.FC = () => {
+  const t = useTranslations("admin.upgrade");
+  const locale = useLocale();
+  const isRtl = locale === "ar";
+
   return (
     // Main container with a subtle background color
     <div
       className="flex items-center justify-center p-4"
-      dir="rtl"
       style={{ minHeight: "calc(100vh - 6rem)" }} // 6rem = header height, adjust if needed
     >
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
@@ -83,16 +96,13 @@ const DashboardUpgradePage: React.FC = () => {
           {/* Left Side: Feature Highlights */}
           <div className="p-8 md:p-12 order-2 md:order-1">
             <h2 className="text-2xl font-bold text-slate-800 mb-2">
-              أطلق العنان لقوة متجرك الكاملة
+              {t("title")}
             </h2>
-            <p className="text-slate-500 mb-8 text-base">
-              الترقية إلى النسخة الاحترافية تمنحك أدوات تحليلية وإدارية متقدمة
-              لمساعدتك على النمو.
-            </p>
+            <p className="text-slate-500 mb-8 text-base">{t("subtitle")}</p>
 
             {/* Features Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
-              {proFeatures.map((feature, index) => (
+              {t.raw("features").map((feature: string, index: number) => (
                 <div key={index} className="flex items-start gap-3">
                   <div className="flex-shrink-0">
                     <CheckCircleIcon className="w-5 h-5 text-indigo-500 mt-1" />
@@ -111,12 +121,11 @@ const DashboardUpgradePage: React.FC = () => {
             </div>
 
             <h1 className="text-3xl font-bold text-slate-900 mb-3">
-              الترقية إلى Pro
+              {t("cta.title")}
             </h1>
 
             <p className="text-slate-600 mb-8 max-w-sm">
-              احصل على لوحة تحكم متكاملة مع إحصائيات دقيقة وتقارير مفصلة لإدارة
-              متجرك باحترافية.
+              {t("cta.description")}
             </p>
 
             {/* CTA Button */}
@@ -126,13 +135,15 @@ const DashboardUpgradePage: React.FC = () => {
               rel="noopener noreferrer"
               className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-blue-500 text-white font-bold text-lg shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-300"
             >
-              <span>الترقية الآن</span>
-              <ArrowLeftIcon className="w-6 h-6" />
+              <span>{t("cta.button")}</span>
+              {isRtl ? (
+                <ArrowLeftIcon className="w-6 h-6" />
+              ) : (
+                <ArrowRightIcon className="w-6 h-6" />
+              )}
             </a>
 
-            <p className="text-xs text-slate-500 mt-4">
-              سيتم توجيهك إلى واتساب للتواصل معنا.
-            </p>
+            <p className="text-xs text-slate-500 mt-4">{t("cta.note")}</p>
           </div>
         </div>
       </div>

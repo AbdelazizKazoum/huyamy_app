@@ -259,5 +259,27 @@
     "cart": "Panier",
     "yourName": "Votre nom",
     "yourEmail": "votre.email@exemple.com"
+  },
+  "admin": {
+    "upgrade": {
+      "title": "Libérez la puissance complète de votre boutique",
+      "subtitle": "La mise à niveau vers la version professionnelle vous offre des outils d'analyse et de gestion avancés pour vous aider à grandir.",
+      "features": [
+        "Affichage des revenus mensuels et annuels",
+        "Nombre de produits vendus et de commandes",
+        "Statistiques des visiteurs et des ventes",
+        "Rapports détaillés sur les performances de la boutique",
+        "Connexion client et sauvegarde du panier d'achat sur le serveur pour que le client puisse y accéder depuis n'importe quel appareil",
+        "Possibilité d'ajouter n'importe quel nombre de variantes aux produits comme les couleurs, tailles, poids, capacité, ou créer vos propres variantes",
+        "Gestion des stocks et suivi des quantités disponibles pour chaque produit",
+        "Recevoir des notifications par e-mail ou SMS lors d'une nouvelle commande"
+      ],
+      "cta": {
+        "title": "Mettre à niveau vers Pro",
+        "description": "Obtenez un tableau de bord intégré avec des statistiques précises et des rapports détaillés pour gérer votre boutique professionnellement.",
+        "button": "Mettre à niveau maintenant",
+        "note": "Vous serez redirigé vers WhatsApp pour nous contacter."
+      }
+    }
   }
 }

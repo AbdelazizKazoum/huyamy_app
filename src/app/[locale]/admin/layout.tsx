@@ -17,7 +17,6 @@ export default function RootLayout({
       <ServiceWorkerRegister />
       <InstallPrompt />
       <div
-        dir="rtl"
         className="bg-gray-100 text-gray-900 min-h-screen"
         style={{ fontFamily: "'Cairo', sans-serif" }}
       >

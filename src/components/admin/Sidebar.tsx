@@ -12,52 +12,60 @@ import { usePathname } from "next/navigation";
 import { Fragment } from "react";
 import { siteConfig } from "@/config/site"; // Add this import
 import Image from "next/image";
+import { Locale } from "@/i18n/config";
 
 const Sidebar: React.FC<{
   isCollapsed: boolean;
-}> = ({ isCollapsed }) => {
+  locale: string;
+}> = ({ isCollapsed, locale }) => {
   const pathname = usePathname();
   const baseAdminPath = pathname.split("/").slice(0, 3).join("/");
+  const currentLocale = locale as Locale;
+
+  const translations = {
+    dashboardTitle: {
+      ar: "لوحة التحكم",
+      fr: "Tableau de bord",
+    },
+  };
 
   const navItems = [
     {
       id: "dashboard",
-      label: "لوحة التحكم",
+      label: { ar: "لوحة التحكم", fr: "Tableau de bord" },
       icon: LayoutDashboard,
       href: baseAdminPath,
     },
     {
       id: "orders",
-      label: "الطلبات",
+      label: { ar: "الطلبات", fr: "Commandes" },
       icon: ShoppingCart,
       href: `${baseAdminPath}/orders`,
     },
     {
       id: "products",
-      label: "المنتجات",
+      label: { ar: "المنتجات", fr: "Produits" },
       icon: Package,
       href: `${baseAdminPath}/products`,
     },
     {
       id: "categories",
-      label: "الفئات",
+      label: { ar: "الفئات", fr: "Catégories" },
       icon: Tag,
       href: `${baseAdminPath}/categories`,
     },
     {
       id: "sections",
-      label: "الأقسام",
+      label: { ar: "الأقسام", fr: "Sections" },
       icon: Layers,
       href: `${baseAdminPath}/sections`,
     },
   ];
 
   const isActive = (href: string) => {
-    // Exact match for the dashboard/base route.
     if (href === baseAdminPath) {
       return pathname === baseAdminPath;
     }
-    // For all other routes, use startsWith.
     return pathname.startsWith(href);
   };
 
@@ -92,7 +100,7 @@ const Sidebar: React.FC<{
           )}
           {!isCollapsed && (
             <span className="text-xs text-primary-800 font-semibold tracking-wider">
-              لوحة التحكم
+              {translations.dashboardTitle[currentLocale]}
             </span>
           )}
         </Link>
@@ -110,10 +118,10 @@ const Sidebar: React.FC<{
                     ? "bg-primary-100 text-primary-800 font-bold"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
-                title={isCollapsed ? item.label : ""}
+                title={isCollapsed ? item.label[currentLocale] : ""}
               >
                 <item.icon size={20} />
-                {!isCollapsed && <span>{item.label}</span>}
+                {!isCollapsed && <span>{item.label[currentLocale]}</span>}
               </Link>
             </li>
           ))}
@@ -126,55 +134,65 @@ const Sidebar: React.FC<{
 const MobileSidebar: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-}> = ({ isOpen, onClose }) => {
+  locale: string;
+}> = ({ isOpen, onClose, locale }) => {
   const pathname = usePathname();
   const baseAdminPath = pathname.split("/").slice(0, 3).join("/");
+  const currentLocale = locale as Locale;
+
+  const translations = {
+    dashboardTitle: {
+      ar: "لوحة التحكم",
+      fr: "Tableau de bord",
+    },
+  };
 
   const navItems = [
     {
       id: "dashboard",
-      label: "لوحة التحكم",
+      label: { ar: "لوحة التحكم", fr: "Tableau de bord" },
       icon: LayoutDashboard,
       href: baseAdminPath,
     },
     {
       id: "orders",
-      label: "الطلبات",
+      label: { ar: "الطلبات", fr: "Commandes" },
       icon: ShoppingCart,
       href: `${baseAdminPath}/orders`,
     },
     {
       id: "products",
-      label: "المنتجات",
+      label: { ar: "المنتجات", fr: "Produits" },
       icon: Package,
       href: `${baseAdminPath}/products`,
     },
     {
       id: "categories",
-      label: "الفئات",
+      label: { ar: "الفئات", fr: "Catégories" },
       icon: Tag,
       href: `${baseAdminPath}/categories`,
     },
     {
       id: "sections",
-      label: "الأقسام",
+      label: { ar: "الأقسام", fr: "Sections" },
       icon: Layers,
       href: `${baseAdminPath}/sections`,
     },
   ];
 
   const isActive = (href: string) => {
-    // Exact match for the dashboard/base route.
     if (href === baseAdminPath) {
       return pathname === baseAdminPath;
     }
-    // For all other routes, use startsWith.
     return pathname.startsWith(href);
   };
 
   return (
     <Transition show={isOpen} as={Fragment}>
-      <div className="fixed inset-0 z-50 md:hidden" dir="rtl">
+      <div
+        className="fixed inset-0 z-50 md:hidden"
+        dir={currentLocale === "ar" ? "rtl" : "ltr"}
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -189,11 +207,15 @@ const MobileSidebar: React.FC<{
         <Transition.Child
           as={Fragment}
           enter="transform transition ease-in-out duration-300"
-          enterFrom="translate-x-full"
+          enterFrom={
+            currentLocale === "ar" ? "translate-x-full" : "-translate-x-full"
+          }
           enterTo="translate-x-0"
           leave="transform transition ease-in-out duration-300"
           leaveFrom="translate-x-0"
-          leaveTo="translate-x-full"
+          leaveTo={
+            currentLocale === "ar" ? "translate-x-full" : "-translate-x-full"
+          }
         >
           <div className="relative w-64 bg-white h-full flex flex-col">
             <div className="flex items-center justify-between h-16 border-b border-neutral-200 px-4">
@@ -208,7 +230,7 @@ const MobileSidebar: React.FC<{
                   Huyamy
                 </span>
                 <span className="text-xs text-green-800 font-semibold tracking-wider">
-                  لوحة التحكم
+                  {translations.dashboardTitle[currentLocale]}
                 </span>
               </Link>
               <button
@@ -232,7 +254,7 @@ const MobileSidebar: React.FC<{
                       }`}
                     >
                       <item.icon size={20} />
-                      <span>{item.label}</span>
+                      <span>{item.label[currentLocale]}</span>
                     </Link>
                   </li>
                 ))}

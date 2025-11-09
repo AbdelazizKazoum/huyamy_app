@@ -1,6 +1,7 @@
 "use client";
 import Header from "@/components/admin/Header";
 import { MobileSidebar, Sidebar } from "@/components/admin/Sidebar";
+import { useLocale } from "next-intl";
 import { useState } from "react";
 
 export default function AdminShell({
@@ -10,17 +11,26 @@ export default function AdminShell({
 }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const locale = useLocale();
+  const isRtl = locale === "ar";
 
   return (
     <div className="flex h-screen">
-      <Sidebar isCollapsed={isSidebarCollapsed} />
+      <Sidebar isCollapsed={isSidebarCollapsed} locale={locale} />
       <MobileSidebar
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
+        locale={locale}
       />
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
-          isSidebarCollapsed ? "md:mr-20" : "md:mr-64"
+          isSidebarCollapsed
+            ? isRtl
+              ? "md:mr-20"
+              : "md:ml-20"
+            : isRtl
+            ? "md:mr-64"
+            : "md:ml-64"
         }`}
       >
         <Header
