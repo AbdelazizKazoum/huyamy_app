@@ -43,6 +43,12 @@ type SiteConfig = {
     lat: number;
     lng: number;
   };
+  baseUrl: string;
+
+  manifest: string;
+
+  themeColor: string;
+
   verification: {
     google?: string;
   };
@@ -139,4 +145,7 @@ export const siteConfig: SiteConfig = {
     ar: "د.م.",
     fr: "MAD",
   },
+  baseUrl: "https://myglass.vercel.app",
+  manifest: "/manifest.json",
+  themeColor: "#1E40AF",
 };
