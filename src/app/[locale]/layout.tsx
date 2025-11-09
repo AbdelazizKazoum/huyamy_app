@@ -6,9 +6,7 @@ import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/config";
 import { Geist, Geist_Mono, Noto_Sans_Arabic, Inter } from "next/font/google";
 import "../globals.css";
-import ToasterProvider from "@/providers/ToasterProvider";
 import InstallPrompt from "@/components/InstallPrompt";
-import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { siteConfig } from "@/config/site";
 
 const geistSans = Geist({
@@ -76,7 +74,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: siteConfig.description[typedLocale],
       images: [
         {
-          url: siteConfig.ogImage,
+          url: siteConfig.logo,
           width: 1200,
           height: 630,
           alt: `${siteConfig.name} - ${siteConfig.description[typedLocale]}`,
@@ -87,7 +85,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: siteConfig.title[typedLocale],
       description: siteConfig.description[typedLocale],
-      images: [siteConfig.ogImage],
+      images: [siteConfig.logo],
       creator: siteConfig.social.twitter,
     },
     alternates: {
