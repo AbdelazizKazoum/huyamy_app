@@ -280,6 +280,57 @@
         "button": "Mettre à niveau maintenant",
         "note": "Vous serez redirigé vers WhatsApp pour nous contacter."
       }
+    },
+    "orders": {
+      "title": "Gestion des commandes",
+      "searchPlaceholder": "Rechercher par nom ou numéro de commande...",
+      "refresh": "Actualiser",
+      "filterBy": "Filtrer par :",
+      "filterByDate": "Filtrer par date :",
+      "dateFrom": "Date de début",
+      "dateTo": "Date de fin",
+      "selectDate": "Sélectionner la date",
+      "today": "Aujourd'hui",
+      "clearFilters": "Effacer les filtres",
+      "status": {
+        "all": "Tous",
+        "pending": "En attente",
+        "shipped": "Expédié",
+        "delivered": "Livré",
+        "cancelled": "Annulé"
+      },
+      "table": {
+        "orderId": "Numéro de commande",
+        "customer": "Client",
+        "date": "Date",
+        "status": "Statut",
+        "total": "Total",
+        "products": "Produits",
+        "actions": "Actions"
+      },
+      "mobile": {
+        "orderId": "Numéro de commande",
+        "customer": "Client",
+        "date": "Date",
+        "status": "Statut",
+        "total": "Montant total",
+        "products": "Nombre de produits"
+      },
+      "messages": {
+        "applyingFilters": "Application des filtres en cours...",
+        "loading": "Chargement en cours...",
+        "results": "Affichage de {count} sur {total} commande(s)",
+        "viewDetails": "Voir les détails",
+        "noOrders": "Aucune commande",
+        "errorLoading": "Erreur lors du chargement des données",
+        "indexingMessage": "📝 Création de l'index de la base de données. Cela peut prendre quelques minutes. Veuillez réessayer plus tard.",
+        "retry": "Réessayer"
+      },
+      "toasts": {
+        "refreshSuccess": "Commandes mises à jour avec succès",
+        "statusUpdateSuccess": "Statut de la commande mis à jour avec succès",
+        "statusUpdateError": "Échec de la mise à jour du statut de la commande"
+      }
     }
   }
 }

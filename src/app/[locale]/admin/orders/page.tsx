@@ -11,6 +11,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useOrderStore, Order } from "@/store/useOrderStore";
 import { toast } from "react-hot-toast";
 import OrderViewModal from "@/components/admin/modals/OrderViewModal";
+import { useTranslations } from "next-intl";
 
 // Loading Skeleton Components
 const OrderRowSkeleton = () => (
@@ -167,6 +168,7 @@ const MobileSkeletonView = () => (
 const OrdersPage: React.FC = () => {
   const params = useParams();
   const lang = params.locale as Language;
+  const t = useTranslations("admin.orders");
 
   // Zustand store
   const {
@@ -273,8 +275,8 @@ const OrdersPage: React.FC = () => {
     setIsRefreshing(true);
     await fetchOrders(true);
     setIsRefreshing(false);
-    toast.success("تم تحديث الطلبات بنجاح");
-  }, [fetchOrders]);
+    toast.success(t("toasts.refreshSuccess"));
+  }, [fetchOrders, t]);
 
   // Handle status update from modal
   const handleModalStatusUpdate = useCallback(
@@ -282,7 +284,7 @@ const OrdersPage: React.FC = () => {
       setIsUpdatingStatus(true);
       try {
         await updateOrderStatus(orderId, newStatus);
-        toast.success("تم تحديث حالة الطلب بنجاح");
+        toast.success(t("toasts.statusUpdateSuccess"));
 
         // Update the selected order in local state
         if (selectedOrder && selectedOrder.id === orderId) {
@@ -293,12 +295,12 @@ const OrdersPage: React.FC = () => {
           });
         }
       } catch (error) {
-        toast.error("فشل في تحديث حالة الطلب");
+        toast.error(t("toasts.statusUpdateError"));
       } finally {
         setIsUpdatingStatus(false);
       }
     },
-    [updateOrderStatus, selectedOrder]
+    [updateOrderStatus, selectedOrder, t]
   );
 
   // Handle view order
@@ -319,11 +321,11 @@ const OrdersPage: React.FC = () => {
 
   // Status options
   const statusOptions: { id: Order["status"] | "all"; label: string }[] = [
-    { id: "all", label: "الكل" },
-    { id: "pending", label: "قيد الانتظار" },
-    { id: "shipped", label: "تم الشحن" },
-    { id: "delivered", label: "تم التوصيل" },
-    { id: "cancelled", label: "ملغي" },
+    { id: "all", label: t("status.all") },
+    { id: "pending", label: t("status.pending") },
+    { id: "shipped", label: t("status.shipped") },
+    { id: "delivered", label: t("status.delivered") },
+    { id: "cancelled", label: t("status.cancelled") },
   ];
 
   // Get status chip component (read-only for table)
@@ -332,25 +334,25 @@ const OrdersPage: React.FC = () => {
       case "pending":
         return (
           <span className="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-            قيد الانتظار
+            {t("status.pending")}
           </span>
         );
       case "shipped":
         return (
           <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-            تم الشحن
+            {t("status.shipped")}
           </span>
         );
       case "delivered":
         return (
           <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-            تم التوصيل
+            {t("status.delivered")}
           </span>
         );
       case "cancelled":
         return (
           <span className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
-            ملغي
+            {t("status.cancelled")}
           </span>
         );
     }
@@ -367,8 +369,8 @@ const OrdersPage: React.FC = () => {
   }[] = [
     {
       key: "id",
-      label: "رقم الطلب",
-      mobileLabel: "رقم الطلب",
+      label: t("table.orderId"),
+      mobileLabel: t("mobile.orderId"),
       sortable: true,
       render: (item) => (
         <span className="font-mono text-xs sm:text-sm">
@@ -378,8 +380,8 @@ const OrdersPage: React.FC = () => {
     },
     {
       key: "shippingInfo" as keyof Order,
-      label: "العميل",
-      mobileLabel: "العميل",
+      label: t("table.customer"),
+      mobileLabel: t("mobile.customer"),
       sortable: true,
       render: (item) => (
         <div>
@@ -394,52 +396,57 @@ const OrdersPage: React.FC = () => {
     },
     {
       key: "createdAt",
-      label: "التاريخ",
-      mobileLabel: "التاريخ",
+      label: t("table.date"),
+      mobileLabel: t("mobile.date"),
       sortable: true,
       hiddenOnMobile: false, // Changed from hidden to visible on mobile
       render: (item) => (
         <div>
           <span className="block text-xs sm:text-sm">
-            {item.createdAt?.toLocaleDateString("ar-MA") || "غير محدد"}
+            {item.createdAt?.toLocaleDateString(
+              lang === "ar" ? "ar-MA" : "fr-FR"
+            ) || t("messages.noOrders")}
           </span>
           <span className="text-xs text-gray-500 hidden sm:inline">
-            {item.createdAt?.toLocaleTimeString("ar-MA", {
-              hour: "2-digit",
-              minute: "2-digit",
-            }) || ""}
+            {item.createdAt?.toLocaleTimeString(
+              lang === "ar" ? "ar-MA" : "fr-FR",
+              {
+                hour: "2-digit",
+                minute: "2-digit",
+              }
+            ) || ""}
           </span>
         </div>
       ),
     },
     {
       key: "status",
-      label: "الحالة",
-      mobileLabel: "الحالة",
+      label: t("table.status"),
+      mobileLabel: t("mobile.status"),
       sortable: true,
       render: (item) => getStatusChip(item.status),
     },
     {
       key: "totalAmount",
-      label: "الإجمالي",
-      mobileLabel: "المبلغ الإجمالي",
+      label: t("table.total"),
+      mobileLabel: t("mobile.total"),
       sortable: true,
       hiddenOnMobile: false, // Changed from hidden to visible on mobile
       render: (item) => (
         <span className="font-mono font-semibold text-xs sm:text-sm text-green-600">
-          {item.totalAmount.toFixed(2)} د.م.
+          {item.totalAmount.toFixed(2)} {lang === "ar" ? "د.م." : "MAD"}
         </span>
       ),
     },
     {
       key: "products" as keyof Order,
-      label: "المنتجات",
-      mobileLabel: "عدد المنتجات",
+      label: t("table.products"),
+      mobileLabel: t("mobile.products"),
       sortable: false,
       hiddenOnMobile: false, // Changed from hidden to visible on mobile
       render: (item) => (
         <span className="text-xs sm:text-sm text-gray-600">
-          {item.products.length} منتج
+          {item.products.length} {lang === "ar" ? "منتج" : "produit(s)"}
         </span>
       ),
     },
@@ -468,19 +475,19 @@ const OrdersPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1 className="text-xl sm:text-3xl font-bold text-gray-800 self-start md:self-center">
-          إدارة الطلبات ({pagination.total})
+          {t("title")} ({pagination.total})
         </h1>
         <div className="flex items-center gap-4 w-full md:w-auto">
           <SearchInput
             value={filters.searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            placeholder="...ابحث بالاسم أو رقم الطلب"
+            placeholder={t("searchPlaceholder")}
           />
           <button
             onClick={handleRefresh}
             disabled={loading || isRefreshing || isFilterLoading}
             className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors disabled:opacity-50"
-            title="تحديث"
+            title={t("refresh")}
           >
             <RefreshCw
               size={20}
@@ -494,7 +501,7 @@ const OrdersPage: React.FC = () => {
       <div className="mb-6 space-y-4">
         {/* Status Filters */}
         <div className="flex flex-col gap-3">
-          <div className="font-semibold text-gray-700">تصفية حسب:</div>
+          <div className="font-semibold text-gray-700">{t("filterBy")}</div>
           <div className="flex flex-wrap items-center gap-2">
             {statusOptions.map((status) => (
               <button
@@ -518,14 +525,14 @@ const OrdersPage: React.FC = () => {
 
         {/* Date Filters */}
         <div className="flex flex-col gap-3">
-          <div className="font-semibold text-gray-700">تصفية حسب التاريخ:</div>
+          <div className="font-semibold text-gray-700">{t("filterByDate")}</div>
           <div className="flex flex-col sm:flex-row sm:items-end gap-3">
             <div className="flex flex-col gap-1 flex-1 min-w-0">
               <label
                 htmlFor="date-from"
                 className="text-xs font-medium text-gray-600"
               >
-                من تاريخ
+                {t("dateFrom")}
               </label>
               <DateInput
                 id="date-from"
@@ -533,7 +540,7 @@ const OrdersPage: React.FC = () => {
                 onChange={(e) =>
                   handleDateFilter(e.target.value, filters.dateTo)
                 }
-                placeholder="اختر التاريخ"
+                placeholder={t("selectDate")}
                 disabled={isFilterLoading}
                 className="w-full"
               />
@@ -543,7 +550,7 @@ const OrdersPage: React.FC = () => {
                 htmlFor="date-to"
                 className="text-xs font-medium text-gray-600"
               >
-                إلى تاريخ
+                {t("dateTo")}
               </label>
               <DateInput
                 id="date-to"
@@ -551,7 +558,7 @@ const OrdersPage: React.FC = () => {
                 onChange={(e) =>
                   handleDateFilter(filters.dateFrom, e.target.value)
                 }
-                placeholder="اختر التاريخ"
+                placeholder={t("selectDate")}
                 disabled={isFilterLoading}
                 className="w-full"
               />
@@ -569,7 +576,7 @@ const OrdersPage: React.FC = () => {
                     : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
                 }`}
               >
-                اليوم
+                {t("today")}
               </button>
               {(filters.dateFrom ||
                 filters.dateTo ||
@@ -580,7 +587,7 @@ const OrdersPage: React.FC = () => {
                   disabled={isFilterLoading}
                   className="px-4 py-2 text-sm font-semibold text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 whitespace-nowrap"
                 >
-                  مسح المرشحات
+                  {t("clearFilters")}
                 </button>
               )}
             </div>
@@ -593,11 +600,16 @@ const OrdersPage: React.FC = () => {
         {loading || isFilterLoading ? (
           <div className="flex items-center gap-2">
             <Loader2 size={16} className="animate-spin" />
-            {isFilterLoading ? "جاري تطبيق التصفية..." : "جاري التحميل..."}
+            {isFilterLoading
+              ? t("messages.applyingFilters")
+              : t("messages.loading")}
           </div>
         ) : (
           <span>
-            عرض {orders.length} من أصل {pagination.total} طلب
+            {t("messages.results", {
+              count: orders.length,
+              total: pagination.total,
+            })}
           </span>
         )}
       </div>
@@ -625,13 +637,13 @@ const OrdersPage: React.FC = () => {
                 <button
                   onClick={() => handleViewOrder(order)}
                   className="flex items-center gap-1 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm transition-colors flex-1 justify-center"
-                  title="عرض التفاصيل"
+                  title={t("messages.viewDetails")}
                 >
                   <Eye size={14} />
-                  <span>عرض</span>
+                  <span>{t("messages.viewDetails")}</span>
                 </button>
               )}
-              emptyMessage="لا توجد طلبات"
+              emptyMessage={t("messages.noOrders")}
             />
           </div>
         )}
@@ -666,21 +678,20 @@ const OrdersPage: React.FC = () => {
               <span className="text-white text-xs">!</span>
             </div>
             <p className="text-red-800 text-sm font-medium">
-              خطأ في تحميل البيانات
+              {t("messages.errorLoading")}
             </p>
           </div>
           <p className="text-red-700 text-sm mt-2">{error}</p>
           {error.includes("index") && (
             <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded">
               <p className="text-yellow-800 text-sm">
-                📝 يتم إنشاء فهرس قاعدة البيانات. قد يستغرق الأمر بضع دقائق.
-                يرجى المحاولة مرة أخرى لاحقاً.
+                {t("messages.indexingMessage")}
               </p>
               <button
                 onClick={handleRefresh}
                 className="mt-2 px-4 py-2 bg-yellow-600 text-white text-sm rounded hover:bg-yellow-700 transition-colors"
               >
-                إعادة المحاولة
+                {t("messages.retry")}
               </button>
             </div>
           )}
