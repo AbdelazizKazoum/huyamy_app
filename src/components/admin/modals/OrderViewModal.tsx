@@ -3,21 +3,22 @@
 import { useState } from "react";
 import { Order } from "@/store/useOrderStore";
 import { Language } from "@/types";
-import { 
-  X, 
-  Package, 
-  User, 
-  MapPin, 
-  Phone, 
-  Calendar, 
+import {
+  X,
+  Package,
+  User,
+  MapPin,
+  Phone,
+  Calendar,
   CreditCard,
   Edit2,
   Check,
   Truck,
   PackageCheck,
-  XCircle
+  XCircle,
 } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface OrderViewModalProps {
   isOpen: boolean;
@@ -36,30 +37,32 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
   onStatusUpdate,
   isUpdating = false,
 }) => {
+  const t = useTranslations("admin.orders.modal");
   const [isEditingStatus, setIsEditingStatus] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<Order["status"]>("pending");
+  const [selectedStatus, setSelectedStatus] =
+    useState<Order["status"]>("pending");
 
   if (!isOpen || !order) return null;
 
   // Status configuration
   const statusConfig = {
     pending: {
-      label: "قيد الانتظار",
+      label: t("status.pending"),
       color: "bg-yellow-100 text-yellow-800 border-yellow-200",
       icon: Clock,
     },
     shipped: {
-      label: "تم الشحن",
+      label: t("status.shipped"),
       color: "bg-blue-100 text-blue-800 border-blue-200",
       icon: Truck,
     },
     delivered: {
-      label: "تم التوصيل",
+      label: t("status.delivered"),
       color: "bg-green-100 text-green-800 border-green-200",
       icon: PackageCheck,
     },
     cancelled: {
-      label: "ملغي",
+      label: t("status.cancelled"),
       color: "bg-red-100 text-red-800 border-red-200",
       icon: XCircle,
     },
@@ -75,8 +78,8 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
   };
 
   const formatDate = (date: Date | null) => {
-    if (!date) return "غير محدد";
-    return new Intl.DateTimeFormat("ar-MA", {
+    if (!date) return t("unknown");
+    return new Intl.DateTimeFormat(lang === "ar" ? "ar-MA" : "fr-FR", {
       year: "numeric",
       month: "long",
       day: "numeric",
@@ -86,7 +89,7 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
   };
 
   const formatCurrency = (amount: number) => {
-    return `${amount.toFixed(2)} د.م.`;
+    return `${amount.toFixed(2)} ${lang === "ar" ? "د.م." : "MAD"}`;
   };
 
   const StatusIcon = statusConfig[order.status].icon;
@@ -101,8 +104,10 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
               <Package className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-800">تفاصيل الطلب</h2>
-              <p className="text-sm text-gray-600 font-mono">#{order.id.slice(0, 12)}...</p>
+              <h2 className="text-xl font-bold text-gray-800">{t("title")}</h2>
+              <p className="text-sm text-gray-600 font-mono">
+                #{order.id.slice(0, 12)}...
+              </p>
             </div>
           </div>
           <button
@@ -121,7 +126,7 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                 <StatusIcon className="w-5 h-5" />
-                حالة الطلب
+                {t("status.title")}
               </h3>
               {!isEditingStatus && (
                 <button
@@ -141,14 +146,16 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
               <div className="flex items-center gap-3">
                 <select
                   value={selectedStatus}
-                  onChange={(e) => setSelectedStatus(e.target.value as Order["status"])}
+                  onChange={(e) =>
+                    setSelectedStatus(e.target.value as Order["status"])
+                  }
                   className="flex-1 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   disabled={isUpdating}
                 >
-                  <option value="pending">قيد الانتظار</option>
-                  <option value="shipped">تم الشحن</option>
-                  <option value="delivered">تم التوصيل</option>
-                  <option value="cancelled">ملغي</option>
+                  <option value="pending">{t("status.pending")}</option>
+                  <option value="shipped">{t("status.shipped")}</option>
+                  <option value="delivered">{t("status.delivered")}</option>
+                  <option value="cancelled">{t("status.cancelled")}</option>
                 </select>
                 <button
                   onClick={handleStatusUpdate}
@@ -156,18 +163,22 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
                   className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <Check size={16} />
-                  حفظ
+                  {t("buttons.save")}
                 </button>
                 <button
                   onClick={() => setIsEditingStatus(false)}
                   disabled={isUpdating}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 disabled:opacity-50"
                 >
-                  إلغاء
+                  {t("buttons.cancel")}
                 </button>
               </div>
             ) : (
-              <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-full border font-medium ${statusConfig[order.status].color}`}>
+              <div
+                className={`inline-flex items-center gap-2 px-3 py-2 rounded-full border font-medium ${
+                  statusConfig[order.status].color
+                }`}
+              >
                 <StatusIcon size={16} />
                 {statusConfig[order.status].label}
               </div>
@@ -179,24 +190,40 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
             <div className="bg-white border border-gray-200 rounded-lg p-5">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-green-600" />
-                معلومات الطلب
+                {t("orderInfo.title")}
               </h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">تاريخ الطلب:</span>
-                  <span className="font-medium">{formatDate(order.createdAt)}</span>
+                  <span className="text-gray-600">
+                    {t("orderInfo.createdAt")}:
+                  </span>
+                  <span className="font-medium">
+                    {formatDate(order.createdAt)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">آخر تحديث:</span>
-                  <span className="font-medium">{formatDate(order.updatedAt)}</span>
+                  <span className="text-gray-600">
+                    {t("orderInfo.updatedAt")}:
+                  </span>
+                  <span className="font-medium">
+                    {formatDate(order.updatedAt)}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">اللغة:</span>
-                  <span className="font-medium">{order.locale === "ar" ? "العربية" : "الفرنسية"}</span>
+                  <span className="text-gray-600">
+                    {t("orderInfo.locale")}:
+                  </span>
+                  <span className="font-medium">
+                    {order.locale === "ar"
+                      ? t("orderInfo.localeArabic")
+                      : t("orderInfo.localeFrench")}
+                  </span>
                 </div>
                 <div className="flex justify-between text-lg">
-                  <span className="text-gray-600">الإجمالي:</span>
-                  <span className="font-bold text-green-600">{formatCurrency(order.totalAmount)}</span>
+                  <span className="text-gray-600">{t("orderInfo.total")}:</span>
+                  <span className="font-bold text-green-600">
+                    {formatCurrency(order.totalAmount)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -205,28 +232,40 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
             <div className="bg-white border border-gray-200 rounded-lg p-5">
               <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <User className="w-5 h-5 text-green-600" />
-                معلومات العميل
+                {t("customerInfo.title")}
               </h3>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
                   <User className="w-4 h-4 text-gray-500" />
                   <div>
-                    <p className="font-medium text-gray-800">{order.shippingInfo.fullName}</p>
-                    <p className="text-sm text-gray-600">اسم العميل</p>
+                    <p className="font-medium text-gray-800">
+                      {order.shippingInfo.fullName}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {t("customerInfo.fullName")}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="w-4 h-4 text-gray-500" />
                   <div>
-                    <p className="font-medium text-gray-800" dir="ltr">{order.shippingInfo.phone}</p>
-                    <p className="text-sm text-gray-600">رقم الهاتف</p>
+                    <p className="font-medium text-gray-800" dir="ltr">
+                      {order.shippingInfo.phone}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {t("customerInfo.phone")}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-gray-500 mt-1" />
                   <div>
-                    <p className="font-medium text-gray-800">{order.shippingInfo.address}</p>
-                    <p className="text-sm text-gray-600">عنوان التوصيل</p>
+                    <p className="font-medium text-gray-800">
+                      {order.shippingInfo.address}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {t("customerInfo.address")}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -237,11 +276,14 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
           <div className="bg-white border border-gray-200 rounded-lg p-5">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
               <Package className="w-5 h-5 text-green-600" />
-              المنتجات ({order.products.length})
+              {t("products.title")} ({order.products.length})
             </h3>
             <div className="space-y-4">
               {order.products.map((product, index) => (
-                <div key={index} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"
+                >
                   <div className="relative w-16 h-16 bg-white rounded-lg overflow-hidden border">
                     <Image
                       src={product.image}
@@ -251,9 +293,13 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
                     />
                   </div>
                   <div className="flex-1">
-                    <h4 className="font-medium text-gray-800">{product.name[lang]}</h4>
+                    <h4 className="font-medium text-gray-800">
+                      {product.name[lang]}
+                    </h4>
                     <div className="flex items-center gap-4 mt-1">
-                      <span className="text-sm text-gray-600">الكمية: {product.quantity}</span>
+                      <span className="text-sm text-gray-600">
+                        {t("products.quantity")}: {product.quantity}
+                      </span>
                       <span className="text-sm font-medium text-green-600">
                         {formatCurrency(product.price)}
                       </span>
@@ -263,15 +309,19 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
                     <p className="font-semibold text-gray-800">
                       {formatCurrency(product.price * product.quantity)}
                     </p>
-                    <p className="text-xs text-gray-500">المجموع</p>
+                    <p className="text-xs text-gray-500">
+                      {t("products.subtotal")}
+                    </p>
                   </div>
                 </div>
               ))}
-              
+
               {/* Total */}
               <div className="border-t pt-4 mt-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold text-gray-800">المجموع الإجمالي:</span>
+                  <span className="text-lg font-semibold text-gray-800">
+                    {t("products.total")}:
+                  </span>
                   <span className="text-xl font-bold text-green-600">
                     {formatCurrency(order.totalAmount)}
                   </span>
@@ -288,7 +338,7 @@ const OrderViewModal: React.FC<OrderViewModalProps> = ({
             disabled={isUpdating}
             className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
-            إغلاق
+            {t("buttons.close")}
           </button>
         </div>
       </div>

@@ -186,7 +186,11 @@
     "copyright": "جميع الحقوق محفوظة."
   },
   "general": {
-    "categories": "الفئات"
+    "categories": "الفئات",
+    "dataTable": {
+      "actions": "الإجراءات",
+      "emptyMessage": "لا توجد بيانات للعرض"
+    }
   },
   "auth": {
     "invalid-credential": "بيانات الدخول غير صحيحة.",
@@ -329,7 +333,53 @@
         "refreshSuccess": "تم تحديث الطلبات بنجاح",
         "statusUpdateSuccess": "تم تحديث حالة الطلب بنجاح",
         "statusUpdateError": "فشل في تحديث حالة الطلب"
+      },
+      "modal": {
+        "title": "تفاصيل الطلب",
+        "status": {
+          "title": "حالة الطلب",
+          "pending": "قيد الانتظار",
+          "shipped": "تم الشحن",
+          "delivered": "تم التوصيل",
+          "cancelled": "ملغي"
+        },
+        "orderInfo": {
+          "title": "معلومات الطلب",
+          "createdAt": "تاريخ الطلب",
+          "updatedAt": "آخر تحديث",
+          "locale": "اللغة",
+          "localeArabic": "العربية",
+          "localeFrench": "الفرنسية",
+          "total": "الإجمالي"
+        },
+        "customerInfo": {
+          "title": "معلومات العميل",
+          "fullName": "اسم العميل",
+          "phone": "رقم الهاتف",
+          "address": "عنوان التوصيل"
+        },
+        "products": {
+          "title": "المنتجات",
+          "quantity": "الكمية",
+          "price": "السعر",
+          "subtotal": "المجموع",
+          "total": "المجموع الإجمالي"
+        },
+        "buttons": {
+          "save": "حفظ",
+          "cancel": "إلغاء",
+          "close": "إغلاق"
+        },
+        "unknown": "غير محدد"
       }
+    },
+    "header": {
+      "visitStore": "زيارة المتجر",
+      "user": "مستخدم",
+      "loggingOut": "جاري الخروج...",
+      "logout": "تسجيل الخروج",
+      "logoutSuccess": "تم تسجيل الخروج بنجاح",
+      "logoutError": "فشل في تسجيل الخروج"
     }
   }
 }

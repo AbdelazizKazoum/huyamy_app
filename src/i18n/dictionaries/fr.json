@@ -187,7 +187,11 @@
     "copyright": "Tous droits réservés."
   },
   "general": {
-    "categories": "Catégories"
+    "categories": "Catégories",
+    "dataTable": {
+      "actions": "Actions",
+      "emptyMessage": "Aucune donnée à afficher"
+    }
   },
   "auth": {
     "invalid-credential": "Les informations d'identification sont incorrectes.",
@@ -330,7 +334,53 @@
         "refreshSuccess": "Commandes mises à jour avec succès",
         "statusUpdateSuccess": "Statut de la commande mis à jour avec succès",
         "statusUpdateError": "Échec de la mise à jour du statut de la commande"
+      },
+      "modal": {
+        "title": "Détails de la commande",
+        "status": {
+          "title": "Statut de la commande",
+          "pending": "En attente",
+          "shipped": "Expédié",
+          "delivered": "Livré",
+          "cancelled": "Annulé"
+        },
+        "orderInfo": {
+          "title": "Informations de la commande",
+          "createdAt": "Date de commande",
+          "updatedAt": "Dernière mise à jour",
+          "locale": "Langue",
+          "localeArabic": "Arabe",
+          "localeFrench": "Français",
+          "total": "Total"
+        },
+        "customerInfo": {
+          "title": "Informations client",
+          "fullName": "Nom du client",
+          "phone": "Numéro de téléphone",
+          "address": "Adresse de livraison"
+        },
+        "products": {
+          "title": "Produits",
+          "quantity": "Quantité",
+          "price": "Prix",
+          "subtotal": "Sous-total",
+          "total": "Total général"
+        },
+        "buttons": {
+          "save": "Enregistrer",
+          "cancel": "Annuler",
+          "close": "Fermer"
+        },
+        "unknown": "Non spécifié"
       }
+    },
+    "header": {
+      "visitStore": "Visiter la boutique",
+      "user": "Utilisateur",
+      "loggingOut": "Déconnexion en cours...",
+      "logout": "Se déconnecter",
+      "logoutSuccess": "Déconnexion réussie",
+      "logoutError": "Échec de la déconnexion"
     }
   }
 }

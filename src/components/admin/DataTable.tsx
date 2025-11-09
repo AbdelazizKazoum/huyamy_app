@@ -1,5 +1,6 @@
 import useSortableData from "@/hooks/useSortableData";
 import { ArrowDown, ArrowUp, ChevronsUpDown } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
 
 interface DataTableProps<T extends object> {
   columns: {
@@ -27,9 +28,12 @@ const DataTable = <T extends { id: string }>({
   renderActions,
   isLoading = false,
   itemsPerPage = 8,
-  emptyMessage = "لا توجد بيانات للعرض",
+  emptyMessage,
   mobileCardRenderer,
 }: DataTableProps<T>) => {
+  const t = useTranslations("general.dataTable");
+  const locale = useLocale();
+  const isRtl = locale === "ar";
   const { items: sortedItems, requestSort, sortConfig } = useSortableData(data);
 
   const getSortIcon = (key: keyof T) => {
@@ -117,7 +121,7 @@ const DataTable = <T extends { id: string }>({
   const EmptyState = () => (
     <div className="text-center py-12">
       <div className="text-gray-400 text-lg mb-2">📋</div>
-      <p className="text-gray-500">{emptyMessage}</p>
+      <p className="text-gray-500">{emptyMessage || t("emptyMessage")}</p>
     </div>
   );
 
@@ -148,7 +152,12 @@ const DataTable = <T extends { id: string }>({
 
       {/* Desktop Table View */}
       <div className="hidden sm:block overflow-x-auto">
-        <table className="w-full text-right min-w-[600px]">
+        <table
+          className={`w-full ${
+            isRtl ? "text-right" : "text-left"
+          } min-w-[600px]`}
+          dir={isRtl ? "rtl" : "ltr"}
+        >
           <thead className="bg-gray-50">
             <tr>
               {columns.map((col) => (
@@ -169,7 +178,7 @@ const DataTable = <T extends { id: string }>({
               ))}
               {renderActions && (
                 <th className="p-2 sm:p-4 font-semibold text-xs sm:text-sm text-gray-600">
-                  إجراءات
+                  {t("actions")}
                 </th>
               )}
             </tr>
