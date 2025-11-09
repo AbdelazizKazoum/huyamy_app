@@ -116,14 +116,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: content.description,
       images: [
         {
-          url: siteConfig.ogImage,
+          url: `${siteConfig.url}${siteConfig.logo}`,
           width: 1200,
           height: 630,
           alt: content.title,
         },
         // Add featured product images
         ...landingPageProducts.slice(0, 3).map((product) => ({
-          url: product.image || siteConfig.ogImage,
+          url: product.image || `${siteConfig.url}${siteConfig.logo}`,
           width: 800,
           height: 600,
           alt: product.name?.[typedLocale] || `${siteConfig.brandName} Product`,
@@ -134,7 +134,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: content.title,
       description: content.description,
-      images: [landingPageProducts[0]?.image || siteConfig.ogImage],
+      images: [landingPageProducts[0]?.image || siteConfig.logo],
     },
     alternates: {
       canonical: `${siteConfig.url}/${typedLocale}`,
@@ -263,7 +263,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
               product.description?.[locale as "ar" | "fr"] ||
               product.description?.ar ||
               product.description?.fr,
-            image: product.image || `${siteConfig.url}${siteConfig.ogImage}`,
+            image: product.image || `${siteConfig.url}${siteConfig.logo}`,
             brand: {
               "@type": "Brand",
               name: siteConfig.brandName,
