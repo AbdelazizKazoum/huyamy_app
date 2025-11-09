@@ -380,6 +380,120 @@
       "logout": "تسجيل الخروج",
       "logoutSuccess": "تم تسجيل الخروج بنجاح",
       "logoutError": "فشل في تسجيل الخروج"
+    },
+    "products": {
+      "title": "إدارة المنتجات",
+      "addProduct": "إضافة منتج جديد",
+      "refresh": "تحديث",
+      "searchPlaceholder": "ابحث بالاسم أو الوصف...",
+      "table": {
+        "product": "المنتج",
+        "category": "الفئة",
+        "price": "السعر",
+        "stock": "المخزون",
+        "status": "الحالة"
+      },
+      "status": {
+        "inStock": "متوفر",
+        "outOfStock": "نفذ من المخزون"
+      },
+      "actions": {
+        "view": "عرض",
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "deleteDialog": {
+        "title": "هل أنت متأكد؟",
+        "description": "سيتم حذف هذا المنتج نهائياً.",
+        "cancel": "إلغاء",
+        "confirm": "تأكيد الحذف"
+      },
+      "toasts": {
+        "deleteSuccess": "تم حذف المنتج بنجاح",
+        "deleteError": "فشل حذف المنتج",
+        "refreshSuccess": "تم تحديث المنتجات بنجاح"
+      },
+      "emptyMessage": "لا توجد منتجات لعرضها",
+      "errorLoading": "فشل في تحميل المنتجات: {error}",
+      "modal": {
+        "addTitle": "إضافة منتج جديد",
+        "editTitle": "تعديل المنتج",
+        "labels": {
+          "nameAr": "اسم المنتج (بالعربية)",
+          "descriptionAr": "وصف المنتج (بالعربية)",
+          "price": "السعر الأساسي (د.م.)",
+          "originalPrice": "السعر الأصلي (اختياري)",
+          "category": "الفئة",
+          "keywords": "الكلمات المفتاحية (افصل بينها بفاصلة ,)",
+          "nameFr": "Nom du produit (Français)",
+          "descriptionFr": "Description du produit (Français)",
+          "purchaseOptions": "خيارات الشراء المتاحة",
+          "directPurchase": "الطلب المباشر",
+          "addToCart": "الإضافة للسلة",
+          "hasVariants": "هذا المنتج له متغيرات (مثل الحجم، الوزن، اللون)",
+          "variantOptions": "خيارات المنتج",
+          "selectOption": "اختر الخيار",
+          "customOptionAr": "الاسم المخصص (AR)",
+          "customOptionFr": "Nom Personnalisé (FR)",
+          "optionValues": "قيم الخيار (اضغط Enter للإضافة)",
+          "addOption": "إضافة خيار جديد",
+          "variantsList": "قائمة المتغيرات",
+          "variantPrice": "السعر",
+          "variantOriginalPrice": "السعر الأصلي",
+          "variantImages": "صور المتغير",
+          "addImage": "إضافة",
+          "hasRelatedProducts": "إضافة قسم المنتجات ذات الصلة",
+          "relatedProducts": "المنتجات ذات الصلة",
+          "selectRelatedProducts": "اختر المنتجات ذات الصلة",
+          "hasCustomSections": "إضافة أقسام مخصصة",
+          "customSection": "القسم المخصص",
+          "sectionNameAr": "اسم القسم (العربية)",
+          "sectionNameFr": "Nom de la section (Français)",
+          "sectionType": "نوع القسم",
+          "sectionProducts": "منتجات",
+          "sectionDescription": "وصف",
+          "selectSectionProducts": "اختر المنتجات لهذا القسم",
+          "sectionDescriptionAr": "الوصف (العربية)",
+          "sectionDescriptionFr": "Description (Français)",
+          "addCustomSection": "إضافة قسم مخصص جديد",
+          "mainImage": "الصورة الرئيسية",
+          "changeImage": "تغيير الصورة",
+          "uploadImage": "تحميل صورة",
+          "subImages": "الصور الفرعية",
+          "certificationImages": "صور الشهادات (اختياري)",
+          "isNew": "منتج جديد؟"
+        },
+        "placeholders": {
+          "selectCategory": "-- اختر فئة --",
+          "addKeyword": "أضف كلمة مفتاحية...",
+          "customOptionAr": "مثال: الضمان",
+          "customOptionFr": "Ex: Garantie",
+          "enterValue": "أضف قيمة واضغط Enter",
+          "enterColor": "أدخل لون (اسم أو #hex)",
+          "price": "0.00",
+          "selectSectionType": "اختر نوع القسم"
+        },
+        "buttons": {
+          "cancel": "إلغاء",
+          "save": "حفظ التغييرات",
+          "create": "إنشاء المنتج"
+        },
+        "errors": {
+          "nameAr": "اسم المنتج بالعربية مطلوب.",
+          "nameFr": "اسم المنتج بالفرنسية مطلوب.",
+          "descriptionAr": "وصف المنتج بالعربية مطلوب.",
+          "descriptionFr": "وصف المنتج بالفرنسية مطلوب.",
+          "price": "السعر يجب أن يكون رقمًا موجبًا.",
+          "category": "يجب اختيار فئة.",
+          "mainImage": "الصورة الرئيسية مطلوبة لمنتج جديد.",
+          "purchaseOptions": "يجب تفعيل خيار شراء واحد على الأقل.",
+          "variants": "يجب تسمية جميع خيارات المنتج باللغتين.",
+          "customSection": "يجب تسمية القسم باللغتين."
+        },
+        "messages": {
+          "imageFormat": "PNG, JPG, GIF up to 10MB"
+        }
+      }
     }
   }
 }

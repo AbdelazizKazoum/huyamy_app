@@ -11,7 +11,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useOrderStore, Order } from "@/store/useOrderStore";
 import { toast } from "react-hot-toast";
 import OrderViewModal from "@/components/admin/modals/OrderViewModal";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 // Loading Skeleton Components
 const OrderRowSkeleton = () => (
@@ -46,32 +46,38 @@ const OrderRowSkeleton = () => (
   </tr>
 );
 
-const OrdersSkeletonTable = () => (
+const OrdersSkeletonTable: React.FC<{
+  t: (key: string) => string;
+  isRtl: boolean;
+}> = ({ t, isRtl }) => (
   <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[600px]">
+      <table
+        className={`w-full min-w-[600px] ${isRtl ? "text-right" : "text-left"}`}
+        dir={isRtl ? "rtl" : "ltr"}
+      >
         <thead className="bg-gray-50 border-b border-gray-200">
           <tr>
-            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[80px]">
-              رقم الطلب
+            <th className="p-2 sm:p-4 text-xs sm:text-sm font-semibold text-gray-700 min-w-[80px]">
+              {t("table.orderId")}
             </th>
-            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[120px]">
-              العميل
+            <th className="p-2 sm:p-4 text-xs sm:text-sm font-semibold text-gray-700 min-w-[120px]">
+              {t("table.customer")}
             </th>
-            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[100px] hidden sm:table-cell">
-              التاريخ
+            <th className="p-2 sm:p-4 text-xs sm:text-sm font-semibold text-gray-700 min-w-[100px] hidden sm:table-cell">
+              {t("table.date")}
             </th>
-            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[90px]">
-              الحالة
+            <th className="p-2 sm:p-4 text-xs sm:text-sm font-semibold text-gray-700 min-w-[90px]">
+              {t("table.status")}
             </th>
-            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[80px] hidden md:table-cell">
-              الإجمالي
+            <th className="p-2 sm:p-4 text-xs sm:text-sm font-semibold text-gray-700 min-w-[80px] hidden md:table-cell">
+              {t("table.total")}
             </th>
-            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[80px] hidden lg:table-cell">
-              المنتجات
+            <th className="p-2 sm:p-4 text-xs sm:text-sm font-semibold text-gray-700 min-w-[80px] hidden lg:table-cell">
+              {t("table.products")}
             </th>
-            <th className="p-2 sm:p-4 text-right text-xs sm:text-sm font-semibold text-gray-700 min-w-[60px]">
-              الإجراءات
+            <th className="p-2 sm:p-4 text-xs sm:text-sm font-semibold text-gray-700 min-w-[60px]">
+              {t("table.actions")}
             </th>
           </tr>
         </thead>
@@ -169,6 +175,8 @@ const OrdersPage: React.FC = () => {
   const params = useParams();
   const lang = params.locale as Language;
   const t = useTranslations("admin.orders");
+  const locale = useLocale();
+  const isRtl = locale === "ar";
 
   // Zustand store
   const {
@@ -464,7 +472,7 @@ const OrdersPage: React.FC = () => {
           <MobileSkeletonView />
         </div>
         <div className="hidden sm:block">
-          <OrdersSkeletonTable />
+          <OrdersSkeletonTable t={t} isRtl={isRtl} />
         </div>
       </div>
     );
@@ -624,7 +632,7 @@ const OrdersPage: React.FC = () => {
             </div>
             {/* Desktop skeleton */}
             <div className="hidden sm:block">
-              <OrdersSkeletonTable />
+              <OrdersSkeletonTable t={t} isRtl={isRtl} />
             </div>
           </>
         ) : (

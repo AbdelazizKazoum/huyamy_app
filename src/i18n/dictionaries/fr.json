@@ -374,6 +374,120 @@
         "unknown": "Non spécifié"
       }
     },
+    "products": {
+      "title": "Gestion des produits",
+      "addProduct": "Ajouter un nouveau produit",
+      "refresh": "Actualiser",
+      "searchPlaceholder": "Rechercher par nom ou description...",
+      "table": {
+        "product": "Produit",
+        "category": "Catégorie",
+        "price": "Prix",
+        "stock": "Stock",
+        "status": "Statut"
+      },
+      "status": {
+        "inStock": "En stock",
+        "outOfStock": "En rupture de stock"
+      },
+      "actions": {
+        "view": "Voir",
+        "edit": "Modifier",
+        "delete": "Supprimer"
+      },
+      "deleteDialog": {
+        "title": "Êtes-vous sûr ?",
+        "description": "Ce produit sera définitivement supprimé.",
+        "cancel": "Annuler",
+        "confirm": "Confirmer la suppression"
+      },
+      "toasts": {
+        "deleteSuccess": "Produit supprimé avec succès",
+        "deleteError": "Échec de la suppression du produit",
+        "refreshSuccess": "Produits mis à jour avec succès"
+      },
+      "emptyMessage": "Aucun produit à afficher",
+      "errorLoading": "Échec du chargement des produits : {error}",
+      "modal": {
+        "addTitle": "Ajouter un nouveau produit",
+        "editTitle": "Modifier le produit",
+        "labels": {
+          "nameAr": "اسم المنتج (بالعربية)",
+          "descriptionAr": "وصف المنتج (بالعربية)",
+          "price": "Prix de base (MAD)",
+          "originalPrice": "Prix original (optionnel)",
+          "category": "Catégorie",
+          "keywords": "Mots-clés (séparez par une virgule ,)",
+          "nameFr": "Nom du produit (Français)",
+          "descriptionFr": "Description du produit (Français)",
+          "purchaseOptions": "Options d'achat disponibles",
+          "directPurchase": "Commande directe",
+          "addToCart": "Ajouter au panier",
+          "hasVariants": "Ce produit a des variantes (comme la taille, le poids, la couleur)",
+          "variantOptions": "Options du produit",
+          "selectOption": "Sélectionner l'option",
+          "customOptionAr": "الاسم المخصص (AR)",
+          "customOptionFr": "Nom Personnalisé (FR)",
+          "optionValues": "Valeurs de l'option (appuyez sur Entrée pour ajouter)",
+          "addOption": "Ajouter une nouvelle option",
+          "variantsList": "Liste des variantes",
+          "variantPrice": "Prix",
+          "variantOriginalPrice": "Prix original",
+          "variantImages": "Images de la variante",
+          "addImage": "Ajouter",
+          "hasRelatedProducts": "Ajouter une section de produits connexes",
+          "relatedProducts": "Produits connexes",
+          "selectRelatedProducts": "Sélectionner les produits connexes",
+          "hasCustomSections": "Ajouter des sections personnalisées",
+          "customSection": "Section personnalisée",
+          "sectionNameAr": "اسم القسم (العربية)",
+          "sectionNameFr": "Nom de la section (Français)",
+          "sectionType": "Type de section",
+          "sectionProducts": "Produits",
+          "sectionDescription": "Description",
+          "selectSectionProducts": "Sélectionner les produits pour cette section",
+          "sectionDescriptionAr": "الوصف (العربية)",
+          "sectionDescriptionFr": "Description (Français)",
+          "addCustomSection": "Ajouter une nouvelle section personnalisée",
+          "mainImage": "Image principale",
+          "changeImage": "Changer l'image",
+          "uploadImage": "Télécharger une image",
+          "subImages": "Images secondaires",
+          "certificationImages": "Images de certification (optionnel)",
+          "isNew": "Nouveau produit ?"
+        },
+        "placeholders": {
+          "selectCategory": "-- Sélectionner une catégorie --",
+          "addKeyword": "Ajouter un mot-clé...",
+          "customOptionAr": "مثال: الضمان",
+          "customOptionFr": "Ex: Garantie",
+          "enterValue": "Ajouter une valeur et appuyer sur Entrée",
+          "enterColor": "Entrer une couleur (nom ou #hex)",
+          "price": "0.00",
+          "selectSectionType": "Sélectionner le type de section"
+        },
+        "buttons": {
+          "cancel": "Annuler",
+          "save": "Enregistrer les modifications",
+          "create": "Créer le produit"
+        },
+        "errors": {
+          "nameAr": "اسم المنتج بالعربية مطلوب.",
+          "nameFr": "Le nom du produit en français est requis.",
+          "descriptionAr": "وصف المنتج بالعربية مطلوب.",
+          "descriptionFr": "La description du produit en français est requise.",
+          "price": "Le prix doit être un nombre positif.",
+          "category": "Une catégorie doit être sélectionnée.",
+          "mainImage": "L'image principale est requise pour un nouveau produit.",
+          "purchaseOptions": "Au moins une option d'achat doit être activée.",
+          "variants": "Toutes les options de produit doivent être nommées dans les deux langues.",
+          "customSection": "La section doit être nommée dans les deux langues."
+        },
+        "messages": {
+          "imageFormat": "PNG, JPG, GIF jusqu'à 10MB"
+        }
+      }
+    },
     "header": {
       "visitStore": "Visiter la boutique",
       "user": "Utilisateur",

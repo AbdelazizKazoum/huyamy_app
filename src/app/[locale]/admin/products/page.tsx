@@ -10,9 +10,11 @@ import { useMemo, useState, useEffect } from "react";
 import ProductFormModal from "@/components/admin/modals/ProductFormModal";
 import { useProductStore } from "@/store/useProductStore";
 import { fetchAllCategoriesAPI } from "@/lib/api/categories";
+import { useTranslations, useLocale } from "next-intl";
 
 const ProductsPage: React.FC = () => {
-  const lang = "ar" as Language;
+  const t = useTranslations("admin.products");
+  const locale = useLocale() as Language;
 
   // Zustand store integration
   const {
@@ -96,7 +98,7 @@ const ProductsPage: React.FC = () => {
   };
 
   const handleDelete = async (productId: string) => {
-    if (window.confirm("هل أنت متأكد من رغبتك في حذف هذا المنتج؟")) {
+    if (window.confirm(t("deleteDialog.description"))) {
       try {
         await deleteProduct(productId);
       } catch (err) {
@@ -115,49 +117,49 @@ const ProductsPage: React.FC = () => {
   }[] = [
     {
       key: "name",
-      label: "المنتج",
-      mobileLabel: "اسم المنتج",
+      label: t("table.product"),
+      mobileLabel: t("table.product"),
       sortable: true,
       render: (item) => (
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <Image
             src={item.image}
-            alt={item.name[lang]}
+            alt={item.name[locale]}
             width={48}
             height={48}
             className="w-8 h-8 sm:w-12 sm:h-12 rounded-md object-cover bg-gray-100 flex-shrink-0"
           />
           <span
             className="font-medium text-gray-800 text-sm sm:text-base truncate min-w-0"
-            title={item.name[lang]}
+            title={item.name[locale]}
           >
-            {item.name[lang]}
+            {item.name[locale]}
           </span>
         </div>
       ),
     },
     {
       key: "category",
-      label: "الفئة",
-      mobileLabel: "الفئة",
+      label: t("table.category"),
+      mobileLabel: t("table.category"),
       sortable: true,
       render: (item) => (
         <span
           className="text-sm sm:text-base text-gray-600 truncate block max-w-[100px] sm:max-w-[150px]"
-          title={item.category.name[lang]}
+          title={item.category.name[locale]}
         >
-          {item.category.name[lang]}
+          {item.category.name[locale]}
         </span>
       ),
     },
     {
       key: "price",
-      label: "السعر",
-      mobileLabel: "السعر",
+      label: t("table.price"),
+      mobileLabel: t("table.price"),
       sortable: true,
       render: (item) => (
         <span className="font-mono text-sm sm:text-base font-semibold text-green-600">
-          {item.price.toFixed(2)} د.م.
+          {item.price.toFixed(2)} {locale === "ar" ? "د.م." : "MAD"}
         </span>
       ),
     },
@@ -166,7 +168,7 @@ const ProductsPage: React.FC = () => {
   if (error) {
     return (
       <div className="text-center py-10 text-red-500 px-4">
-        Failed to load products: {error}
+        {t("errorLoading", { error })}
       </div>
     );
   }
@@ -176,7 +178,7 @@ const ProductsPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1 className="text-xl sm:text-3xl font-bold text-gray-800 self-start md:self-center">
-          إدارة المنتجات ({products.length})
+          {t("title")} ({products.length})
         </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <SearchInput
@@ -185,7 +187,7 @@ const ProductsPage: React.FC = () => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="...ابحث عن منتج"
+            placeholder={t("searchPlaceholder")}
             // className="w-full md:w-auto"
           />
           <button
@@ -193,8 +195,8 @@ const ProductsPage: React.FC = () => {
             className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors w-full md:w-auto justify-center text-sm sm:text-base"
           >
             <PlusCircle size={18} className="sm:w-5 sm:h-5" />
-            <span className="hidden sm:inline">منتج جديد</span>
-            <span className="sm:hidden">إضافة</span>
+            <span className="hidden sm:inline">{t("addProduct")}</span>
+            <span className="sm:hidden">{t("addProduct")}</span>
           </button>
         </div>
       </div>
@@ -205,31 +207,31 @@ const ProductsPage: React.FC = () => {
         data={paginatedProducts}
         isLoading={isLoading && products.length === 0}
         itemsPerPage={itemsPerPage}
-        emptyMessage="لا توجد منتجات"
+        emptyMessage={t("emptyMessage")}
         renderActions={(item: Product) => (
           <div className="flex items-center justify-center gap-2">
             {/* <button
-              title="عرض المنتج"
+              title={t("actions.view")}
               className="flex items-center gap-1 px-3 py-1.5 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm transition-colors justify-center"
             >
               <Eye size={14} />
-              <span className="hidden sm:inline">عرض</span>
+              <span className="hidden sm:inline">{t("actions.view")}</span>
             </button> */}
             <button
-              title="تعديل المنتج"
+              title={t("actions.edit")}
               onClick={() => handleOpenEditModal(item)}
               className="flex items-center gap-1 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm transition-colors justify-center"
             >
               <Edit size={14} />
-              <span>تعديل</span>
+              <span>{t("actions.edit")}</span>
             </button>
             <button
-              title="حذف المنتج"
+              title={t("actions.delete")}
               onClick={() => handleDelete(item.id)}
               className="flex items-center gap-1 px-3 py-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-sm transition-colors justify-center"
             >
               <Trash2 size={14} />
-              <span>حذف</span>
+              <span>{t("actions.delete")}</span>
             </button>
           </div>
         )}
@@ -252,7 +254,7 @@ const ProductsPage: React.FC = () => {
           onSubmit={handleFormSubmit}
           product={editingProduct}
           categories={categories}
-          lang={lang}
+          lang={locale}
           isSubmitting={isSubmitting}
         />
       )}
