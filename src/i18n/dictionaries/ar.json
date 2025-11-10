@@ -64,6 +64,7 @@
     "processing": "جاري المعالجة...",
     "orderSuccessToast": "تم إرسال طلبك بنجاح!",
     "orderSuccessMessage": "لقد تلقينا طلبك وسنتصل بك قريباً للتأكيد. شكراً لثقتكم!",
+    "orderSuccessMessageCard": "تم الدفع بنجاح. سنتصل بك لتفاصيل التسليم وموعد الوصول.",
     "loadingPaymentForm": "جاري تحميل نموذج الدفع...",
     "paymentInitError": "خطأ في تهيئة الدفع",
     "orderSaveError": "خطأ في حفظ الطلب",

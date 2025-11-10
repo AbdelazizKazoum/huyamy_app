@@ -841,7 +841,11 @@ const CheckoutPage = () => {
           setIsSuccessModalOpen(false);
           router.push(`/${locale}/products`);
         }}
-        message={t("orderSuccessMessage")}
+        message={
+          paymentMethod === "card"
+            ? t("orderSuccessMessageCard")
+            : t("orderSuccessMessage")
+        }
         lang={locale}
       />
     </>

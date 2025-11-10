@@ -100,6 +100,7 @@
     "codHint": "Payez à la livraison en espèces ou par carte bancaire",
     "codInfo": "Vous paierez le montant total à la livraison",
     "orderSuccessMessage": "Nous avons reçu votre commande et vous contacterons bientôt pour confirmation. Merci pour votre confiance !",
+    "orderSuccessMessageCard": "Votre paiement a été effectué avec succès. Nous vous contacterons pour les détails de livraison et la date d'arrivée.",
     "loadingPaymentForm": "Chargement du formulaire de paiement...",
     "paymentInitError": "Erreur lors de l'initialisation du paiement",
     "orderSaveError": "Erreur lors de la sauvegarde de la commande",
