@@ -102,7 +102,8 @@
     "orderSuccessMessage": "Nous avons reçu votre commande et vous contacterons bientôt pour confirmation. Merci pour votre confiance !",
     "loadingPaymentForm": "Chargement du formulaire de paiement...",
     "paymentInitError": "Erreur lors de l'initialisation du paiement",
-    "orderSaveError": "Erreur lors de la sauvegarde de la commande"
+    "orderSaveError": "Erreur lors de la sauvegarde de la commande",
+    "paymentErrorDefault": "Une erreur de paiement s'est produite. Cela peut être dû à un problème avec votre banque. Veuillez vérifier votre compte bancaire ou votre application bancaire. Si le problème persiste, contactez votre banque ou essayez une autre méthode de paiement."
   },
   "hero": {
     "promoAlt": "Offre promotionnelle - Produits naturels de haute qualité"
