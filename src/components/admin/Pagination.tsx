@@ -1,3 +1,6 @@
+"use client";
+
+import { useLocale } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface PaginationProps {
@@ -13,6 +16,9 @@ const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   loading = false,
 }) => {
+  const locale = useLocale();
+  const isRtl = locale === "ar";
+
   if (totalPages <= 1) return null;
 
   const getPageNumbers = () => {
@@ -47,6 +53,10 @@ const Pagination: React.FC<PaginationProps> = ({
     return pages;
   };
 
+  // Define icons based on language direction
+  const PrevIcon = isRtl ? ChevronRight : ChevronLeft;
+  const NextIcon = isRtl ? ChevronLeft : ChevronRight;
+
   return (
     <div className="flex items-center justify-center gap-2 mt-6 mb-4">
       {/* Previous Button */}
@@ -55,7 +65,7 @@ const Pagination: React.FC<PaginationProps> = ({
         disabled={currentPage === 1 || loading}
         className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        <ChevronRight size={20} />
+        <PrevIcon size={20} />
       </button>
 
       {/* Page Numbers */}
@@ -99,7 +109,7 @@ const Pagination: React.FC<PaginationProps> = ({
         disabled={currentPage === totalPages || loading}
         className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        <ChevronLeft size={20} />
+        <NextIcon size={20} />
       </button>
     </div>
   );
