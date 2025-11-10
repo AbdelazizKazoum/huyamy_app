@@ -27,7 +27,7 @@
     "continueShopping": "Continuer vos achats",
     "empty": {
       "title": "Votre panier est vide",
-      "description": "Vous n'avez encore ajouté aucun produit.",
+      "description": "Ajoutez des produits à votre panier pour continuer.",
       "startShopping": "Commencer les achats"
     },
     "unitPrice": "Prix unitaire",
