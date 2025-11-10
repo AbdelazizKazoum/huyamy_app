@@ -18,6 +18,7 @@ import { useProductStore } from "@/store/useProductStore";
 import CancelButton from "../ui/CancelButton";
 import SubmitButton from "../ui/SubmitButton";
 import ProductSelector from "../ProductSelector";
+import { useTranslations } from "next-intl";
 
 interface SectionFormModalProps {
   isOpen: boolean;
@@ -49,6 +50,8 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
   lang,
   isSubmitting = false,
 }) => {
+  const t = useTranslations("admin.sections.modal");
+
   // Fetch products from the product store (no longer needed to call fetchProducts here, as ProductSelector handles it)
   const { products } = useProductStore();
 
@@ -159,7 +162,7 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
 
   if (!isOpen) return null;
 
-  const title = section ? "تعديل القسم" : "إضافة قسم جديد";
+  const title = section ? t("editTitle") : t("addTitle");
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 z-50 flex justify-center items-center p-4">
@@ -167,7 +170,7 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
         onSubmit={handleSubmit}
         className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col"
       >
-        {/* ... Modal Header ... */}
+        {/* Modal Header */}
         <div className="flex justify-between items-center p-4 border-b border-neutral-200">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
           <button
@@ -185,7 +188,7 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
             {/* Core Section Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormSelect
-                label="نوع القسم"
+                label={t("labels.type")}
                 id="type"
                 value={type}
                 onChange={(e) => setType(e.target.value as SectionType)}
@@ -198,7 +201,7 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
               </FormSelect>
               <div className="flex items-end pb-2">
                 <FormToggle
-                  label="فعال؟"
+                  label={t("labels.isActive")}
                   checked={isActive}
                   onChange={(e) => setIsActive(e.target.checked)}
                 />
@@ -210,25 +213,25 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
             {/* Dynamic Data Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
-                label="العنوان (العربية)"
+                label={t("labels.titleAr")}
                 id="titleAr"
                 value={titleAr}
                 onChange={(e) => setTitleAr(e.target.value)}
               />
               <FormInput
-                label="العنوان (الفرنسية)"
+                label={t("labels.titleFr")}
                 id="titleFr"
                 value={titleFr}
                 onChange={(e) => setTitleFr(e.target.value)}
               />
               <FormInput
-                label="العنوان الفرعي (العربية)"
+                label={t("labels.subtitleAr")}
                 id="subtitleAr"
                 value={subtitleAr}
                 onChange={(e) => setSubtitleAr(e.target.value)}
               />
               <FormInput
-                label="العنوان الفرعي (الفرنسية)"
+                label={t("labels.subtitleFr")}
                 id="subtitleFr"
                 value={subtitleFr}
                 onChange={(e) => setSubtitleFr(e.target.value)}
@@ -239,19 +242,19 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
             {(type === "hero" || type === "banner") && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormInput
-                  label="نص الزر (العربية)"
+                  label={t("labels.ctaTextAr")}
                   id="ctaTextAr"
                   value={ctaTextAr}
                   onChange={(e) => setCtaTextAr(e.target.value)}
                 />
                 <FormInput
-                  label="نص الزر (الفرنسية)"
+                  label={t("labels.ctaTextFr")}
                   id="ctaTextFr"
                   value={ctaTextFr}
                   onChange={(e) => setCtaTextFr(e.target.value)}
                 />
                 <FormInput
-                  label="رابط الزر"
+                  label={t("labels.ctaUrl")}
                   id="ctaUrl"
                   value={ctaUrl}
                   onChange={(e) => setCtaUrl(e.target.value)}
@@ -265,7 +268,7 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
                 availableProducts={availableProducts}
                 onProductSelect={addProductToSection}
                 lang={lang}
-                label="المنتجات المعروضة"
+                label={t("labels.selectedProducts")}
               />
 
               <div className="p-4 border border-gray-200 rounded-lg bg-gray-50/50 min-h-[150px]">
@@ -300,10 +303,10 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
                   <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 py-8">
                     <PackageSearch size={48} className="mb-4 text-gray-400" />
                     <h3 className="font-semibold text-gray-600">
-                      لم يتم اختيار أي منتجات
+                      {t("messages.noProductsSelected")}
                     </h3>
                     <p className="text-sm">
-                      استخدم شريط البحث أعلاه لإضافة منتجات إلى هذا القسم.
+                      {t("messages.useSearchToAdd")}
                     </p>
                   </div>
                 )}
@@ -314,7 +317,7 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
             {(type === "hero" || type === "banner") && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  صورة الخلفية
+                  {t("labels.backgroundImage")}
                 </label>
                 <div
                   onClick={() => fileInputRef.current?.click()}
@@ -331,7 +334,7 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
                   ) : (
                     <div className="space-y-1 text-center">
                       <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
-                      <p>انقر للتحميل</p>
+                      <p>{t("messages.clickToUpload")}</p>
                     </div>
                   )}
                 </div>
@@ -348,13 +351,13 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
           </fieldset>
         </div>
 
-        {/* ... Modal Footer ... */}
+        {/* Modal Footer */}
         <div className="flex justify-end items-center gap-4 p-4 border-t border-neutral-200 bg-gray-50 rounded-b-lg">
           <CancelButton onClick={onClose} isSubmitting={isSubmitting}>
-            إلغاء
+            {t("buttons.cancel")}
           </CancelButton>
           <SubmitButton isSubmitting={isSubmitting}>
-            <span>{section ? "حفظ التغييرات" : "إنشاء القسم"}</span>
+            <span>{section ? t("buttons.save") : t("buttons.create")}</span>
           </SubmitButton>
         </div>
       </form>

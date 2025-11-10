@@ -1,4 +1,5 @@
 "use client";
+
 import DataTable from "@/components/admin/DataTable";
 import CategoryFormModal from "@/components/admin/modals/CategoryFormModal";
 import { Category, Language } from "@/types";
@@ -8,9 +9,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useCategoryStore } from "@/store/useCategoryStore";
 import SearchInput from "@/components/admin/ui/SearchInput";
 import Pagination from "@/components/admin/Pagination";
+import { useTranslations, useLocale } from "next-intl";
 
 const CategoriesPage: React.FC = () => {
-  const lang = "ar" as Language;
+  const t = useTranslations("admin.categories");
+  const locale = useLocale() as Language;
 
   // 1. Zustand Store Integration
   const {
@@ -88,7 +91,7 @@ const CategoriesPage: React.FC = () => {
   };
 
   const handleDelete = async (categoryId: string) => {
-    if (window.confirm("هل أنت متأكد من رغبتك في حذف هذه الفئة؟")) {
+    if (window.confirm(t("deleteDialog.description"))) {
       try {
         await deleteCategory(categoryId);
       } catch (err) {
@@ -107,39 +110,39 @@ const CategoriesPage: React.FC = () => {
   }[] = [
     {
       key: "name",
-      label: "الفئة",
-      mobileLabel: "اسم الفئة",
+      label: t("table.category"),
+      mobileLabel: t("table.category"),
       sortable: true,
       render: (item) => (
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <Image
             src={item.image}
-            alt={item.name[lang]}
+            alt={item.name[locale]}
             width={48}
             height={48}
             className="w-8 h-8 sm:w-12 sm:h-12 rounded-full object-cover bg-gray-100 flex-shrink-0"
           />
           <span
             className="font-medium text-gray-800 text-sm sm:text-base truncate min-w-0"
-            title={item.name[lang]}
+            title={item.name[locale]}
           >
-            {item.name[lang]}
+            {item.name[locale]}
           </span>
         </div>
       ),
     },
     {
       key: "description",
-      label: "الوصف",
-      mobileLabel: "الوصف",
+      label: t("table.description"),
+      mobileLabel: t("table.description"),
       sortable: true,
       render: (item) => (
         <div className="min-w-0 max-w-[150px] sm:max-w-[300px]">
           <span
             className="text-sm sm:text-base text-gray-600 block truncate"
-            title={item.description[lang]}
+            title={item.description[locale]}
           >
-            {item.description[lang]}
+            {item.description[locale]}
           </span>
         </div>
       ),
@@ -149,7 +152,7 @@ const CategoriesPage: React.FC = () => {
   if (error) {
     return (
       <div className="text-center py-10 text-red-500 px-4">
-        Failed to load categories: {error}
+        {t("errorLoading", { error })}
       </div>
     );
   }
@@ -159,7 +162,7 @@ const CategoriesPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
         <h1 className="text-xl sm:text-3xl font-bold text-gray-800 self-start md:self-center">
-          إدارة الفئات ({categories.length})
+          {t("title")} ({categories.length})
         </h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <SearchInput
@@ -168,7 +171,7 @@ const CategoriesPage: React.FC = () => {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            placeholder="...ابحث عن فئة"
+            placeholder={t("searchPlaceholder")}
             // className="w-full md:w-auto"
           />
           <button
@@ -176,8 +179,8 @@ const CategoriesPage: React.FC = () => {
             className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors w-full md:w-auto justify-center text-sm sm:text-base"
           >
             <PlusCircle size={18} className="sm:w-5 sm:h-5" />
-            <span className="hidden sm:inline">فئة جديدة</span>
-            <span className="sm:hidden">إضافة</span>
+            <span className="hidden sm:inline">{t("addCategory")}</span>
+            <span className="sm:hidden">{t("add")}</span>
           </button>
         </div>
       </div>
@@ -188,24 +191,24 @@ const CategoriesPage: React.FC = () => {
         data={paginatedCategories}
         isLoading={isLoading && categories.length === 0}
         itemsPerPage={itemsPerPage}
-        emptyMessage="لا توجد فئات"
+        emptyMessage={t("emptyMessage")}
         renderActions={(item: Category) => (
           <div className="flex items-center justify-center gap-2">
             <button
               onClick={() => handleOpenEditModal(item)}
               className="flex items-center gap-1 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm transition-colors justify-center"
-              title="تعديل"
+              title={t("actions.edit")}
             >
               <Edit size={14} />
-              <span>تعديل</span>
+              <span>{t("actions.edit")}</span>
             </button>
             <button
               onClick={() => handleDelete(item.id)}
               className="flex items-center gap-1 px-3 py-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-sm transition-colors justify-center"
-              title="حذف"
+              title={t("actions.delete")}
             >
               <Trash2 size={14} />
-              <span>حذف</span>
+              <span>{t("actions.delete")}</span>
             </button>
           </div>
         )}
@@ -227,7 +230,7 @@ const CategoriesPage: React.FC = () => {
           onClose={handleCloseModal}
           onSubmit={handleFormSubmit}
           category={editingCategory}
-          lang={lang}
+          lang={locale}
           isSubmitting={isSubmitting}
         />
       )}

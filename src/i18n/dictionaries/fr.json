@@ -495,6 +495,216 @@
       "logout": "Se déconnecter",
       "logoutSuccess": "Déconnexion réussie",
       "logoutError": "Échec de la déconnexion"
+    },
+    "categories": {
+      "title": "Gestion des catégories",
+      "addCategory": "Nouvelle catégorie",
+      "add": "Ajouter",
+      "searchPlaceholder": "Rechercher une catégorie...",
+      "table": {
+        "category": "Catégorie",
+        "description": "Description"
+      },
+      "actions": {
+        "edit": "Modifier",
+        "delete": "Supprimer"
+      },
+      "deleteDialog": {
+        "description": "Êtes-vous sûr de vouloir supprimer cette catégorie ?"
+      },
+      "emptyMessage": "Aucune catégorie trouvée",
+      "errorLoading": "Échec du chargement des catégories : {error}",
+      "modal": {
+        "addTitle": "Ajouter une nouvelle catégorie",
+        "editTitle": "Modifier la catégorie",
+        "labels": {
+          "nameAr": "اسم الفئة (العربية)",
+          "nameFr": "Nom de la catégorie (Français)",
+          "descriptionAr": "الوصف (العربية)",
+          "descriptionFr": "Description (Français)",
+          "image": "Image de la catégorie"
+        },
+        "buttons": {
+          "cancel": "Annuler",
+          "save": "Enregistrer les modifications",
+          "create": "Créer la catégorie"
+        },
+        "errors": {
+          "nameAr": "اسم الفئة بالعربية مطلوب.",
+          "nameFr": "Le nom de la catégorie en français est requis.",
+          "descriptionAr": "الوصف بالعربية مطلوب.",
+          "descriptionFr": "La description en français est requise.",
+          "image": "L'image de la catégorie est requise."
+        },
+        "messages": {
+          "dragDrop": "Glissez-déposez ou cliquez pour télécharger",
+          "imageFormat": "PNG, JPG, WEBP jusqu'à 2MB"
+        }
+      }
+    },
+    "sections": {
+      "title": "Gestion des sections",
+      "addSection": "Nouvelle section",
+      "add": "Ajouter",
+      "table": {
+        "type": "Type",
+        "title": "Titre",
+        "products": "Produits",
+        "status": "Actif"
+      },
+      "status": {
+        "active": "Actif",
+        "inactive": "Inactif"
+      },
+      "actions": {
+        "edit": "Modifier",
+        "delete": "Supprimer"
+      },
+      "deleteDialog": {
+        "description": "Êtes-vous sûr de vouloir supprimer cette section ?"
+      },
+      "emptyMessage": "Aucune section trouvée",
+      "productCount": "{count} produit(s)",
+      "modal": {
+        "addTitle": "Ajouter une nouvelle section",
+        "editTitle": "Modifier la section",
+        "labels": {
+          "type": "Type de section",
+          "isActive": "Actif ?",
+          "titleAr": "العنوان (العربية)",
+          "titleFr": "Titre (Français)",
+          "subtitleAr": "العنوان الفرعي (العربية)",
+          "subtitleFr": "Sous-titre (Français)",
+          "ctaTextAr": "نص الزر (العربية)",
+          "ctaTextFr": "Texte du bouton (Français)",
+          "ctaUrl": "Lien du bouton",
+          "selectedProducts": "Produits affichés",
+          "backgroundImage": "Image de fond"
+        },
+        "buttons": {
+          "cancel": "Annuler",
+          "save": "Enregistrer les modifications",
+          "create": "Créer la section"
+        },
+        "messages": {
+          "noProductsSelected": "Aucun produit sélectionné",
+          "useSearchToAdd": "Utilisez la barre de recherche ci-dessus pour ajouter des produits à cette section.",
+          "clickToUpload": "Cliquez pour télécharger"
+        },
+        "sectionTypes": {
+          "landing-page": "Page d'accueil",
+          "featured": "Produits Recommandés",
+          "also-choose": "Choisissez aussi"
+        }
+      }
+    },
+    "productSelector": {
+      "searchPlaceholder": "...Rechercher un produit à ajouter"
+    },
+    "parameters": {
+      "header": {
+        "title": "Paramètres de la boutique",
+        "description": "Gérer les détails de votre boutique et vos préférences de base."
+      },
+      "navigation": {
+        "siteSettings": "Paramètres du site",
+        "shippingPayment": "Expédition et paiement",
+        "integrations": "Intégrations"
+      },
+      "cards": {
+        "basicInfo": {
+          "title": "Informations de base",
+          "description": "Mettre à jour les informations générales de votre boutique qui apparaissent aux clients.",
+          "labels": {
+            "storeName": "Nom de la boutique",
+            "brandName": "Nom de la marque",
+            "siteUrl": "URL du site"
+          }
+        },
+        "brandAssets": {
+          "title": "Actifs de la marque",
+          "description": "Gérer le logo de votre boutique, la bannière et le favicon.",
+          "labels": {
+            "storeLogo": "Logo de la boutique",
+            "storeBanner": "Bannière de la boutique",
+            "favicon": "Favicon"
+          },
+          "descriptions": {
+            "logo": "Doit être un .png transparent de 256px de largeur.",
+            "banner": "Préférablement de taille 1920x1080px.",
+            "favicon": "Icône du navigateur. Doit être de 32x32px."
+          }
+        },
+        "storeSettings": {
+          "title": "Paramètres de la boutique",
+          "description": "Catégorie, devises et langue par défaut de votre boutique.",
+          "labels": {
+            "storeCategory": "Catégorie de la boutique",
+            "defaultLanguage": "Langue par défaut",
+            "currencyAr": "Devise (Arabe)",
+            "currencyFr": "Devise (Français)"
+          },
+          "languages": {
+            "ar": "العربية",
+            "fr": "Français"
+          }
+        },
+        "translatedContent": {
+          "title": "Contenu traduit (SEO)",
+          "description": "Gérer le contenu pour l'optimisation des moteurs de recherche dans différentes langues.",
+          "labels": {
+            "titleTemplate": "Modèle de titre",
+            "siteTitleAr": "Titre du site (Arabe)",
+            "siteTitleFr": "Titre du site (Français)",
+            "siteDescriptionAr": "Description du site (Arabe)",
+            "siteDescriptionFr": "Description du site (Français)",
+            "storeNicheAr": "Niche de la boutique (Arabe)",
+            "storeNicheFr": "Niche de la boutique (Français)",
+            "keywordsAr": "Mots-clés (Arabe)",
+            "keywordsFr": "Mots-clés (Français)"
+          },
+          "placeholders": {
+            "addKeywordAr": "أضف كلمة واضغط Enter...",
+            "addKeywordFr": "Ajouter un mot-clé et appuyez sur Entrée..."
+          },
+          "tabs": {
+            "ar": "العربية",
+            "fr": "الفرنسية"
+          }
+        },
+        "locationVerification": {
+          "title": "Emplacement et vérification",
+          "description": "Gérer l'emplacement de votre boutique et les codes de vérification pour les moteurs.",
+          "labels": {
+            "location": "Emplacement",
+            "latitude": "Latitude",
+            "longitude": "Longitude",
+            "googleVerification": "Code de vérification Google"
+          }
+        },
+        "contactInfo": {
+          "title": "Informations de contact",
+          "description": "Comment vos clients peuvent vous contacter.",
+          "labels": {
+            "email": "Email",
+            "phone": "Téléphone",
+            "whatsapp": "WhatsApp"
+          }
+        },
+        "socialMedia": {
+          "title": "Réseaux sociaux",
+          "description": "Liens vers vos comptes sur les réseaux sociaux.",
+          "labels": {
+            "twitterHandle": "Identifiant Twitter (sans @)",
+            "facebookLink": "Facebook (lien)",
+            "instagramLink": "Instagram (lien)",
+            "twitterLink": "Twitter (lien)"
+          }
+        }
+      },
+      "buttons": {
+        "saveChanges": "Enregistrer les modifications"
+      }
     }
   }
 }

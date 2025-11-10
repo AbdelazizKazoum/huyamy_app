@@ -14,6 +14,7 @@ import FormInput from "@/components/admin/ui/FormInput";
 import ImageUpload from "@/components/admin/ui/ImageUpload";
 import { siteConfig as siteConfigData } from "@/config/site";
 import { Language } from "@/types";
+import { useTranslations, useLocale } from "next-intl";
 
 // --- Type Definitions ---
 // Using a simplified type for the page state, derived from the imported config.
@@ -148,6 +149,9 @@ const SettingsCard: React.FC<SettingsCardProps> = ({
 
 // --- Settings Page Component ---
 export default function SettingsPage() {
+  const t = useTranslations("admin.parameters");
+  const locale = useLocale() as Language;
+
   const [config, setConfig] = useState<PageSiteConfig>(siteConfigData);
   const [langTab, setLangTab] = useState<Language>("ar");
 
@@ -237,7 +241,7 @@ export default function SettingsPage() {
   const SaveButton = () => (
     <button className="bg-primary-700 text-white font-bold py-2.5 px-5 rounded-lg hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 transition-colors flex items-center gap-2">
       <Save size={16} />
-      <span>حفظ التغييرات</span>
+      <span>{t("buttons.saveChanges")}</span>
     </button>
   );
 
@@ -246,11 +250,9 @@ export default function SettingsPage() {
       <div className="max-w-screen-xl mx-auto">
         <header className="mb-10">
           <h1 className="text-4xl font-bold text-neutral-900">
-            إعدادات المتجر
+            {t("header.title")}
           </h1>
-          <p className="mt-2 text-neutral-600">
-            إدارة تفاصيل متجرك وتفضيلاتك الأساسية.
-          </p>
+          <p className="mt-2 text-neutral-600">{t("header.description")}</p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
@@ -259,17 +261,17 @@ export default function SettingsPage() {
             <nav className="flex flex-col space-y-1.5 sticky top-8">
               <NavButton
                 icon={<Settings size={20} />}
-                label="إعدادات الموقع"
+                label={t("navigation.siteSettings")}
                 isActive={true}
               />
               <NavButton
                 icon={<CreditCard size={20} />}
-                label="الشحن والدفع"
+                label={t("navigation.shippingPayment")}
                 isActive={false}
               />
               <NavButton
                 icon={<Puzzle size={20} />}
-                label="التكاملات"
+                label={t("navigation.integrations")}
                 isActive={false}
               />
             </nav>
@@ -279,20 +281,20 @@ export default function SettingsPage() {
           <main className="lg:col-span-3 space-y-8">
             <SettingsCard
               icon={<Settings size={24} />}
-              title="المعلومات الأساسية"
-              description="تحديث المعلومات العامة لمتجرك التي تظهر للعملاء."
+              title={t("cards.basicInfo.title")}
+              description={t("cards.basicInfo.description")}
               footer={<SaveButton />}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormInput
-                  label="اسم المتجر"
+                  label={t("cards.basicInfo.labels.storeName")}
                   id="name"
                   name="name"
                   value={config.name}
                   onChange={handleInputChange}
                 />
                 <FormInput
-                  label="اسم العلامة التجارية"
+                  label={t("cards.basicInfo.labels.brandName")}
                   id="brandName"
                   name="brandName"
                   value={config.brandName}
@@ -300,7 +302,7 @@ export default function SettingsPage() {
                 />
               </div>
               <FormInput
-                label="رابط الموقع (URL)"
+                label={t("cards.basicInfo.labels.siteUrl")}
                 id="url"
                 name="url"
                 type="url"
@@ -311,28 +313,28 @@ export default function SettingsPage() {
 
             <SettingsCard
               icon={<Store size={24} />}
-              title="أصول العلامة التجارية"
-              description="إدارة شعار متجرك، البانر، وال favicon."
+              title={t("cards.brandAssets.title")}
+              description={t("cards.brandAssets.description")}
               footer={<SaveButton />}
             >
               <ImageUpload
-                label="شعار المتجر"
-                description="يجب أن يكون .png شفاف بعرض 256px."
+                label={t("cards.brandAssets.labels.storeLogo")}
+                description={t("cards.brandAssets.descriptions.logo")}
                 currentImage={config.logo}
                 onImageChange={(file) => handleImageChange("logo", file)}
                 onImageRemove={() => handleImageRemove("logo")}
               />
               <ImageUpload
-                label="بانر المتجر"
-                description="يفضل أن يكون بحجم 1920x1080px."
+                label={t("cards.brandAssets.labels.storeBanner")}
+                description={t("cards.brandAssets.descriptions.banner")}
                 currentImage={""} // Assuming banner is not in site.ts, add it if needed
                 onImageChange={(file) => handleImageChange("banner", file)}
                 onImageRemove={() => handleImageRemove("banner")}
                 aspectRatio="aspect-video"
               />
               <ImageUpload
-                label="Favicon"
-                description="أيقونة المتصفح. يجب أن تكون 32x32px."
+                label={t("cards.brandAssets.labels.favicon")}
+                description={t("cards.brandAssets.descriptions.favicon")}
                 currentImage={""} // Assuming favicon is not in site.ts, add it if needed
                 onImageChange={(file) => handleImageChange("favicon", file)}
                 onImageRemove={() => handleImageRemove("favicon")}
@@ -341,12 +343,12 @@ export default function SettingsPage() {
 
             <SettingsCard
               icon={<Store size={24} />}
-              title="إعدادات المتجر"
-              description="التصنيف، العملات، واللغة الافتراضية لمتجرك."
+              title={t("cards.storeSettings.title")}
+              description={t("cards.storeSettings.description")}
               footer={<SaveButton />}
             >
               <FormInput
-                label="تصنيف المتجر"
+                label={t("cards.storeSettings.labels.storeCategory")}
                 id="category"
                 name="category"
                 value={config.category}
@@ -357,7 +359,7 @@ export default function SettingsPage() {
                   htmlFor="i18n.defaultLocale"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  اللغة الافتراضية
+                  {t("cards.storeSettings.labels.defaultLanguage")}
                 </label>
                 <select
                   id="i18n.defaultLocale"
@@ -368,21 +370,21 @@ export default function SettingsPage() {
                 >
                   {config.i18n.locales.map((loc) => (
                     <option key={loc} value={loc}>
-                      {loc === "ar" ? "العربية" : "Français"}
+                      {t(`cards.storeSettings.languages.${loc}`)}
                     </option>
                   ))}
                 </select>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormInput
-                  label="العملة (العربية)"
+                  label={t("cards.storeSettings.labels.currencyAr")}
                   id="currencies.ar"
                   name="currencies.ar"
                   value={config.currencies.ar}
                   onChange={handleInputChange}
                 />
                 <FormInput
-                  label="العملة (الفرنسية)"
+                  label={t("cards.storeSettings.labels.currencyFr")}
                   id="currencies.fr"
                   name="currencies.fr"
                   value={config.currencies.fr}
@@ -392,12 +394,12 @@ export default function SettingsPage() {
             </SettingsCard>
 
             <SettingsCard
-              title="المحتوى المترجم (SEO)"
-              description="إدارة المحتوى الخاص بتحسين محركات البحث بلغات مختلفة."
+              title={t("cards.translatedContent.title")}
+              description={t("cards.translatedContent.description")}
               footer={<SaveButton />}
             >
               <FormInput
-                label="قالب العنوان"
+                label={t("cards.translatedContent.labels.titleTemplate")}
                 id="titleTemplate"
                 name="titleTemplate"
                 value={config.titleTemplate}
@@ -416,7 +418,7 @@ export default function SettingsPage() {
                         : "text-neutral-600 hover:text-neutral-900"
                     }`}
                   >
-                    العربية
+                    {t("cards.translatedContent.tabs.ar")}
                   </button>
                   <button
                     onClick={() => setLangTab("fr")}
@@ -426,7 +428,7 @@ export default function SettingsPage() {
                         : "text-neutral-600 hover:text-neutral-900"
                     }`}
                   >
-                    الفرنسية
+                    {t("cards.translatedContent.tabs.fr")}
                   </button>
                 </nav>
               </div>
@@ -434,61 +436,69 @@ export default function SettingsPage() {
                 {langTab === "ar" ? (
                   <>
                     <FormInput
-                      label="عنوان الموقع (بالعربية)"
+                      label={t("cards.translatedContent.labels.siteTitleAr")}
                       id="title.ar"
                       name="title"
                       value={config.title.ar}
                       onChange={handleLocalizedChange}
                     />
                     <FormTextArea
-                      label="وصف الموقع (بالعربية)"
+                      label={t(
+                        "cards.translatedContent.labels.siteDescriptionAr"
+                      )}
                       id="description.ar"
                       name="description"
                       value={config.description.ar}
                       onChange={handleLocalizedChange}
                     />
                     <FormInput
-                      label="مجال المتجر (بالعربية)"
+                      label={t("cards.translatedContent.labels.storeNicheAr")}
                       id="niche.ar"
                       name="niche"
                       value={config.niche.ar}
                       onChange={handleLocalizedChange}
                     />
                     <TagInput
-                      label="الكلمات المفتاحية (بالعربية)"
+                      label={t("cards.translatedContent.labels.keywordsAr")}
                       tags={config.keywords.ar}
                       onTagsChange={(tags) => handleKeywordsChange("ar", tags)}
-                      placeholder="أضف كلمة واضغط Enter..."
+                      placeholder={t(
+                        "cards.translatedContent.placeholders.addKeywordAr"
+                      )}
                     />
                   </>
                 ) : (
                   <>
                     <FormInput
-                      label="عنوان الموقع (بالفرنسية)"
+                      label={t("cards.translatedContent.labels.siteTitleFr")}
                       id="title.fr"
                       name="title"
                       value={config.title.fr}
                       onChange={handleLocalizedChange}
                     />
                     <FormTextArea
-                      label="وصف الموقع (بالفرنسية)"
+                      label={t(
+                        "cards.translatedContent.labels.siteDescriptionFr"
+                      )}
                       id="description.fr"
                       name="description"
                       value={config.description.fr}
                       onChange={handleLocalizedChange}
                     />
                     <FormInput
-                      label="مجال المتجر (بالفرنسية)"
+                      label={t("cards.translatedContent.labels.storeNicheFr")}
                       id="niche.fr"
                       name="niche"
                       value={config.niche.fr}
                       onChange={handleLocalizedChange}
                     />
                     <TagInput
-                      label="الكلمات المفتاحية (بالفرنسية)"
+                      label={t("cards.translatedContent.labels.keywordsFr")}
                       tags={config.keywords.fr}
                       onTagsChange={(tags) => handleKeywordsChange("fr", tags)}
-                      placeholder="Ajouter un mot-clé et appuyez sur Entrée..."
+                      placeholder={t(
+                        "cards.translatedContent.placeholders.addKeywordFr"
+                      )}
                     />
                   </>
                 )}
@@ -497,12 +507,12 @@ export default function SettingsPage() {
 
             <SettingsCard
               icon={<MapPin size={24} />}
-              title="الموقع والتحقق"
-              description="إدارة موقع متجرك ورموز التحقق للمحركات."
+              title={t("cards.locationVerification.title")}
+              description={t("cards.locationVerification.description")}
               footer={<SaveButton />}
             >
               <FormInput
-                label="الموقع"
+                label={t("cards.locationVerification.labels.location")}
                 id="location"
                 name="location"
                 value={config.location}
@@ -510,7 +520,7 @@ export default function SettingsPage() {
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormInput
-                  label="خط العرض (Latitude)"
+                  label={t("cards.locationVerification.labels.latitude")}
                   id="locationCoordinates.lat"
                   name="locationCoordinates.lat"
                   type="number"
@@ -518,7 +528,7 @@ export default function SettingsPage() {
                   onChange={handleInputChange}
                 />
                 <FormInput
-                  label="خط الطول (Longitude)"
+                  label={t("cards.locationVerification.labels.longitude")}
                   id="locationCoordinates.lng"
                   name="locationCoordinates.lng"
                   type="number"
@@ -527,7 +537,9 @@ export default function SettingsPage() {
                 />
               </div>
               <FormInput
-                label="رمز تحقق جوجل"
+                label={t(
+                  "cards.locationVerification.labels.googleVerification"
+                )}
                 id="verification.google"
                 name="verification.google"
                 value={config.verification?.google}
@@ -537,13 +549,13 @@ export default function SettingsPage() {
 
             <SettingsCard
               icon={<Fingerprint size={24} />}
-              title="معلومات التواصل"
-              description="كيف يمكن لعملائك التواصل معك."
+              title={t("cards.contactInfo.title")}
+              description={t("cards.contactInfo.description")}
               footer={<SaveButton />}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormInput
-                  label="البريد الإلكتروني"
+                  label={t("cards.contactInfo.labels.email")}
                   id="contact.email"
                   name="contact.email"
                   type="email"
@@ -551,7 +563,7 @@ export default function SettingsPage() {
                   onChange={handleInputChange}
                 />
                 <FormInput
-                  label="الهاتف"
+                  label={t("cards.contactInfo.labels.phone")}
                   id="contact.phone"
                   name="contact.phone"
                   type="tel"
@@ -559,7 +571,7 @@ export default function SettingsPage() {
                   onChange={handleInputChange}
                 />
                 <FormInput
-                  label="واتساب"
+                  label={t("cards.contactInfo.labels.whatsapp")}
                   id="contact.whatsapp"
                   name="contact.whatsapp"
                   type="tel"
@@ -570,19 +582,19 @@ export default function SettingsPage() {
             </SettingsCard>
 
             <SettingsCard
-              title="وسائل التواصل الاجتماعي"
-              description="روابط حساباتك على الشبكات الاجتماعية."
+              title={t("cards.socialMedia.title")}
+              description={t("cards.socialMedia.description")}
               footer={<SaveButton />}
             >
               <FormInput
-                label="معرف تويتر (بدون @)"
+                label={t("cards.socialMedia.labels.twitterHandle")}
                 id="social.twitter"
                 name="social.twitter"
                 value={config.social.twitter}
                 onChange={handleInputChange}
               />
               <FormInput
-                label="فيسبوك (رابط)"
+                label={t("cards.socialMedia.labels.facebookLink")}
                 id="socialLinks.facebook"
                 name="socialLinks.facebook"
                 type="url"
@@ -590,7 +602,7 @@ export default function SettingsPage() {
                 onChange={handleInputChange}
               />
               <FormInput
-                label="انستغرام (رابط)"
+                label={t("cards.socialMedia.labels.instagramLink")}
                 id="socialLinks.instagram"
                 name="socialLinks.instagram"
                 type="url"
@@ -598,7 +610,7 @@ export default function SettingsPage() {
                 onChange={handleInputChange}
               />
               <FormInput
-                label="تويتر (رابط)"
+                label={t("cards.socialMedia.labels.twitterLink")}
                 id="socialLinks.twitter"
                 name="socialLinks.twitter"
                 type="url"

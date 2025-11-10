@@ -494,6 +494,216 @@
           "imageFormat": "PNG, JPG, GIF up to 10MB"
         }
       }
+    },
+    "categories": {
+      "title": "إدارة الفئات",
+      "addCategory": "فئة جديدة",
+      "add": "إضافة",
+      "searchPlaceholder": "ابحث عن فئة...",
+      "table": {
+        "category": "الفئة",
+        "description": "الوصف"
+      },
+      "actions": {
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "deleteDialog": {
+        "description": "هل أنت متأكد من رغبتك في حذف هذه الفئة؟"
+      },
+      "emptyMessage": "لا توجد فئات",
+      "errorLoading": "فشل في تحميل الفئات: {error}",
+      "modal": {
+        "addTitle": "إضافة فئة جديدة",
+        "editTitle": "تعديل الفئة",
+        "labels": {
+          "nameAr": "اسم الفئة (العربية)",
+          "nameFr": "اسم الفئة (الفرنسية)",
+          "descriptionAr": "الوصف (العربية)",
+          "descriptionFr": "الوصف (الفرنسية)",
+          "image": "صورة الفئة"
+        },
+        "buttons": {
+          "cancel": "إلغاء",
+          "save": "حفظ التغييرات",
+          "create": "إنشاء الفئة"
+        },
+        "errors": {
+          "nameAr": "اسم الفئة بالعربية مطلوب.",
+          "nameFr": "اسم الفئة بالفرنسية مطلوب.",
+          "descriptionAr": "الوصف بالعربية مطلوب.",
+          "descriptionFr": "الوصف بالفرنسية مطلوب.",
+          "image": "صورة الفئة مطلوبة."
+        },
+        "messages": {
+          "dragDrop": "اسحب وأفلت أو انقر للتحميل",
+          "imageFormat": "PNG, JPG, WEBP up to 2MB"
+        }
+      }
+    },
+    "sections": {
+      "title": "إدارة الأقسام",
+      "addSection": "قسم جديد",
+      "add": "إضافة",
+      "table": {
+        "type": "النوع",
+        "title": "العنوان",
+        "products": "المنتجات",
+        "status": "فعال"
+      },
+      "status": {
+        "active": "فعال",
+        "inactive": "غير فعال"
+      },
+      "actions": {
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "deleteDialog": {
+        "description": "هل أنت متأكد من رغبتك في حذف هذا القسم؟"
+      },
+      "emptyMessage": "لا توجد أقسام",
+      "productCount": "{count} منتج",
+      "modal": {
+        "addTitle": "إضافة قسم جديد",
+        "editTitle": "تعديل القسم",
+        "labels": {
+          "type": "نوع القسم",
+          "isActive": "فعال؟",
+          "titleAr": "العنوان (العربية)",
+          "titleFr": "العنوان (الفرنسية)",
+          "subtitleAr": "العنوان الفرعي (العربية)",
+          "subtitleFr": "العنوان الفرعي (الفرنسية)",
+          "ctaTextAr": "نص الزر (العربية)",
+          "ctaTextFr": "نص الزر (الفرنسية)",
+          "ctaUrl": "رابط الزر",
+          "selectedProducts": "المنتجات المعروضة",
+          "backgroundImage": "صورة الخلفية"
+        },
+        "buttons": {
+          "cancel": "إلغاء",
+          "save": "حفظ التغييرات",
+          "create": "إنشاء القسم"
+        },
+        "messages": {
+          "noProductsSelected": "لم يتم اختيار أي منتجات",
+          "useSearchToAdd": "استخدم شريط البحث أعلاه لإضافة منتجات إلى هذا القسم.",
+          "clickToUpload": "انقر للتحميل"
+        },
+        "sectionTypes": {
+          "landing-page": "صفحة الهبوط",
+          "featured": "منتجات موصى بها",
+          "also-choose": "اختر أيضًا"
+        }
+      }
+    },
+    "productSelector": {
+      "searchPlaceholder": "...ابحث عن منتج لإضافته"
+    },
+    "parameters": {
+      "header": {
+        "title": "إعدادات المتجر",
+        "description": "إدارة تفاصيل متجرك وتفضيلاتك الأساسية."
+      },
+      "navigation": {
+        "siteSettings": "إعدادات الموقع",
+        "shippingPayment": "الشحن والدفع",
+        "integrations": "التكاملات"
+      },
+      "cards": {
+        "basicInfo": {
+          "title": "المعلومات الأساسية",
+          "description": "تحديث المعلومات العامة لمتجرك التي تظهر للعملاء.",
+          "labels": {
+            "storeName": "اسم المتجر",
+            "brandName": "اسم العلامة التجارية",
+            "siteUrl": "رابط الموقع (URL)"
+          }
+        },
+        "brandAssets": {
+          "title": "أصول العلامة التجارية",
+          "description": "إدارة شعار متجرك، البانر، وال favicon.",
+          "labels": {
+            "storeLogo": "شعار المتجر",
+            "storeBanner": "بانر المتجر",
+            "favicon": "Favicon"
+          },
+          "descriptions": {
+            "logo": "يجب أن يكون .png شفاف بعرض 256px.",
+            "banner": "يفضل أن يكون بحجم 1920x1080px.",
+            "favicon": "أيقونة المتصفح. يجب أن تكون 32x32px."
+          }
+        },
+        "storeSettings": {
+          "title": "إعدادات المتجر",
+          "description": "التصنيف، العملات، واللغة الافتراضية لمتجرك.",
+          "labels": {
+            "storeCategory": "تصنيف المتجر",
+            "defaultLanguage": "اللغة الافتراضية",
+            "currencyAr": "العملة (العربية)",
+            "currencyFr": "العملة (الفرنسية)"
+          },
+          "languages": {
+            "ar": "العربية",
+            "fr": "Français"
+          }
+        },
+        "translatedContent": {
+          "title": "المحتوى المترجم (SEO)",
+          "description": "إدارة المحتوى الخاص بتحسين محركات البحث بلغات مختلفة.",
+          "labels": {
+            "titleTemplate": "قالب العنوان",
+            "siteTitleAr": "عنوان الموقع (بالعربية)",
+            "siteTitleFr": "عنوان الموقع (بالفرنسية)",
+            "siteDescriptionAr": "وصف الموقع (بالعربية)",
+            "siteDescriptionFr": "وصف الموقع (بالفرنسية)",
+            "storeNicheAr": "مجال المتجر (بالعربية)",
+            "storeNicheFr": "مجال المتجر (بالفرنسية)",
+            "keywordsAr": "الكلمات المفتاحية (بالعربية)",
+            "keywordsFr": "الكلمات المفتاحية (بالفرنسية)"
+          },
+          "placeholders": {
+            "addKeywordAr": "أضف كلمة واضغط Enter...",
+            "addKeywordFr": "Ajouter un mot-clé et appuyez sur Entrée..."
+          },
+          "tabs": {
+            "ar": "العربية",
+            "fr": "الفرنسية"
+          }
+        },
+        "locationVerification": {
+          "title": "الموقع والتحقق",
+          "description": "إدارة موقع متجرك ورموز التحقق للمحركات.",
+          "labels": {
+            "location": "الموقع",
+            "latitude": "خط العرض (Latitude)",
+            "longitude": "خط الطول (Longitude)",
+            "googleVerification": "رمز تحقق جوجل"
+          }
+        },
+        "contactInfo": {
+          "title": "معلومات التواصل",
+          "description": "كيف يمكن لعملائك التواصل معك.",
+          "labels": {
+            "email": "البريد الإلكتروني",
+            "phone": "الهاتف",
+            "whatsapp": "واتساب"
+          }
+        },
+        "socialMedia": {
+          "title": "وسائل التواصل الاجتماعي",
+          "description": "روابط حساباتك على الشبكات الاجتماعية.",
+          "labels": {
+            "twitterHandle": "معرف تويتر (بدون @)",
+            "facebookLink": "فيسبوك (رابط)",
+            "instagramLink": "انستغرام (رابط)",
+            "twitterLink": "تويتر (رابط)"
+          }
+        }
+      },
+      "buttons": {
+        "saveChanges": "حفظ التغييرات"
+      }
     }
   }
 }

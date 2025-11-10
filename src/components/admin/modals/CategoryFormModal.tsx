@@ -8,6 +8,7 @@ import FormInput from "../ui/FormInput";
 import FormTextarea from "../ui/FormTextarea";
 import CancelButton from "../ui/CancelButton";
 import SubmitButton from "../ui/SubmitButton";
+import { useTranslations } from "next-intl";
 
 interface CategoryFormModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
   category,
   isSubmitting = false,
 }) => {
+  const t = useTranslations("admin.categories.modal");
+
   const [nameAr, setNameAr] = useState("");
   const [nameFr, setNameFr] = useState("");
   const [descriptionAr, setDescriptionAr] = useState("");
@@ -65,13 +68,13 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
 
   const validate = (): boolean => {
     const newErrors: Partial<Record<string, string>> = {};
-    if (!nameAr.trim()) newErrors.nameAr = "اسم الفئة بالعربية مطلوب.";
-    if (!nameFr.trim()) newErrors.nameFr = "اسم الفئة بالفرنسية مطلوب.";
+    if (!nameAr.trim()) newErrors.nameAr = t("errors.nameAr");
+    if (!nameFr.trim()) newErrors.nameFr = t("errors.nameFr");
     if (!descriptionAr.trim())
-      newErrors.descriptionAr = "الوصف بالعربية مطلوب.";
+      newErrors.descriptionAr = t("errors.descriptionAr");
     if (!descriptionFr.trim())
-      newErrors.descriptionFr = "الوصف بالفرنسية مطلوب.";
-    if (!category && !image) newErrors.image = "صورة الفئة مطلوبة.";
+      newErrors.descriptionFr = t("errors.descriptionFr");
+    if (!category && !image) newErrors.image = t("errors.image");
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -97,7 +100,7 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
 
   if (!isOpen) return null;
 
-  const title = category ? "تعديل الفئة" : "إضافة فئة جديدة";
+  const title = category ? t("editTitle") : t("addTitle");
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 z-50 flex justify-center items-center p-4">
@@ -120,14 +123,14 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
           <fieldset disabled={isSubmitting} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormInput
-                label="اسم الفئة (العربية)"
+                label={t("labels.nameAr")}
                 id="nameAr"
                 value={nameAr}
                 onChange={(e) => setNameAr(e.target.value)}
                 error={errors.nameAr}
               />
               <FormInput
-                label="اسم الفئة (الفرنسية)"
+                label={t("labels.nameFr")}
                 id="nameFr"
                 value={nameFr}
                 onChange={(e) => setNameFr(e.target.value)}
@@ -135,7 +138,7 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
               />
             </div>
             <FormTextarea
-              label="الوصف (العربية)"
+              label={t("labels.descriptionAr")}
               id="descriptionAr"
               value={descriptionAr}
               onChange={(e) => setDescriptionAr(e.target.value)}
@@ -143,7 +146,7 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
               error={errors.descriptionAr}
             />
             <FormTextarea
-              label="الوصف (الفرنسية)"
+              label={t("labels.descriptionFr")}
               id="descriptionFr"
               value={descriptionFr}
               onChange={(e) => setDescriptionFr(e.target.value)}
@@ -152,7 +155,7 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
             />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                صورة الفئة
+                {t("labels.image")}
               </label>
               <div
                 onClick={() => fileInputRef.current?.click()}
@@ -174,10 +177,10 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
                   <div className="space-y-1 text-center">
                     <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
                     <p className="text-sm text-gray-600">
-                      اسحب وأفلت أو انقر للتحميل
+                      {t("messages.dragDrop")}
                     </p>
                     <p className="text-xs text-gray-500">
-                      PNG, JPG, WEBP up to 2MB
+                      {t("messages.imageFormat")}
                     </p>
                   </div>
                 )}
@@ -199,10 +202,10 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
         </div>
         <div className="flex justify-end items-center gap-4 p-4 border-t border-neutral-200 bg-gray-50 rounded-b-lg">
           <CancelButton onClick={onClose} isSubmitting={isSubmitting}>
-            إلغاء
+            {t("buttons.cancel")}
           </CancelButton>
           <SubmitButton isSubmitting={isSubmitting}>
-            <span>{category ? "حفظ التغييرات" : "إنشاء الفئة"}</span>
+            <span>{category ? t("buttons.save") : t("buttons.create")}</span>
           </SubmitButton>
         </div>
       </form>

@@ -5,6 +5,7 @@ import { Product, Language } from "@/types";
 import { Search } from "lucide-react";
 import Image from "next/image";
 import { useProductStore } from "@/store/useProductStore";
+import { useTranslations, useLocale } from "next-intl";
 
 interface ProductSelectorProps {
   availableProducts: Product[]; // Passed as prop; if empty, no products shown
@@ -19,6 +20,9 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
   lang,
   label,
 }) => {
+  const t = useTranslations("admin.productSelector");
+  const locale = useLocale() as Language;
+
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false); // Local loading state for fetching
@@ -79,7 +83,7 @@ const ProductSelector: React.FC<ProductSelectorProps> = ({
           </span>
           <input
             type="text"
-            placeholder="...ابحث عن منتج لإضافته"
+            placeholder={t("searchPlaceholder")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={() => setIsOpen(true)}
