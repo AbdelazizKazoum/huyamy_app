@@ -71,7 +71,11 @@
       "phoneRequired": "Le numéro de téléphone est requis",
       "cityRequired": "La ville est requise",
       "addressRequired": "L'adresse est requise",
-      "emailInvalid": "L'email est invalide"
+      "emailInvalid": "L'email est invalide",
+      "invalidCardNumber": "Numéro de carte invalide",
+      "invalidExpiryDate": "Date d'expiration invalide",
+      "invalidCvc": "CVC invalide",
+      "shippingFormInvalid": "Veuillez corriger les erreurs dans le formulaire de livraison"
     },
 
     "fullNamePlaceholder": "Prénom et Nom 🧑🏻‍",
@@ -86,12 +90,19 @@
     },
     "pageSubtitle": "Entrez vos informations de livraison pour confirmer votre commande",
     "quantityLabel": "Quantité",
+    "paymentMethodTitle": "Méthode de paiement",
+    "paymentCard": "Carte de crédit",
+    "paymentCardHint": "Payez en toute sécurité avec votre carte bancaire",
+    "cardDetailsTitle": "Détails de la carte",
+    "securedByStripe": "Sécurisé par Stripe",
+    "payNow": "Payer maintenant",
+    "processingPayment": "Traitement du paiement...",
+    "codHint": "Payez à la livraison en espèces ou par carte bancaire",
+    "codInfo": "Vous paierez le montant total à la livraison",
     "orderSuccessMessage": "Nous avons reçu votre commande et vous contacterons bientôt pour confirmation. Merci pour votre confiance !",
-    "empty": {
-      "title": "Votre panier est vide",
-      "description": "Vous n'avez aucun article sélectionné pour le paiement.",
-      "startShopping": "Commencer les achats"
-    }
+    "loadingPaymentForm": "Chargement du formulaire de paiement...",
+    "paymentInitError": "Erreur lors de l'initialisation du paiement",
+    "orderSaveError": "Erreur lors de la sauvegarde de la commande"
   },
   "hero": {
     "promoAlt": "Offre promotionnelle - Produits naturels de haute qualité"

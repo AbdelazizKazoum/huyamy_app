@@ -62,6 +62,7 @@ interface OrderStore {
   setPage: (page: number) => void;
   clearError: () => void;
   clearSelectedOrder: () => void;
+  setLoading: (loading: boolean) => void;
 }
 
 const initialFilters: OrderFilters = {
@@ -260,6 +261,11 @@ export const useOrderStore = create<OrderStore>()(
       // Clear selected order
       clearSelectedOrder: () => {
         set({ selectedOrder: null });
+      },
+
+      // Set loading state
+      setLoading: (loading: boolean) => {
+        set({ loading });
       },
     }),
     {

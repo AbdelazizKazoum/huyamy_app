@@ -7,17 +7,20 @@ export interface OrderData {
     price: number;
     quantity: number;
     image: string;
+    variant: Record<string, string> | null;
   }>;
   shippingInfo: {
     fullName: string;
     phone: string;
-    city?: string;
+    city: string;
     address: string;
     email?: string;
   };
   orderDate: string;
   totalAmount: number;
   locale: "ar" | "fr";
+  paymentMethod: "cod" | "card";
+  paymentIntentId?: string;
 }
 
 export interface Order extends OrderData {
