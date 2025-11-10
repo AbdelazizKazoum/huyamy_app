@@ -22,6 +22,7 @@ const Header: React.FC<{
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const userMenuRef = React.useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
 
@@ -40,6 +41,13 @@ const Header: React.FC<{
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [userMenuRef]);
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -100,23 +108,28 @@ const Header: React.FC<{
 
       {/* Right Section - User Menu */}
       <div className="flex items-center gap-3">
-        {/* Go to Store Button */}
-        <button
-          onClick={() => router.push(`/${locale}`)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-primary-500 to-primary-700 text-white hover:from-primary-600 hover:to-primary-800 transition-all duration-200 font-semibold shadow-md border border-primary-600 hover:scale-105 active:scale-95"
-          aria-label="Go to Store"
-        >
-          <Store size={18} className="mb-0.5" />
-          <span>{t("visitStore")}</span>
-        </button>
+        {/* Conditionally render Go to Store and Language Selector on desktop */}
+        {!isMobile && (
+          <>
+            {/* Go to Store Button */}
+            <button
+              onClick={() => router.push(`/${locale}`)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-primary-500 to-primary-700 text-white hover:from-primary-600 hover:to-primary-800 transition-all duration-200 font-semibold shadow-md border border-primary-600 hover:scale-105 active:scale-95"
+              aria-label="Go to Store"
+            >
+              <Store size={18} className="mb-0.5" />
+              <span>{t("visitStore")}</span>
+            </button>
 
-        {/* Language Selector */}
-        <LanguageSelector
-          lang={locale as Locale}
-          onLanguageChange={handleLanguageChange}
-          isOpen={isLangMenuOpen}
-          onToggle={() => setIsLangMenuOpen(!isLangMenuOpen)}
-        />
+            {/* Language Selector */}
+            <LanguageSelector
+              lang={locale as Locale}
+              onLanguageChange={handleLanguageChange}
+              isOpen={isLangMenuOpen}
+              onToggle={() => setIsLangMenuOpen(!isLangMenuOpen)}
+            />
+          </>
+        )}
 
         <div className="relative" ref={userMenuRef}>
           <button
@@ -172,6 +185,29 @@ const Header: React.FC<{
                   </div>
                 </div>
               </div>
+
+              {/* Mobile-only Go to Store and Language Selector */}
+              {isMobile && (
+                <div className="px-4 py-2 border-b border-gray-200">
+                  <div className="relative z-60 mb-2">
+                    <LanguageSelector
+                      lang={locale as Locale}
+                      onLanguageChange={handleLanguageChange}
+                      isOpen={isLangMenuOpen}
+                      onToggle={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                    />
+                  </div>
+                  <button
+                    onClick={() => router.push(`/${locale}`)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-primary-500 to-primary-700 text-white hover:from-primary-600 hover:to-primary-800 transition-all duration-200 font-semibold shadow-md border border-primary-600 hover:scale-105 active:scale-95 w-full"
+                    aria-label="Go to Store"
+                  >
+                    <Store size={18} className="mb-0.5" />
+                    <span>{t("visitStore")}</span>
+                  </button>
+                </div>
+              )}
+
               {/* Menu Items */}
               <div className="py-2">
                 <button

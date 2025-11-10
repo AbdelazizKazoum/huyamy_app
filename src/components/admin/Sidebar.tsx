@@ -221,14 +221,24 @@ const MobileSidebar: React.FC<{
             <div className="flex items-center justify-between h-16 border-b border-neutral-200 px-4">
               <Link
                 href={baseAdminPath}
-                className="flex flex-col items-start leading-none"
+                className="flex flex-col items-center leading-none"
               >
-                <span
-                  className="text-3xl font-bold text-amber-500"
-                  style={{ fontFamily: "'Cairo', sans-serif" }}
-                >
-                  Huyamy
-                </span>
+                {siteConfig.logo ? (
+                  <Image
+                    src={siteConfig.logo}
+                    alt={siteConfig.name}
+                    width={50}
+                    height={50}
+                    priority
+                  />
+                ) : (
+                  <span
+                    className="text-3xl font-bold text-amber-500"
+                    style={{ fontFamily: "'Cairo', sans-serif" }}
+                  >
+                    {siteConfig.name}
+                  </span>
+                )}
                 <span className="text-xs text-green-800 font-semibold tracking-wider">
                   {translations.dashboardTitle[currentLocale]}
                 </span>
