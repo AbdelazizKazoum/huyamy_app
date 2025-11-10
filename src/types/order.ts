@@ -12,14 +12,14 @@ export interface OrderData {
   shippingInfo: {
     fullName: string;
     phone: string;
-    city: string;
+    city?: string;
     address: string;
     email?: string;
   };
   orderDate: string;
   totalAmount: number;
   locale: "ar" | "fr";
-  paymentMethod: "cod" | "card";
+  paymentMethod?: "cod" | "card";
   paymentIntentId?: string;
 }
 
