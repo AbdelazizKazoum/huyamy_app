@@ -696,8 +696,8 @@ const CheckoutPage = () => {
             </div>
 
             {/* Order Summary (Right Column) */}
-            <div className="lg:col-span-5 mt-10 lg:mt-0">
-              <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80 lg:sticky lg:top-24">
+            <div className="lg:col-span-5 mt-10 lg:mt-0 lg:sticky lg:top-24">
+              <div className="bg-white p-8 rounded-2xl shadow-xl border border-slate-200/80">
                 <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4 mb-4 flex items-center gap-3">
                   <ShoppingCart className="h-6 w-6 text-primary-800" />
                   {t("summaryTitle")}

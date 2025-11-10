@@ -78,6 +78,12 @@
       "shippingFormInvalid": "Veuillez corriger les erreurs dans le formulaire de livraison"
     },
 
+    "empty": {
+      "title": "Votre panier est vide",
+      "description": "Ajoutez des produits à votre panier pour continuer.",
+      "startShopping": "Commencer les achats"
+    },
+
     "fullNamePlaceholder": "Prénom et Nom 🧑🏻‍",
     "phonePlaceholder": "Téléphone 📞",
     "addressPlaceholder": "Adresse 🏡",
