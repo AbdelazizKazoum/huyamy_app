@@ -26,6 +26,7 @@ import {
   ShoppingCart,
   ShoppingBag,
   CreditCard,
+  Loader2, // <-- Import Loader2 icon
 } from "lucide-react";
 import { ButtonPrimary } from "@/components/ui";
 import SuccessModal from "@/components/modals/CheckoutSuccessModal";
@@ -330,11 +331,15 @@ const CheckoutPage = () => {
 
     if (!isShippingValid) {
       toast.error(t("validation.shippingFormInvalid"));
-      // Scroll to the first error
+      // Scroll to the first error and focus/select the input
       const firstError = Object.keys(errors)[0] as keyof ShippingFormData;
-      const errorField = document.querySelector(`[name="${firstError}"]`);
+      const errorField = document.querySelector(
+        `[name="${firstError}"]`
+      ) as HTMLInputElement | null;
       if (errorField) {
         errorField.scrollIntoView({ behavior: "smooth", block: "center" });
+        errorField.focus();
+        errorField.select(); // Select the text in the input for better UX
       }
       return;
     }
@@ -790,28 +795,36 @@ const CheckoutPage = () => {
 
                 {/* --- 9. Final Button Logic (TYPO FIXED) --- */}
                 <ButtonPrimary
-                  type="button" // Always 'button' so we can control the click
-                  onClick={handleSmartSubmit} // Use our smart handler
+                  type="button"
+                  onClick={handleSmartSubmit}
                   disabled={
-                    isCreatingOrder || // Zustand loading state
-                    isStripeFormLoading || // Stripe form is loading
-                    (paymentMethod === "card" && !clientSecret) || // Stripe not ready
+                    isCreatingOrder ||
+                    isStripeFormLoading ||
+                    (paymentMethod === "card" && !clientSecret) ||
                     items.length === 0
                   }
-                  className="w-full text-lg py-3 mt-6"
+                  className="w-full text-lg py-3 mt-6 flex items-center justify-center gap-x-2.5 disabled:opacity-70 disabled:cursor-not-allowed" // Added disabled styles
                 >
-                  {paymentMethod === "card" ? (
+                  {isCreatingOrder ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span>
+                        {paymentMethod === "card"
+                          ? t("processingPayment")
+                          : t("placingOrder")}
+                      </span>
+                    </>
+                  ) : paymentMethod === "card" ? (
                     <>
                       <CreditCard className="h-5 w-5" />
-                      {isCreatingOrder
-                        ? t("processingPayment")
-                        : t("payNow")}{" "}
-                      {subtotal.toFixed(2)} {t("currency")}
+                      <span>
+                        {t("payNow")} {subtotal.toFixed(2)} {t("currency")}
+                      </span>
                     </>
                   ) : (
                     <>
                       <Wallet className="h-5 w-5" />
-                      {isCreatingOrder ? t("placingOrder") : t("placeOrder")}
+                      <span>{t("placeOrder")}</span>
                     </>
                   )}
                 </ButtonPrimary>
