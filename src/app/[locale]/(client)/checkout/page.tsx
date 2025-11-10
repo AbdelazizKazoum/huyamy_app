@@ -331,16 +331,18 @@ const CheckoutPage = () => {
 
     if (!isShippingValid) {
       toast.error(t("validation.shippingFormInvalid"));
-      // Scroll to the first error and focus/select the input
-      const firstError = Object.keys(errors)[0] as keyof ShippingFormData;
-      const errorField = document.querySelector(
-        `[name="${firstError}"]`
-      ) as HTMLInputElement | null;
-      if (errorField) {
-        errorField.scrollIntoView({ behavior: "smooth", block: "center" });
-        errorField.focus();
-        errorField.select(); // Select the text in the input for better UX
-      }
+      // Delay to ensure errors are updated before accessing them
+      setTimeout(() => {
+        const firstError = Object.keys(errors)[0] as keyof ShippingFormData;
+        const errorField = document.querySelector(
+          `[name="${firstError}"]`
+        ) as HTMLInputElement | null;
+        if (errorField) {
+          errorField.scrollIntoView({ behavior: "smooth", block: "center" });
+          errorField.focus();
+          errorField.select(); // Select the text in the input for better UX
+        }
+      }, 200); // Increased delay to ensure state update
       return;
     }
 
