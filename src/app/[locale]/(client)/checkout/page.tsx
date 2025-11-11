@@ -608,20 +608,61 @@ const CheckoutPage = () => {
                     </div>
                     {/* (card logos) */}
                     <div className="flex items-center gap-1">
-                      <Image
-                        src="https://placehold.co/32x20/EFEFEF/B0B0B0?text=Visa"
-                        alt="Visa"
-                        width={32}
-                        height={20}
-                        className="h-5 rounded-sm"
-                      />
-                      <Image
-                        src="https://placehold.co/32x20/EFEFEF/B0B0B0?text=MC"
-                        alt="Mastercard"
-                        width={32}
-                        height={20}
-                        className="h-5 rounded-sm"
-                      />
+                      {/* Inline Visa SVG (use JSX SVG like Mastercard) */}
+                      <span className="rounded-sm overflow-hidden">
+                        <svg
+                          width={32}
+                          height={20}
+                          viewBox="0 0 32 20"
+                          className="h-5 w-auto"
+                          preserveAspectRatio="xMidYMid meet"
+                          role="img"
+                          aria-label="Visa"
+                        >
+                          <rect width="32" height="20" rx="3" fill="#1428A0" />
+                          <g
+                            fill="#fff"
+                            fontFamily="Arial, Helvetica, sans-serif"
+                            fontWeight="700"
+                            fontSize="8"
+                            textAnchor="middle"
+                          >
+                            <text x="16" y="13">
+                              VISA
+                            </text>
+                          </g>
+                        </svg>
+                      </span>
+
+                      <span
+                        role="img"
+                        aria-label="Mastercard"
+                        className="rounded-sm overflow-hidden"
+                      >
+                        <svg
+                          width={32}
+                          height={20}
+                          viewBox="0 0 32 20"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-auto"
+                          preserveAspectRatio="xMidYMid meet"
+                        >
+                          <rect width="32" height="20" rx="3" fill="#EFEFEF" />
+                          <g transform="translate(6,2)">
+                            <circle cx="6" cy="8" r="6" fill="#FF5F00" />
+                            <circle cx="14" cy="8" r="6" fill="#EB001B" />
+                            {/* middle overlap visual */}
+                            <ellipse
+                              cx="10"
+                              cy="8"
+                              rx="3.8"
+                              ry="6"
+                              fill="#FF9900"
+                              opacity="0.95"
+                            />
+                          </g>
+                        </svg>
+                      </span>
                     </div>
                   </label>
 

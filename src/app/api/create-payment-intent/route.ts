@@ -78,6 +78,9 @@ export async function POST(request: NextRequest) {
       amount: totalAmount,
       currency: "mad", // Moroccan Dirham
       payment_method_types: ["card"], // Only allow card payments
+      payment_method_options: {
+        link: {},
+      },
       metadata: {
         items: JSON.stringify(items),
       },
