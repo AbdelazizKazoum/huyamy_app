@@ -394,7 +394,7 @@ const CheckoutPage = () => {
             {/* Left Column: Shipping & NEW Payment */}
             <div className="lg:col-span-7 space-y-8 lg:sticky lg:top-24">
               {/* Card 1: Shipping Information Form */}
-              <div className="bg-white p-3 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
+              <div className="bg-white p-4 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="h-6 w-6 bg-slate-200 rounded animate-pulse"></div>
                   <div className="h-8 w-48 bg-slate-200 rounded-lg animate-pulse"></div>
@@ -423,7 +423,7 @@ const CheckoutPage = () => {
                 </div>
               </div>
               {/* Payment Form Skeleton */}
-              <div className="bg-white p-3 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
+              <div className="bg-white p-4 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="h-6 w-6 bg-slate-200 rounded animate-pulse"></div>
                   <div className="h-8 w-48 bg-slate-200 rounded-lg animate-pulse"></div>
@@ -436,7 +436,7 @@ const CheckoutPage = () => {
             </div>
             {/* Summary Skeleton (Right Column) */}
             <div className="lg:col-span-5 mt-10 lg:mt-0">
-              <div className="bg-white p-3 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
+              <div className="bg-white p-4 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
                 <div className="flex items-center gap-3 border-b border-slate-200 pb-4 mb-4">
                   <div className="h-6 w-6 bg-slate-200 rounded animate-pulse"></div>
                   <div className="h-8 w-40 bg-slate-200 rounded-lg animate-pulse"></div>
@@ -515,7 +515,7 @@ const CheckoutPage = () => {
             {/* Left Column: Shipping & NEW Payment */}
             <div className="lg:col-span-7 space-y-8 lg:sticky lg:top-24">
               {/* Card 1: Shipping Information Form */}
-              <div className="bg-white p-3 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
+              <div className="bg-white p-4 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
                 <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
                   <Contact className="h-6 w-6 text-primary-800" />
                   {t("shippingTitle")}
@@ -571,7 +571,7 @@ const CheckoutPage = () => {
               </div>
 
               {/* Card 2: NEW Payment Method Section */}
-              <div className="bg-white p-3 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
+              <div className="bg-white p-4 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
                 <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
                   <CreditCard className="h-6 w-6 text-primary-800" />
                   {t("paymentMethodTitle")}
@@ -738,7 +738,7 @@ const CheckoutPage = () => {
 
             {/* Order Summary (Right Column) */}
             <div className="lg:col-span-5 mt-10 lg:mt-0 lg:sticky lg:top-24">
-              <div className="bg-white p-3 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
+              <div className="bg-white p-4 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
                 <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4 mb-4 flex items-center gap-3">
                   <ShoppingCart className="h-6 w-6 text-primary-800" />
                   {t("summaryTitle")}
