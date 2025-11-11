@@ -309,14 +309,22 @@ const CheckoutPage = () => {
       setIsSuccessModalOpen(true); // Show your success modal
     } catch (error) {
       // CRITICAL ERROR: Payment was taken but order save failed.
-      // You must log this for manual reconciliation.
+      // This is a serious issue that requires manual intervention
+      console.error("CRITICAL: Payment succeeded but order save failed:", {
+        paymentIntentId,
+        orderData,
+        error: error instanceof Error ? error.message : error,
+        timestamp: new Date().toISOString(),
+      });
+
+      // Show error modal instead of success
       toast.error(t("orderSaveError"));
-      console.error(
-        "CRITICAL: Payment succeeded but order save failed:",
-        error
-      );
-      // Still show success, but maybe with a "contact support" message
-      setIsSuccessModalOpen(true);
+      // Don't show success modal - payment was taken but order wasn't saved
+      // This will be handled by customer support for manual reconciliation
+
+      // TODO: Implement webhook-based order creation for better reliability
+      // The payment was successful, but we couldn't save the order.
+      // In production, use Stripe webhooks to create orders reliably.
     } finally {
       setLoading(false); // Final loading stop
     }
