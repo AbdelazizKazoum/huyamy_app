@@ -1,8 +1,15 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState, useRef } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+} from "react";
 import { Section, SectionType, Language, Product } from "@/types";
-import { UploadCloud } from "lucide-react";
+import { PackageSearch, UploadCloud, X } from "lucide-react";
 import Image from "next/image";
 import FormSelect from "@/components/admin/ui/FormSelect";
 import FormToggle from "@/components/admin/ui/FormToggle";
@@ -10,10 +17,10 @@ import { useProductStore } from "@/store/useProductStore";
 import CancelButton from "@/components/admin/ui/CancelButton";
 import SubmitButton from "@/components/admin/ui/SubmitButton";
 import CloseButton from "@/components/admin/ui/CloseButton";
+import ProductSelector from "@/components/admin/ProductSelector";
 import { useTranslations } from "next-intl";
 import SectionDataFields from "./SectionDataFields";
 import SectionCTAFields from "./SectionCTAFields";
-import SectionProductDisplay from "./SectionProductDisplay";
 
 interface SectionFormModalProps {
   isOpen: boolean;
@@ -64,9 +71,6 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
   const [ctaUrl, setCtaUrl] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]); // Changed to store full Product objects
 
-  // Search state for product selection
-  const [productSearchTerm, setProductSearchTerm] = useState("");
-
   // Image state
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -99,12 +103,18 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
       setCtaTextFr("");
       setCtaUrl("");
       setSelectedProducts([]);
-      setProductSearchTerm("");
       setImageFile(null);
       setImagePreview(null);
     }
     // setErrors({}); // Removed unused errors state
   }, [section, isOpen]);
+
+  // Memoize available products (exclude already selected ones)
+  const availableProducts = useMemo(
+    () =>
+      products.filter((p) => !selectedProducts.some((sp) => sp.id === p.id)),
+    [products, selectedProducts]
+  );
 
   const addProductToSection = (product: Product) => {
     if (!selectedProducts.some((p) => p.id === product.id)) {
@@ -218,21 +228,53 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
             )}
 
             {/* Product Selector UI - Now always visible */}
-            <SectionProductDisplay
-              products={products}
-              selectedProductIds={selectedProducts.map((p) => p.id)}
-              onProductSelectionChange={(productId, checked) => {
-                if (checked) {
-                  const product = products.find((p) => p.id === productId);
-                  if (product) addProductToSection(product);
-                } else {
-                  removeProductFromSection(productId);
-                }
-              }}
-              searchTerm={productSearchTerm}
-              onSearchTermChange={setProductSearchTerm}
-              lang={lang}
-            />
+            <div className="space-y-4">
+              <ProductSelector
+                availableProducts={availableProducts}
+                onProductSelect={addProductToSection}
+                lang={lang}
+                label={t("labels.selectedProducts")}
+              />
+
+              <div className="p-4 border border-gray-200 rounded-lg bg-gray-50/50 min-h-[150px]">
+                {selectedProducts.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {selectedProducts.map((p) => (
+                      <div
+                        key={p.id}
+                        className="relative border border-gray-200 bg-white rounded-lg p-2 flex flex-col items-center text-center shadow-sm transition-all duration-200 hover:shadow-md hover:border-green-400"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => removeProductFromSection(p.id)}
+                          className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5 z-10 hover:bg-red-700 transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                        <Image
+                          src={p.image}
+                          alt={p.name[lang]}
+                          width={80}
+                          height={80}
+                          className="w-20 h-20 object-cover rounded-md bg-gray-100"
+                        />
+                        <span className="mt-2 text-xs font-medium text-gray-700 w-full truncate">
+                          {p.name[lang]}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 py-8">
+                    <PackageSearch size={48} className="mb-4 text-gray-400" />
+                    <h3 className="font-semibold text-gray-600">
+                      {t("messages.noProductsSelected")}
+                    </h3>
+                    <p className="text-sm">{t("messages.useSearchToAdd")}</p>
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Image Upload */}
             {(type === "hero" || type === "banner") && (
