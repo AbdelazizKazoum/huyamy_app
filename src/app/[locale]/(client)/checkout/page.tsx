@@ -62,20 +62,23 @@ const createShippingSchema = (t: (key: string) => string) =>
 type ShippingFormData = z.infer<ReturnType<typeof createShippingSchema>>;
 
 /**
- * --- 3. Secure Stripe Form Component ---
- * We create a new component to handle the payment logic.
- * It *must* be a child of the <Elements> provider to use Stripe hooks.
+ * --- 3. Secure Stripe Form Component (REFACTORED) ---
+ * This component now handles the entire payment submission logic,
+ * including updating the payment intent before confirming.
  */
 const SecureStripeForm = ({
   onPaymentSuccess,
+  shippingInfo,
+  clientSecret,
 }: {
   onPaymentSuccess: (paymentIntentId: string) => void;
+  shippingInfo: ShippingFormData | null;
+  clientSecret: string;
 }) => {
   const stripe = useStripe();
   const elements = useElements();
   const t = useTranslations("checkout");
 
-  // Get loading state from your order store
   const { loading: isProcessing, setLoading } = useOrderStore();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -83,48 +86,68 @@ const SecureStripeForm = ({
     e.preventDefault();
 
     if (!stripe || !elements) {
-      // Stripe.js has not yet loaded.
+      return; // Stripe.js has not yet loaded.
+    }
+
+    // Although the parent validates, we do a quick check here too.
+    if (!shippingInfo) {
+      toast.error(t("validation.shippingFormInvalid"));
       return;
     }
 
-    setLoading(true); // Use your Zustand store to set loading
+    setLoading(true);
     setErrorMessage(null);
 
-    // Trigger the payment confirmation
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      // We use 'if_required' to handle the result here
-      // instead of redirecting the user.
-      redirect: "if_required",
-    });
+    try {
+      // STEP 1: Update the PaymentIntent with shipping info FIRST.
+      const paymentIntentId = clientSecret.split("_secret")[0];
+      const updateRes = await fetch("/api/update-payment-intent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          paymentIntentId: paymentIntentId,
+          shippingInfo: shippingInfo,
+        }),
+      });
 
-    if (error) {
-      if (error.type === "card_error" || error.type === "validation_error") {
-        setErrorMessage(error.message || t("paymentErrorDefault"));
+      if (!updateRes.ok) {
+        const errorData = await updateRes.json();
+        console.error("Failed to update payment intent:", errorData);
+        throw new Error("Failed to save shipping info before payment.");
+      }
+
+      // STEP 2: Now that metadata is saved, confirm the payment.
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        redirect: "if_required",
+      });
+
+      if (error) {
+        if (error.type === "card_error" || error.type === "validation_error") {
+          setErrorMessage(error.message || t("paymentErrorDefault"));
+        } else {
+          setErrorMessage(t("paymentErrorDefault"));
+        }
+        setLoading(false);
+      } else if (paymentIntent && paymentIntent.status === "succeeded") {
+        onPaymentSuccess(paymentIntent.id);
       } else {
         setErrorMessage(t("paymentErrorDefault"));
+        setLoading(false);
       }
-      setLoading(false); // Stop loading on error
-    } else if (paymentIntent && paymentIntent.status === "succeeded") {
-      // Payment was successful!
-      // Call the parent function to save the order to *our* database.
-      onPaymentSuccess(paymentIntent.id);
-      // The parent will set loading to false *after* saving the order.
-    } else {
-      setErrorMessage(t("paymentErrorDefault"));
+    } catch (error) {
+      console.error("Stripe submission error:", error);
+      setErrorMessage((error as Error).message || t("paymentErrorDefault"));
       setLoading(false);
     }
   };
 
   return (
-    // This form's ID will be targeted by our main "Pay Now" button
     <form id="stripe-payment-form" onSubmit={handleSubmit}>
       <p className="text-sm font-medium text-primary-700 mb-3">
         {t("cardDetailsTitle")}
       </p>
 
-      {/* This one component replaces your entire manual card form.
-          It's a secure iframe controlled by Stripe. */}
       <PaymentElement />
 
       {errorMessage && (
@@ -135,7 +158,6 @@ const SecureStripeForm = ({
         {t("securedByStripe")}
       </p>
 
-      {/* This button is hidden. The *real* button is in the summary column. */}
       <button
         type="submit"
         disabled={!stripe || isProcessing}
@@ -294,45 +316,21 @@ const CheckoutPage = () => {
   // --- 6. Handle Card Payment Success ---
   // This runs *after* Stripe confirms payment is successful
   const onCardPaymentSuccess = async (paymentIntentId: string) => {
-    // Payment is DONE. Now create the order in our database.
-    const shippingData = getValues(); // Get validated shipping data
-    const orderData = createOrderDataObject(
-      shippingData,
-      "card",
-      paymentIntentId
+    // setLoading(true) was already called in SecureStripeForm
+
+    // With the webhook in place, the client's job is done.
+    // The webhook will handle order creation. We just need to show success.
+    console.log(
+      `Client-side success for PaymentIntent: ${paymentIntentId}. Handing off to webhook.`
     );
 
-    // setLoading(true) was already called in SecureStripeForm
-    try {
-      await createOrder(orderData); // Save to your Firebase DB via Zustand
-      clearCart();
-      setIsSuccessModalOpen(true); // Show your success modal
-    } catch (error) {
-      // CRITICAL ERROR: Payment was taken but order save failed.
-      // This is a serious issue that requires manual intervention
-      console.error("CRITICAL: Payment succeeded but order save failed:", {
-        paymentIntentId,
-        orderData,
-        error: error instanceof Error ? error.message : error,
-        timestamp: new Date().toISOString(),
-      });
-
-      // Show error modal instead of success
-      toast.error(t("orderSaveError"));
-      // Don't show success modal - payment was taken but order wasn't saved
-      // This will be handled by customer support for manual reconciliation
-
-      // TODO: Implement webhook-based order creation for better reliability
-      // The payment was successful, but we couldn't save the order.
-      // In production, use Stripe webhooks to create orders reliably.
-    } finally {
-      setLoading(false); // Final loading stop
-    }
+    clearCart();
+    setIsSuccessModalOpen(true); // Show your success modal
+    setLoading(false); // Final loading stop
   };
 
-  // --- 7. Create Smart Submit Handler ---
-  // This function validates the shipping form *before*
-  // trying to submit either COD or Card payment.
+  // --- 7. Create Smart Submit Handler (REFACTORED) ---
+  // This function now only validates and triggers the appropriate form.
   const handleSmartSubmit = async () => {
     // 1. Manually trigger validation on the shipping form
     const isShippingValid = await trigger();
@@ -355,13 +353,13 @@ const CheckoutPage = () => {
     }
 
     // 2. Shipping form is valid, now check payment method
-    const shippingData = getValues();
-
     if (paymentMethod === "cod") {
+      const shippingData = getValues();
       // If COD, run the COD logic
       await onCodSubmit(shippingData);
     } else if (paymentMethod === "card") {
-      // If Card, find the hidden Stripe form's submit button and click it
+      // For card payments, just click the hidden button in the Stripe form.
+      // The form's own handleSubmit will now manage the API call and payment confirmation.
       const stripeSubmitButton = document.querySelector(
         '#stripe-payment-form button[type="submit"]'
       ) as HTMLButtonElement | null;
@@ -369,6 +367,7 @@ const CheckoutPage = () => {
       if (stripeSubmitButton) {
         stripeSubmitButton.click();
       } else {
+        console.error("Stripe submit button not found.");
         toast.error(t("paymentErrorDefault"));
       }
     }
@@ -674,31 +673,29 @@ const CheckoutPage = () => {
                     </div>
                   </label>
 
-                  {/* --- 8. Render Stripe Form --- */}
+                  {/* --- 8. Render Stripe Form (REFACTORED) --- */}
                   {paymentMethod === "card" && (
-                    <div className="p-4 border-2 border-primary-200 bg-primary-50 rounded-lg">
-                      {isStripeFormLoading && (
-                        <div className="h-24 flex items-center justify-center text-primary-700">
-                          <p>{t("loadingPaymentForm")}...</p>
+                    <div className="pt-4">
+                      {isStripeFormLoading ? (
+                        <div className="flex items-center justify-center p-8">
+                          <Loader2 className="h-8 w-8 animate-spin text-primary-800" />
                         </div>
-                      )}
-                      {clientSecret && (
+                      ) : clientSecret ? (
                         <Elements
-                          options={stripeOptions}
                           stripe={stripePromise}
+                          options={stripeOptions}
                         >
                           <SecureStripeForm
                             onPaymentSuccess={onCardPaymentSuccess}
+                            shippingInfo={getValues()}
+                            clientSecret={clientSecret}
                           />
                         </Elements>
+                      ) : (
+                        <p className="text-center text-red-600">
+                          {t("paymentInitError")}
+                        </p>
                       )}
-                      {!clientSecret &&
-                        !isStripeFormLoading &&
-                        items.length > 0 && (
-                          <div className="h-24 flex items-center justify-center text-red-700">
-                            <p>{t("paymentInitError")}</p>
-                          </div>
-                        )}
                     </div>
                   )}
 

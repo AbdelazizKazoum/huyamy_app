@@ -78,11 +78,10 @@ export async function POST(request: NextRequest) {
       amount: totalAmount,
       currency: "mad", // Moroccan Dirham
       payment_method_types: ["card"], // Only allow card payments
-      payment_method_options: {
-        link: {},
-      },
       metadata: {
+        // Store the minimal items list for the webhook to use
         items: JSON.stringify(items),
+        locale: request.headers.get("x-next-intl-locale") || "ar",
       },
     });
 

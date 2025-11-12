@@ -47,6 +47,34 @@ export async function createGuestOrder(orderData: OrderData) {
 }
 
 /**
+ * Creates an order in the Firestore database.
+ * This function is designed to be called from a secure, server-side environment (e.g., a webhook).
+ *
+ * @param orderData - The complete order data object.
+ * @returns The ID of the newly created order document.
+ */
+export const createOrderInFirestore = async (
+  orderData: OrderData
+): Promise<string> => {
+  try {
+    const orderWithTimestamp = {
+      ...orderData,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      status: "pending", // Initial status
+    };
+
+    const orderRef = await adminDb.collection("orders").add(orderWithTimestamp);
+    console.log(`Order successfully created with ID: ${orderRef.id}`);
+    return orderRef.id;
+  } catch (error) {
+    console.error("Error creating order in Firestore:", error);
+    // Re-throw the error to be handled by the calling function (the webhook)
+    throw new Error("Failed to save order to database.");
+  }
+};
+
+/**
  * Creates an order for a signed-in user.
  * Use this when you can provide a user's auth token.
  * @param {string} token - The Firebase ID token of the authenticated user.

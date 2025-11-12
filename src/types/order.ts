@@ -21,6 +21,7 @@ export interface OrderData {
   locale: "ar" | "fr";
   paymentMethod?: "cod" | "card";
   paymentIntentId?: string;
+  status?: "pending" | "shipped" | "delivered" | "cancelled";
 }
 
 export interface Order extends OrderData {
