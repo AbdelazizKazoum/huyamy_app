@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { unstable_cache } from "next/cache";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import { Product, Category, Locale } from "@/types";
 import { CACHE_CONFIG, CACHE_TAGS } from "@/lib/cache/tags";
 import ProductsClient from "@/app/[locale]/(client)/products/components/ProductsClient";
@@ -12,6 +11,8 @@ import {
   getCategoryBySlug,
   getProductsByCategorySlug,
 } from "@/lib/services/productService";
+import CategoryHeader from "./components/CategoryHeader";
+import CategoryError from "./components/CategoryError";
 
 // Helper function to serialize Firestore data
 function serializeFirestoreData<T>(data: T): T {
@@ -110,30 +111,7 @@ export default async function CategoryPage({
 
     return (
       <div className="bg-neutral-50/70">
-        {/* Category Header */}
-        <div className="relative bg-neutral-800 text-white py-16 sm:py-24 px-4 overflow-hidden">
-          {currentCategory.image && (
-            <Image
-              src={currentCategory.image}
-              alt={currentCategory.name[locale] || "Category Image"}
-              layout="fill"
-              objectFit="cover"
-              className="absolute inset-0 z-0 opacity-30"
-              priority
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/60 to-neutral-800/30 z-10" />
-          <div className="container mx-auto relative z-20 text-center">
-            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight drop-shadow-lg">
-              {currentCategory.name[locale]}
-            </h1>
-            {currentCategory.description?.[locale] && (
-              <p className="mt-4 max-w-2xl mx-auto text-lg text-neutral-200 drop-shadow-md">
-                {currentCategory.description[locale]}
-              </p>
-            )}
-          </div>
-        </div>
+        <CategoryHeader category={currentCategory} locale={locale} />
 
         <Suspense fallback={<ProductsLoadingSkeleton />}>
           <ProductsClient initialData={initialData} locale={locale} />
@@ -143,22 +121,7 @@ export default async function CategoryPage({
   } catch (error) {
     console.error(`CategoryPage error for slug ${slug}:`, error);
 
-    return (
-      <div className="container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="text-red-600 bg-red-50 p-8 rounded-lg max-w-md">
-          <h2 className="text-2xl font-bold mb-2">Unable to Load Products</h2>
-          <p className="mb-4">
-            There was an issue loading products for this category.
-          </p>
-          <a
-            href={`/${locale}/products`}
-            className="inline-block px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Back to All Products
-          </a>
-        </div>
-      </div>
-    );
+    return <CategoryError locale={locale} />;
   }
 }
 
