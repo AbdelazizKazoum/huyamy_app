@@ -3,7 +3,6 @@ import Stripe from "stripe";
 import { adminDb } from "@/lib/firebaseAdmin";
 import { createOrderInFirestore } from "@/lib/services/orderService";
 import { getProductsByIds } from "@/lib/services/productService";
-import { Product } from "@/types/product";
 import { OrderData } from "@/types/order";
 
 // Define the expected item structure from metadata
