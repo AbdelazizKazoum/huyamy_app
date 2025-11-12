@@ -5,7 +5,7 @@ import { Section, SectionWithProducts, Language } from "@/types";
 import { Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
 
 interface SectionsTableProps {
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
   locale: Language;
   sections: SectionWithProducts[];
   isLoading: boolean;
@@ -64,7 +64,10 @@ export default function SectionsTable({
       sortable: false,
       render: (item: SectionWithProducts) => (
         <span className="text-sm sm:text-base">
-          {item.products?.length || item.data.ctaProductIds?.length || 0} {t("products")}
+          {t("productCount", {
+            count:
+              item.products?.length || item.data.ctaProductIds?.length || 0,
+          })}
         </span>
       ),
     },

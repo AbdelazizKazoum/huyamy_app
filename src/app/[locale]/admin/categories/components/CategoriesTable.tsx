@@ -6,7 +6,7 @@ import { Edit, Trash2 } from "lucide-react";
 import Image from "next/image";
 
 interface CategoriesTableProps {
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, string | number>) => string;
   locale: Language;
   categories: Category[];
   isLoading: boolean;
