@@ -6,23 +6,23 @@ import {
   Language,
   Product,
   VariantOption,
-  ProductVariant,
+  ProductVariant, // Make sure this type in @/types is updated to have images: string[]
 } from "@/types";
 import { PlusCircle, Trash2, UploadCloud, X, Palette } from "lucide-react";
 import Image from "next/image";
-import FormInput from "@/components/admin/ui/FormInput";
-import FormTextarea from "@/components/admin/ui/FormTextarea";
-import CustomSelect from "@/components/admin/ui/CustomSelect";
-import FormToggle from "@/components/admin/ui/FormToggle";
-import SubmitButton from "@/components/admin/ui/SubmitButton";
-import CancelButton from "@/components/admin/ui/CancelButton";
-import ColorPickerModal from "@/components/admin/modals/ColorPickerModal";
-import ProductSelector from "@/components/admin/ProductSelector";
-import { useProductStore } from "@/store/useProductStore";
-import { useTranslations } from "next-intl";
+import FormInput from "../ui/FormInput";
+import FormTextarea from "../ui/FormTextarea";
+import CustomSelect from "../ui/CustomSelect";
+import FormToggle from "../ui/FormToggle";
+import SubmitButton from "../ui/SubmitButton";
+import CancelButton from "../ui/CancelButton";
+import ColorPickerModal from "./ColorPickerModal";
+import ProductSelector from "../ProductSelector"; // Import the ProductSelector
+import { useProductStore } from "@/store/useProductStore"; // Import the store
 
 // --- Predefined list of common variant options with placeholders ---
 const PREDEFINED_OPTIONS = [
+  // ... (no changes)
   { ar: "الحجم", fr: "Taille", placeholder: "مثال: S, M, L, XL" },
   { ar: "اللون", fr: "Couleur", placeholder: "مثال: أحمر, أزرق, أخضر" },
   { ar: "الوزن", fr: "Poids", placeholder: "مثال: 1kg, 500g, 250g" },
@@ -32,6 +32,7 @@ const PREDEFINED_OPTIONS = [
 
 // --- Helper function to generate variant combinations ---
 const generateCombinations = (
+  // ... (no changes)
   options: VariantOption[]
 ): { [key: string]: string }[] => {
   if (options.length === 0 || options.some((o) => o.values.length === 0)) {
@@ -54,6 +55,7 @@ const generateCombinations = (
 };
 
 interface ProductFormModalProps {
+  // ... (no changes)
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (productData: FormData) => void;
@@ -72,11 +74,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   lang,
   isSubmitting = false,
 }) => {
-  const t = useTranslations("admin.products.modal");
-
-  console.log("ProductFormModal render:", { isOpen, product });
-
   // --- Existing State ---
+  // ... (all other state is unchanged)
   const [nameAr, setNameAr] = useState("");
   const [nameFr, setNameFr] = useState("");
   const [descriptionAr, setDescriptionAr] = useState("");
@@ -103,6 +102,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     useState<string[]>([]);
 
   // --- Variant State ---
+  // ... (no changes)
   const [hasVariants, setHasVariants] = useState(false);
   const [variantOptions, setVariantOptions] = useState<VariantOption[]>([]);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
@@ -114,6 +114,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   }>({});
 
   // --- Color Picker State ---
+  // ... (no changes)
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
   const [currentColorPickerIndex, setCurrentColorPickerIndex] = useState<
     number | null
@@ -121,12 +122,20 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [pickerColor, setPickerColor] = useState("#ffffff");
 
   // --- MODIFIED: Per-Variant Image State ---
+  /**
+   * Stores new File objects for variant images, keyed by variant.id
+   * e.g., { 'variant-id-123': [File1, File2] }
+   */
   const [newVariantImages, setNewVariantImages] = useState<{
     [variantId: string]: File[];
   }>({});
+  /**
+   * Stores existing image URLs to be deleted, e.g., ['http://.../img1.jpg']
+   */
   const [deletedVariantImageUrls, setDeletedVariantImageUrls] = useState<
     string[]
   >([]);
+  // --- END MODIFIED ---
 
   // --- NEW: Product Sections State ---
   const [hasRelatedProducts, setHasRelatedProducts] = useState(false);
@@ -160,6 +169,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     // --- END NEW ---
 
     if (product) {
+      // ... (all other population is unchanged)
       setNameAr(product.name.ar);
       setNameFr(product.name.fr);
       setDescriptionAr(product.description.ar);
@@ -187,12 +197,11 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         !!product.variantOptions && product.variantOptions.length > 0;
       setHasVariants(productHasVariants);
       setVariantOptions(product.variantOptions || []);
-      const productVariants = (product.variants || []).map((v) => ({
-        ...v,
-        images: v.images || [],
-      }));
-      console.log("Loading product variants:", productVariants);
-      setVariants(productVariants);
+      // --- MODIFIED: Ensure images is always an array ---
+      setVariants(
+        (product.variants || []).map((v) => ({ ...v, images: v.images || [] }))
+      );
+      // --- END MODIFIED ---
 
       // Initialize custom flags for existing product
       const initialCustomFlags: { [key: number]: boolean } = {};
@@ -230,6 +239,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       // --- END NEW ---
     } else {
       // Reset form for new product
+      // ... (all other reset is unchanged)
       setNameAr("");
       setNameFr("");
       setDescriptionAr("");
@@ -262,34 +272,33 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   // --- Variant Generation Effect ---
   useEffect(() => {
-    if (!hasVariants) {
-      setVariants([]);
-      return;
-    }
+    if (!hasVariants) return;
 
     const newCombinations = generateCombinations(variantOptions);
-    setVariants((currentVariants) => {
-      const newVariants = newCombinations.map((combo) => {
-        const comboId = Object.values(combo).join("-");
-        const existingVariant = currentVariants.find(
-          (v) =>
-            Object.entries(v.options).every(
-              ([key, value]) => combo[key] === value
-            ) && Object.keys(v.options).length === Object.keys(combo).length
-        );
-        return {
-          id: existingVariant?.id || comboId,
-          price: existingVariant?.price ?? 0, // Use nullish coalescing to preserve 0 values
-          originalPrice: existingVariant?.originalPrice ?? undefined,
-          images: existingVariant?.images || [],
-          options: combo,
-        };
-      });
-      return newVariants;
+    const newVariants = newCombinations.map((combo) => {
+      const comboId = Object.values(combo).join("-");
+      // Try to find an existing variant to preserve its price/image
+      const existingVariant = variants.find(
+        (v) =>
+          Object.entries(v.options).every(
+            ([key, value]) => combo[key] === value
+          ) && Object.keys(v.options).length === Object.keys(combo).length
+      );
+      return {
+        id: existingVariant?.id || comboId, // IMPORTANT: Preserves existing ID
+        price: existingVariant?.price || 0,
+        originalPrice: existingVariant?.originalPrice,
+        // --- MODIFIED: Use images array ---
+        images: existingVariant?.images || [], // This preserves the existing images array
+        // --- END MODIFIED ---
+        options: combo,
+      };
     });
-  }, [variantOptions, hasVariants]);
+    setVariants(newVariants);
+  }, [variantOptions, hasVariants]); // Note: 'variants' is NOT in dependency array
 
   // --- Variant UI Handlers ---
+  // ... (all other handlers are unchanged)
   const addVariantOption = () => {
     setVariantOptions([
       ...variantOptions,
@@ -339,7 +348,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     const newOptions = [...variantOptions];
     if (!newOptions[optionIndex].values.includes(value)) {
       newOptions[optionIndex].values.push(value);
-      setVariantOptions(newOptions);
     }
     setOptionValueInputs({ ...optionValueInputs, [optionIndex]: "" });
   };
@@ -358,24 +366,14 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     value: number | string
   ) => {
     setVariants(
-      variants.map((v) => {
-        if (v.id === variantId) {
-          if (field === "originalPrice") {
-            // For originalPrice, allow empty values to be undefined
-            const numValue =
-              value === "" ? undefined : Number(value) || undefined;
-            return { ...v, [field]: numValue };
-          } else {
-            // For price, default to 0 if empty/invalid
-            return { ...v, [field]: Number(value) || 0 };
-          }
-        }
-        return v;
-      })
+      variants.map((v) =>
+        v.id === variantId ? { ...v, [field]: Number(value) || 0 } : v
+      )
     );
   };
 
   // --- Color Picker Submit Handler ---
+  // ... (no changes)
   const handleColorPickerSubmit = () => {
     if (currentColorPickerIndex === null) return;
 
@@ -390,7 +388,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     setCurrentColorPickerIndex(null);
   };
 
-  // --- MODIFIED: Per-Variant Image Handlers ---
+  // --- MODIFIED: Per-Variant Image Handlers (Plural) ---
   const handleVariantImagesChange = (
     e: ChangeEvent<HTMLInputElement>,
     variantId: string
@@ -399,6 +397,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       const newFiles = Array.from(e.target.files);
       const newPreviewUrls = newFiles.map((file) => URL.createObjectURL(file));
 
+      // Update the variant's images preview array
       setVariants((prevVariants) =>
         prevVariants.map((v) =>
           v.id === variantId
@@ -407,6 +406,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         )
       );
 
+      // Store the new file objects, mapped by variantId
       setNewVariantImages((prev) => {
         const existingFiles = prev[variantId] || [];
         return {
@@ -422,9 +422,14 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     if (!variant) return;
 
     if (imageUrlToRemove.startsWith("blob:")) {
+      // It's a new file. We need to find its index among the *blobs*
+      // to remove the correct File object from newVariantImages.
+
+      // Get all blob URLs for *this variant* in their current order
       const blobImages = (variant.images || []).filter((img) =>
         img.startsWith("blob:")
       );
+      // Find the specific index of the blob we're removing
       const blobIndexToRemove = blobImages.findIndex(
         (img) => img === imageUrlToRemove
       );
@@ -432,6 +437,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       if (blobIndexToRemove !== -1) {
         setNewVariantImages((prev) => {
           const variantFiles = prev[variantId] || [];
+          // Remove the file at that specific index
           const updatedFiles = variantFiles.filter(
             (_, i) => i !== blobIndexToRemove
           );
@@ -442,9 +448,11 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         });
       }
     } else {
+      // It's an existing image (http:), mark it for deletion
       setDeletedVariantImageUrls((prev) => [...prev, imageUrlToRemove]);
     }
 
+    // In either case, remove the preview from the 'variants' state
     setVariants((prevVariants) =>
       prevVariants.map((v) =>
         v.id === variantId
@@ -458,6 +466,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       )
     );
   };
+  // --- END MODIFIED ---
 
   // --- NEW: Product Section Handlers ---
   const addRelatedProduct = (product: Product) => {
@@ -538,7 +547,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   };
   // --- END NEW ---
 
-  // --- Existing Handlers ---
+  // --- Existing Handlers (handleMainImageChange, etc.) ---
+  // ... (all other handlers are unchanged)
   const handleMainImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -622,47 +632,54 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   };
 
   const validate = (): boolean => {
+    // ... (no changes)
     const newErrors: Partial<Record<string, string>> = {};
 
-    if (!nameAr.trim()) newErrors.nameAr = t("errors.nameAr");
-    if (!nameFr.trim()) newErrors.nameFr = t("errors.nameFr");
+    if (!nameAr.trim()) newErrors.nameAr = "اسم المنتج بالعربية مطلوب.";
+    if (!nameFr.trim()) newErrors.nameFr = "اسم المنتج بالفرنسية مطلوب.";
     if (!descriptionAr.trim())
-      newErrors.descriptionAr = t("errors.descriptionAr");
+      newErrors.descriptionAr = "وصف المنتج بالعربية مطلوب.";
     if (!descriptionFr.trim())
-      newErrors.descriptionFr = t("errors.descriptionFr");
+      newErrors.descriptionFr = "وصف المنتج بالفرنسية مطلوب.";
     if (!hasVariants && (!price || Number(price) <= 0))
-      newErrors.price = t("errors.price");
-    if (!selectedCategoryJSON) newErrors.categoryId = t("errors.category");
+      newErrors.price = "السعر يجب أن يكون رقمًا موجبًا.";
+    if (!selectedCategoryJSON) newErrors.categoryId = "يجب اختيار فئة.";
     if (!product && !mainImage) {
-      newErrors.mainImage = t("errors.mainImage");
+      newErrors.mainImage = "الصورة الرئيسية مطلوبة لمنتج جديد.";
     }
     if (!allowDirectPurchase && !allowAddToCart) {
-      newErrors.purchaseOptions = t("errors.purchaseOptions");
+      newErrors.purchaseOptions = "يجب تفعيل خيار شراء واحد على الأقل.";
     }
     if (hasVariants) {
       if (variantOptions.some((o) => !o.name.ar.trim() || !o.name.fr.trim())) {
-        newErrors.variants = t("errors.variants");
+        newErrors.variants = "يجب تسمية جميع خيارات المنتج باللغتين.";
       }
       if (variantOptions.some((o) => o.values.length === 0)) {
-        newErrors.variants = t("errors.variants");
+        newErrors.variants = "يجب أن يحتوي كل خيار على قيمة واحدة على الأقل.";
       }
       if (variants.some((v) => v.price <= 0)) {
-        newErrors.variants = t("errors.variants");
+        newErrors.variants = "يجب أن يكون سعر كل متغير أكبر من صفر.";
       }
     }
+    // --- NEW: Validate custom sections ---
     if (hasCustomSections) {
       customSections.forEach((section, index) => {
         if (!section.nameAr.trim() || !section.nameFr.trim()) {
-          newErrors[`customSection${index}`] = t("errors.customSection");
+          newErrors[`customSection${index}`] = `يجب تسمية القسم ${
+            index + 1
+          } باللغتين.`;
         }
         if (
           section.type === "description" &&
           (!section.descriptionAr.trim() || !section.descriptionFr.trim())
         ) {
-          newErrors[`customSection${index}`] = t("errors.customSection");
+          newErrors[`customSection${index}`] = `يجب إضافة وصف للقسم ${
+            index + 1
+          } باللغتين.`;
         }
       });
     }
+    // --- END NEW ---
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -679,16 +696,20 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       ? (JSON.parse(selectedCategoryJSON) as Category)
       : null;
 
+    // --- MODIFIED: Clean variants array for submission ---
     const cleanedVariants = hasVariants
       ? variants.map((v) => {
+          // Filter out blob: URLs, keep existing http: URLs
           const keptImages = (v.images || []).filter(
             (img) => !img.startsWith("blob:")
           );
           return { ...v, images: keptImages };
         })
       : [];
+    // --- END MODIFIED ---
 
     const productData = {
+      // ... (other data is unchanged)
       name: { ar: nameAr, fr: nameFr },
       description: { ar: descriptionAr, fr: descriptionFr },
       price: Number(price),
@@ -700,7 +721,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       allowDirectPurchase,
       allowAddToCart,
       variantOptions: hasVariants ? variantOptions : [],
-      variants: cleanedVariants,
+      variants: cleanedVariants, // --- USE CLEANED VARIANTS ---
+      // --- NEW: Add sections data ---
       relatedProducts: hasRelatedProducts
         ? {
             ids: selectedRelatedProducts.map((p) => p.id),
@@ -723,49 +745,64 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             }),
           }))
         : null,
+      // --- END NEW ---
     };
 
     const formData = new FormData();
     formData.append("productData", JSON.stringify(productData));
 
+    // Append deleted image URLs for the backend to process
     if (deletedSubImageUrls.length > 0) {
+      // ... (no changes)
       formData.append(
         "deletedSubImageUrls",
         JSON.stringify(deletedSubImageUrls)
       );
     }
     if (deletedCertificationImageUrls.length > 0) {
+      // ... (no changes)
       formData.append(
         "deletedCertificationImageUrls",
         JSON.stringify(deletedCertificationImageUrls)
       );
     }
+    // --- MODIFIED: Append Deleted Variant Image URLs ---
     if (deletedVariantImageUrls.length > 0) {
       formData.append(
         "deletedVariantImageUrls",
         JSON.stringify(deletedVariantImageUrls)
       );
     }
+    // --- END MODIFIED ---
 
+    // Append product ID for updates
     if (product) {
+      // ... (no changes)
       formData.append("id", product.id);
     }
 
+    // Append image files
     if (mainImage) {
+      // ... (no changes)
       formData.append("mainImage", mainImage);
     }
     subImages.forEach((file) => {
+      // ... (no changes)
       formData.append("subImages", file);
     });
     certificationImages.forEach((file) => {
+      // ... (no changes)
       formData.append("certificationImages", file);
     });
 
+    // --- MODIFIED: Append Variant Images ---
+    // The backend will receive an array of files for each 'variantId' key
     Object.entries(newVariantImages).forEach(([variantId, files]) => {
       files.forEach((file) => {
         formData.append(variantId, file);
       });
     });
+    // --- END MODIFIED ---
 
     // --- For Debugging ---
     console.log("--- Submitting Product Data (JSON) ---");
@@ -773,20 +810,24 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
     console.log("--- Submitting Files ---");
     if (mainImage) {
+      // ... (no changes)
       console.log(
         `mainImage: File { name: "${mainImage.name}", size: ${mainImage.size} }`
       );
     }
     subImages.forEach((file, index) => {
+      // ... (no changes)
       console.log(
         `subImages[${index}]: File { name: "${file.name}", size: ${file.size} }`
       );
     });
     certificationImages.forEach((file, index) => {
+      // ... (no changes)
       console.log(
         `certificationImages[${index}]: File { name: "${file.name}", size: ${file.size} }`
       );
     });
+    // --- MODIFIED: Log variant files ---
     Object.entries(newVariantImages).forEach(([variantId, files]) => {
       files.forEach((file, index) => {
         console.log(
@@ -794,6 +835,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         );
       });
     });
+    // --- END MODIFIED ---
     console.log("--------------------------");
 
     onSubmit(formData);
@@ -801,16 +843,18 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   if (!isOpen) return null;
 
-  const title = product ? t("editTitle") : t("addTitle");
+  const title = product ? "تعديل المنتج" : "إضافة منتج جديد";
 
+  // --- NEW: Filtered available products for selectors ---
   const availableProductsForSelectors = allProducts.filter(
     (p) =>
-      (!product || p.id !== product.id) &&
+      (!product || p.id !== product.id) && // Exclude current product if editing
       !selectedRelatedProducts.some((sp) => sp.id === p.id) &&
       !customSections.some((section) =>
         section.selectedProducts.some((sp) => sp.id === p.id)
       )
   );
+  // --- END NEW ---
 
   return (
     <div className="fixed inset-0 bg-gray-900/50 z-50 flex justify-center items-center p-4">
@@ -819,6 +863,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         className="bg-white rounded-lg shadow-xl w-full max-w-5xl max-h-[90vh] flex flex-col"
       >
         {/* --- Modal Header --- */}
+        {/* ... (no changes) */}
         <div className="flex justify-between items-center p-4 border-b border-neutral-200">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
           <button
@@ -835,11 +880,12 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         <div className="overflow-y-auto p-6 space-y-6">
           <fieldset disabled={isSubmitting} className="space-y-6">
             {/* --- Existing Form Fields --- */}
+            {/* ... (no changes to this section) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Left Column */}
               <div className="space-y-6">
                 <FormInput
-                  label={t("labels.nameAr")}
+                  label="اسم المنتج (بالعربية)"
                   id="nameAr"
                   value={nameAr}
                   onChange={(e) => setNameAr(e.target.value)}
@@ -847,7 +893,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   required
                 />
                 <FormTextarea
-                  label={t("labels.descriptionAr")}
+                  label="وصف المنتج (بالعربية)"
                   id="descriptionAr"
                   value={descriptionAr}
                   onChange={(e) => setDescriptionAr(e.target.value)}
@@ -859,7 +905,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   {!hasVariants && (
                     <>
                       <FormInput
-                        label={t("labels.price")}
+                        label="السعر الأساسي (د.م.)"
                         id="price"
                         type="number"
                         value={price}
@@ -868,7 +914,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         required
                       />
                       <FormInput
-                        label={t("labels.originalPrice")}
+                        label="السعر الأصلي (اختياري)"
                         id="originalPrice"
                         type="number"
                         value={originalPrice}
@@ -878,14 +924,15 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   )}
                   {hasVariants && (
                     <>
+                      {/* When variants, show category and keywords side by side */}
                       <CustomSelect
-                        label={t("labels.category")}
+                        label="الفئة"
                         value={selectedCategoryJSON}
                         onChange={(value) => setSelectedCategoryJSON(value)}
                         error={errors.categoryId}
                       >
                         <option value="" disabled>
-                          {t("placeholders.selectCategory")}
+                          -- اختر فئة --
                         </option>
                         {categories.map((cat) => (
                           <option key={cat.id} value={JSON.stringify(cat)}>
@@ -895,7 +942,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       </CustomSelect>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          {t("labels.keywords")}
+                          الكلمات المفتاحية (افصل بينها بفاصلة ,)
                         </label>
                         <div className="flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md focus-within:ring-1 focus-within:ring-green-700">
                           {keywords.map((kw, index) => (
@@ -919,7 +966,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                             onChange={handleKeywordsChange}
                             onKeyDown={handleKeywordKeyDown}
                             className="flex-grow bg-transparent focus:outline-none"
-                            placeholder={t("placeholders.addKeyword")}
+                            placeholder="أضف كلمة مفتاحية..."
                           />
                         </div>
                       </div>
@@ -928,13 +975,13 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 </div>
                 {!hasVariants && (
                   <CustomSelect
-                    label={t("labels.category")}
+                    label="الفئة"
                     value={selectedCategoryJSON}
                     onChange={(value) => setSelectedCategoryJSON(value)}
                     error={errors.categoryId}
                   >
                     <option value="" disabled>
-                      {t("placeholders.selectCategory")}
+                      -- اختر فئة --
                     </option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={JSON.stringify(cat)}>
@@ -944,22 +991,22 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   </CustomSelect>
                 )}
                 <FormToggle
-                  label={t("labels.isNew")}
+                  label="منتج جديد؟"
                   checked={isNew}
                   onChange={(e) => setIsNew(e.target.checked)}
                 />
                 <div className="pt-4 mt-4 border-t border-gray-200">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t("labels.purchaseOptions")}
+                    خيارات الشراء المتاحة
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormToggle
-                      label={t("labels.directPurchase")}
+                      label="الطلب المباشر"
                       checked={allowDirectPurchase}
                       onChange={(e) => setAllowDirectPurchase(e.target.checked)}
                     />
                     <FormToggle
-                      label={t("labels.addToCart")}
+                      label="الإضافة للسلة"
                       checked={allowAddToCart}
                       onChange={(e) => setAllowAddToCart(e.target.checked)}
                     />
@@ -975,7 +1022,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
               {/* Right Column */}
               <div className="space-y-6">
                 <FormInput
-                  label={t("labels.nameFr")}
+                  label="Nom du produit (Français)"
                   id="nameFr"
                   value={nameFr}
                   onChange={(e) => setNameFr(e.target.value)}
@@ -983,7 +1030,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   required
                 />
                 <FormTextarea
-                  label={t("labels.descriptionFr")}
+                  label="Description du produit (Français)"
                   id="descriptionFr"
                   value={descriptionFr}
                   onChange={(e) => setDescriptionFr(e.target.value)}
@@ -995,7 +1042,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 {!hasVariants && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("labels.keywords")}
+                      الكلمات المفتاحية (افصل بينها بفاصلة ,)
                     </label>
                     <div className="flex flex-wrap items-center gap-2 p-2 border border-gray-300 rounded-md focus-within:ring-1 focus-within:ring-green-700">
                       {keywords.map((kw, index) => (
@@ -1019,7 +1066,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         onChange={handleKeywordsChange}
                         onKeyDown={handleKeywordKeyDown}
                         className="flex-grow bg-transparent focus:outline-none"
-                        placeholder={t("placeholders.addKeyword")}
+                        placeholder="أضف كلمة مفتاحية..."
                       />
                     </div>
                   </div>
@@ -1030,7 +1077,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             {/* --- Variants Section --- */}
             <div className="space-y-4 pt-6 border-t border-gray-200">
               <FormToggle
-                label={t("labels.hasVariants")}
+                label="هذا المنتج له متغيرات (مثل الحجم، الوزن، اللون)"
                 checked={hasVariants}
                 onChange={(e) => setHasVariants(e.target.checked)}
               />
@@ -1039,7 +1086,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   {/* 1. Variant Options Definition */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold text-gray-800">
-                      {t("labels.variantOptions")}
+                      خيارات المنتج
                     </h3>
                     {variantOptions.map((option, index) => {
                       const predefined = PREDEFINED_OPTIONS.find(
@@ -1048,19 +1095,18 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       const isColorOption =
                         option.name.fr.toLowerCase() === "couleur";
                       const placeholderText =
-                        predefined?.placeholder || t("placeholders.enterValue");
+                        predefined?.placeholder || "أضف قيمة واضغط Enter";
 
                       return (
                         <div
                           key={index}
                           className="p-4 border border-gray-200 rounded-lg bg-white shadow-sm transition-all hover:border-green-300"
                         >
+                          {/* ... (Select Option dropdown and Custom Option inputs) */}
                           <div className="flex items-start gap-3 mb-3">
                             <div className="flex-grow space-y-4">
                               <CustomSelect
-                                label={`${t("labels.selectOption")} ${
-                                  index + 1
-                                }`}
+                                label={`اختر الخيار ${index + 1}`}
                                 value={
                                   customOptionFlags[index]
                                     ? "custom"
@@ -1071,7 +1117,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                 }
                               >
                                 <option value="" disabled>
-                                  -- {t("labels.selectOption")} --
+                                  -- اختر --
                                 </option>
                                 {PREDEFINED_OPTIONS.map((opt) => (
                                   <option key={opt.fr} value={opt.fr}>
@@ -1079,15 +1125,14 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                   </option>
                                 ))}
                                 <option value="custom">
-                                  {t("labels.customOptionAr")} /{" "}
-                                  {t("labels.customOptionFr")}
+                                  خيار مخصص / Autre...
                                 </option>
                               </CustomSelect>
 
                               {customOptionFlags[index] && (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-green-50/50 rounded-md border border-green-200">
                                   <FormInput
-                                    label={t("labels.customOptionAr")}
+                                    label="الاسم المخصص (AR)"
                                     value={option.name.ar}
                                     onChange={(e) =>
                                       updateCustomOptionName(
@@ -1096,12 +1141,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                         e.target.value
                                       )
                                     }
-                                    placeholder={t(
-                                      "placeholders.customOptionAr"
-                                    )}
+                                    placeholder="مثال: الضمان"
                                   />
                                   <FormInput
-                                    label={t("labels.customOptionFr")}
+                                    label="Nom Personnalisé (FR)"
                                     value={option.name.fr}
                                     onChange={(e) =>
                                       updateCustomOptionName(
@@ -1110,9 +1153,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                         e.target.value
                                       )
                                     }
-                                    placeholder={t(
-                                      "placeholders.customOptionFr"
-                                    )}
+                                    placeholder="Ex: Garantie"
                                   />
                                 </div>
                               )}
@@ -1128,7 +1169,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                             </button>
                           </div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            {t("labels.optionValues")}
+                            قيم الخيار (اضغط Enter للإضافة)
                           </label>
                           {/* --- Conditional render for Color Input --- */}
                           {isColorOption ? (
@@ -1173,7 +1214,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                     }
                                   }}
                                   className="flex-grow bg-transparent focus:outline-none min-w-[120px]"
-                                  placeholder={t("placeholders.enterColor")}
+                                  placeholder="أدخل لون (اسم أو #hex)"
                                 />
                               </div>
                               {/* Color Picker Button */}
@@ -1241,7 +1282,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-sky-300 rounded-lg text-sm font-semibold text-sky-600 hover:bg-sky-50 hover:border-sky-400 transition-all"
                     >
                       <PlusCircle size={18} />
-                      {t("labels.addOption")}
+                      إضافة خيار جديد
                     </button>
                   </div>
 
@@ -1249,13 +1290,14 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   {variants.length > 0 && (
                     <div className="pt-8 border-t border-slate-200">
                       <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                        {t("labels.variantsList")}
+                        قائمة المتغيرات
                       </h3>
                       <div className="flow-root">
                         <div className="-mx-1 -my-2 overflow-x-auto">
                           <div className="inline-block min-w-full py-2 align-middle">
                             <div className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white overflow-hidden shadow-sm">
                               {variants.map((variant, index) => (
+                                // --- MODIFIED: Grid layout for 3 columns ---
                                 <div
                                   key={variant.id}
                                   className={`p-4 ${
@@ -1263,15 +1305,17 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                   }`}
                                 >
                                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+                                    {/* Col 1: Name */}
                                     <div className="font-medium text-slate-800 pt-2">
                                       {Object.values(variant.options).join(
                                         " / "
                                       )}
                                     </div>
 
+                                    {/* Col 2: Price Inputs */}
                                     <div className="grid grid-cols-2 gap-3">
                                       <FormInput
-                                        label={t("labels.variantPrice")}
+                                        label="السعر"
                                         type="number"
                                         value={variant.price}
                                         onChange={(e) =>
@@ -1281,12 +1325,12 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                             e.target.value
                                           )
                                         }
-                                        placeholder={t("placeholders.price")}
+                                        placeholder="0.00"
                                       />
                                       <FormInput
-                                        label={t("labels.variantOriginalPrice")}
+                                        label="السعر الأصلي"
                                         type="number"
-                                        value={variant.originalPrice ?? ""}
+                                        value={variant.originalPrice || ""}
                                         onChange={(e) =>
                                           updateVariantPrice(
                                             variant.id,
@@ -1294,14 +1338,16 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                             e.target.value
                                           )
                                         }
-                                        placeholder={t("placeholders.price")}
+                                        placeholder="0.00"
                                       />
                                     </div>
 
+                                    {/* Col 3: MODIFIED - Multi-Image Uploader */}
                                     <div>
                                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        {t("labels.variantImages")}
+                                        صور المتغير
                                       </label>
+                                      {/* This markup is copied from your subImages uploader */}
                                       <div className="grid grid-cols-3 gap-2">
                                         {(variant.images || []).map(
                                           (src, imgIndex) => (
@@ -1341,7 +1387,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                             className="text-gray-400"
                                           />
                                           <span className="text-xs text-gray-500 mt-1">
-                                            {t("labels.addImage")}
+                                            إضافة
                                           </span>
                                           <input
                                             id={`variant-images-upload-${variant.id}`}
@@ -1359,6 +1405,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                         </label>
                                       </div>
                                     </div>
+                                    {/* --- END MODIFIED --- */}
                                   </div>
                                 </div>
                               ))}
@@ -1382,20 +1429,20 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
               {/* Related Products Section */}
               <div className="space-y-4">
                 <FormToggle
-                  label={t("labels.hasRelatedProducts")}
+                  label="إضافة قسم المنتجات ذات الصلة"
                   checked={hasRelatedProducts}
                   onChange={(e) => setHasRelatedProducts(e.target.checked)}
                 />
                 {hasRelatedProducts && (
                   <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
                     <h4 className="text-lg font-semibold text-gray-800 mb-4">
-                      {t("labels.relatedProducts")}
+                      المنتجات ذات الصلة
                     </h4>
                     <ProductSelector
                       availableProducts={availableProductsForSelectors}
                       onProductSelect={addRelatedProduct}
                       lang={lang}
-                      label={t("labels.selectRelatedProducts")}
+                      label="اختر المنتجات ذات الصلة"
                     />
                     <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
                       {selectedRelatedProducts.map((p) => (
@@ -1406,7 +1453,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                           <button
                             type="button"
                             onClick={() => removeRelatedProduct(p.id)}
-                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
+                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-0.5"
                           >
                             <X size={14} />
                           </button>
@@ -1430,7 +1477,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
               {/* Custom Sections */}
               <div className="space-y-4">
                 <FormToggle
-                  label={t("labels.hasCustomSections")}
+                  label="إضافة أقسام مخصصة"
                   checked={hasCustomSections}
                   onChange={(e) => setHasCustomSections(e.target.checked)}
                 />
@@ -1443,7 +1490,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       >
                         <div className="flex justify-between items-center mb-4">
                           <h4 className="text-lg font-semibold text-gray-800">
-                            {t("labels.customSection")} {index + 1}
+                            القسم المخصص {index + 1}
                           </h4>
                           <button
                             type="button"
@@ -1454,9 +1501,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                             <Trash2 size={18} />
                           </button>
                         </div>
+                        {/* Rest of the section content */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                           <FormInput
-                            label={t("labels.sectionNameAr")}
+                            label="اسم القسم (العربية)"
                             value={section.nameAr}
                             onChange={(e) =>
                               updateCustomSection(
@@ -1469,7 +1517,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                             required
                           />
                           <FormInput
-                            label={t("labels.sectionNameFr")}
+                            label="Nom de la section (Français)"
                             value={section.nameFr}
                             onChange={(e) =>
                               updateCustomSection(
@@ -1484,7 +1532,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         </div>
                         <div className="mb-4">
                           <CustomSelect
-                            label={t("labels.sectionType")}
+                            label="نوع القسم"
                             value={section.type}
                             onChange={(value) =>
                               updateCustomSection(
@@ -1494,12 +1542,8 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                               )
                             }
                           >
-                            <option value="products">
-                              {t("labels.sectionProducts")}
-                            </option>
-                            <option value="description">
-                              {t("labels.sectionDescription")}
-                            </option>
+                            <option value="products">منتجات</option>
+                            <option value="description">وصف</option>
                           </CustomSelect>
                         </div>
                         {section.type === "products" && (
@@ -1510,7 +1554,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                                 addProductToSection(index, product)
                               }
                               lang={lang}
-                              label={t("labels.selectSectionProducts")}
+                              label="اختر المنتجات لهذا القسم"
                             />
                             <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
                               {section.selectedProducts.map((p) => (
@@ -1545,7 +1589,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         {section.type === "description" && (
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormTextarea
-                              label={t("labels.sectionDescriptionAr")}
+                              label="الوصف (العربية)"
                               value={section.descriptionAr}
                               onChange={(e) =>
                                 updateCustomSection(
@@ -1559,7 +1603,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                               required
                             />
                             <FormTextarea
-                              label={t("labels.sectionDescriptionFr")}
+                              label="Description (Français)"
                               value={section.descriptionFr}
                               onChange={(e) =>
                                 updateCustomSection(
@@ -1582,21 +1626,23 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-green-300 rounded-lg text-sm font-semibold text-green-600 hover:bg-green-50 hover:border-green-400 transition-all"
                     >
                       <PlusCircle size={18} />
-                      {t("labels.addCustomSection")}
+                      إضافة قسم مخصص جديد
                     </button>
                   </div>
                 )}
               </div>
             </div>
+            {/* --- END NEW --- */}
 
             {/* --- Image Uploads Section --- */}
+            {/* ... (no changes to this section) */}
             <div className="space-y-8 pt-6 border-t border-gray-200">
               {/* Row 1: Main and Sub Images */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Main Image Upload */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t("labels.mainImage")}
+                    الصورة الرئيسية
                   </label>
                   <div
                     className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-md ${
@@ -1623,11 +1669,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                           htmlFor="main-image-upload"
                           className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none"
                         >
-                          <span>
-                            {product
-                              ? t("labels.changeImage")
-                              : t("labels.uploadImage")}
-                          </span>
+                          <span>{product ? "تغيير الصورة" : "تحميل صورة"}</span>
                           <input
                             id="main-image-upload"
                             name="main-image-upload"
@@ -1639,7 +1681,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                         </label>
                       </div>
                       <p className="text-xs text-gray-500">
-                        {t("messages.imageFormat")}
+                        PNG, JPG, GIF up to 10MB
                       </p>
                     </div>
                   </div>
@@ -1653,7 +1695,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                 {/* Sub Images Upload */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t("labels.subImages")}
+                    الصور الفرعية
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {subImagePreviews.map((src, index) => (
@@ -1679,9 +1721,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                       className="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:bg-gray-50"
                     >
                       <PlusCircle size={24} className="text-gray-400" />
-                      <span className="text-xs text-gray-500 mt-1">
-                        {t("labels.addImage")}
-                      </span>
+                      <span className="text-xs text-gray-500 mt-1">إضافة</span>
                       <input
                         id="sub-images-upload"
                         type="file"
@@ -1698,7 +1738,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
               {/* Row 2: Certification Images */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t("labels.certificationImages")}
+                  صور الشهادات (اختياري)
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {certificationImagePreviews.map((src, index) => (
@@ -1724,9 +1764,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     className="flex flex-col items-center justify-center w-24 h-24 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:bg-gray-50"
                   >
                     <PlusCircle size={24} className="text-gray-400" />
-                    <span className="text-xs text-gray-500 mt-1">
-                      {t("labels.addImage")}
-                    </span>
+                    <span className="text-xs text-gray-500 mt-1">إضافة</span>
                     <input
                       id="certification-images-upload"
                       type="file"
@@ -1743,17 +1781,19 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         </div>
 
         {/* --- Modal Footer --- */}
+        {/* ... (no changes) */}
         <div className="flex justify-end items-center gap-4 p-4 border-t border-neutral-200 bg-gray-50 rounded-b-lg">
           <CancelButton onClick={onClose} isSubmitting={isSubmitting}>
-            {t("buttons.cancel")}
+            إلغاء
           </CancelButton>
           <SubmitButton isSubmitting={isSubmitting}>
-            <span>{product ? t("buttons.save") : t("buttons.create")}</span>
+            <span>{product ? "حفظ التغييرات" : "إنشاء المنتج"}</span>
           </SubmitButton>
         </div>
       </form>
 
       {/* --- Color Picker Modal --- */}
+      {/* ... (no changes) */}
       <ColorPickerModal
         isOpen={isColorPickerOpen}
         color={pickerColor}
