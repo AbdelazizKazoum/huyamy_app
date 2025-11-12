@@ -1,13 +1,13 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState, useRef } from "react";
+import { FormEvent, useEffect, useState, useRef } from "react";
 import { Category, Language } from "@/types";
-import { UploadCloud, X } from "lucide-react";
-import Image from "next/image";
 import FormInput from "@/components/admin/ui/FormInput";
 import FormTextarea from "@/components/admin/ui/FormTextarea";
 import CancelButton from "@/components/admin/ui/CancelButton";
 import SubmitButton from "@/components/admin/ui/SubmitButton";
+import ImageUpload from "@/components/admin/ui/ImageUpload";
+import CloseButton from "@/components/admin/ui/CloseButton";
 import { useTranslations } from "next-intl";
 
 interface CategoryFormModalProps {
@@ -57,13 +57,10 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
     setErrors({});
   }, [category, isOpen]);
 
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);
-    }
+  const handleImageChange = (file: File) => {
+    setImage(file);
+    const previewUrl = URL.createObjectURL(file);
+    setImagePreview(previewUrl);
   };
 
   const validate = (): boolean => {
@@ -110,14 +107,7 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
       >
         <div className="flex justify-between items-center p-4 border-b border-neutral-200">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="p-2 rounded-full text-gray-500 hover:bg-gray-100 disabled:opacity-50"
-          >
-            <X size={24} />
-          </button>
+          <CloseButton onClick={onClose} disabled={isSubmitting} />
         </div>
         <div className="overflow-y-auto p-6 space-y-6">
           <fieldset disabled={isSubmitting} className="space-y-6">
@@ -153,51 +143,22 @@ const CategoryFormModal: React.FC<CategoryFormModalProps> = ({
               rows={3}
               error={errors.descriptionFr}
             />
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("labels.image")}
-              </label>
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 ${
-                  errors.image ? "border-red-500" : "border-gray-300"
-                } border-dashed rounded-md cursor-pointer`}
-              >
-                {imagePreview ? (
-                  <div className="relative">
-                    <Image
-                      src={imagePreview}
-                      alt="Preview"
-                      width={150}
-                      height={150}
-                      className="h-36 w-auto object-contain rounded-md"
-                    />
-                  </div>
-                ) : (
-                  <div className="space-y-1 text-center">
-                    <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
-                    <p className="text-sm text-gray-600">
-                      {t("messages.dragDrop")}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {t("messages.imageFormat")}
-                    </p>
-                  </div>
-                )}
-              </div>
-              <input
-                id="image-upload"
-                ref={fileInputRef}
-                name="image-upload"
-                type="file"
-                className="sr-only"
-                accept="image/png, image/jpeg, image/webp"
-                onChange={handleImageChange}
-              />
-              {errors.image && (
-                <p className="text-red-500 text-sm mt-1">{errors.image}</p>
-              )}
-            </div>
+            <ImageUpload
+              label={t("labels.image")}
+              description={t("messages.dragDrop")}
+              currentImage={imagePreview || ""}
+              onImageChange={handleImageChange}
+              onImageRemove={() => {
+                setImage(null);
+                setImagePreview(null);
+                if (fileInputRef.current) {
+                  fileInputRef.current.value = "";
+                }
+              }}
+            />
+            {errors.image && (
+              <p className="text-red-500 text-sm mt-1">{errors.image}</p>
+            )}
           </fieldset>
         </div>
         <div className="flex justify-end items-center gap-4 p-4 border-t border-neutral-200 bg-gray-50 rounded-b-lg">

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { UploadCloud } from "lucide-react";
+import Image from "next/image";
 
 interface ImageUploadProps {
   label: string;
@@ -66,10 +67,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           }`}
         >
           {preview ? (
-            <img
+            <Image
               src={preview}
               alt={label}
-              className="object-contain h-full w-full rounded-md"
+              fill
+              className="object-contain rounded-md"
             />
           ) : (
             <div className="flex flex-col items-center gap-1 text-center">

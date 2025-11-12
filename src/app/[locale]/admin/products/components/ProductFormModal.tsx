@@ -16,6 +16,7 @@ import CustomSelect from "@/components/admin/ui/CustomSelect";
 import FormToggle from "@/components/admin/ui/FormToggle";
 import SubmitButton from "@/components/admin/ui/SubmitButton";
 import CancelButton from "@/components/admin/ui/CancelButton";
+import CloseButton from "@/components/admin/ui/CloseButton";
 import ColorPickerModal from "@/components/admin/modals/ColorPickerModal";
 import ProductSelector from "@/components/admin/ProductSelector";
 import { useProductStore } from "@/store/useProductStore";
@@ -277,7 +278,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       };
     });
     setVariants(newVariants);
-  }, [variantOptions, hasVariants]);
+  }, [variantOptions, hasVariants, variants]);
 
   // --- Variant UI Handlers ---
   const addVariantOption = () => {
@@ -799,14 +800,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         {/* --- Modal Header --- */}
         <div className="flex justify-between items-center p-4 border-b border-neutral-200">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="p-2 rounded-full text-gray-500 hover:bg-gray-100 disabled:opacity-50"
-          >
-            <X size={24} />
-          </button>
+          <CloseButton onClick={onClose} disabled={isSubmitting} />
         </div>
 
         {/* --- Modal Body --- */}

@@ -17,6 +17,7 @@ import FormToggle from "@/components/admin/ui/FormToggle";
 import { useProductStore } from "@/store/useProductStore";
 import CancelButton from "@/components/admin/ui/CancelButton";
 import SubmitButton from "@/components/admin/ui/SubmitButton";
+import CloseButton from "@/components/admin/ui/CloseButton";
 import ProductSelector from "@/components/admin/ProductSelector";
 import { useTranslations } from "next-intl";
 
@@ -173,14 +174,7 @@ const SectionFormModal: React.FC<SectionFormModalProps> = ({
         {/* Modal Header */}
         <div className="flex justify-between items-center p-4 border-b border-neutral-200">
           <h2 className="text-xl font-bold text-gray-800">{title}</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="p-2 rounded-full text-gray-500 hover:bg-gray-100"
-          >
-            <X size={24} />
-          </button>
+          <CloseButton onClick={onClose} disabled={isSubmitting} />
         </div>
 
         <div className="overflow-y-auto p-6 space-y-6">
