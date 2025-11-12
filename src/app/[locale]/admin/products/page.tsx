@@ -1,14 +1,11 @@
 "use client";
 
-import DataTable from "@/components/admin/DataTable";
-import Pagination from "@/components/admin/Pagination";
-import SearchInput from "@/components/admin/ui/SearchInput";
-import ActionButtons from "@/components/admin/ui/ActionButtons";
+import ProductsHeader from "./components/ProductsHeader";
+import ProductsTable from "./components/ProductsTable";
+import ProductsPagination from "./components/ProductsPagination";
+import ProductFormModal from "./components/ProductFormModal";
 import { Category, Language, Product } from "@/types";
-import { PlusCircle } from "lucide-react";
-import Image from "next/image";
 import { useMemo, useState, useEffect } from "react";
-import ProductFormModal from "@/components/admin/modals/ProductFormModal";
 import { useProductStore } from "@/store/useProductStore";
 import { fetchAllCategoriesAPI } from "@/lib/api/categories";
 import { useTranslations, useLocale } from "next-intl";
@@ -108,63 +105,10 @@ const ProductsPage: React.FC = () => {
     }
   };
 
-  const columns: {
-    key: keyof Product;
-    label: string;
-    sortable: boolean;
-    render?: (item: Product) => React.ReactNode;
-    mobileLabel?: string;
-    hiddenOnMobile?: boolean;
-  }[] = [
-    {
-      key: "name",
-      label: t("table.product"),
-      mobileLabel: t("table.product"),
-      sortable: true,
-      render: (item) => (
-        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-          <Image
-            src={item.image}
-            alt={item.name[locale]}
-            width={48}
-            height={48}
-            className="w-8 h-8 sm:w-12 sm:h-12 rounded-md object-cover bg-gray-100 flex-shrink-0"
-          />
-          <span
-            className="font-medium text-gray-800 text-sm sm:text-base truncate min-w-0"
-            title={item.name[locale]}
-          >
-            {item.name[locale]}
-          </span>
-        </div>
-      ),
-    },
-    {
-      key: "category",
-      label: t("table.category"),
-      mobileLabel: t("table.category"),
-      sortable: true,
-      render: (item) => (
-        <span
-          className="text-sm sm:text-base text-gray-600 truncate block max-w-[100px] sm:max-w-[150px]"
-          title={item.category.name[locale]}
-        >
-          {item.category.name[locale]}
-        </span>
-      ),
-    },
-    {
-      key: "price",
-      label: t("table.price"),
-      mobileLabel: t("table.price"),
-      sortable: true,
-      render: (item) => (
-        <span className="font-mono text-sm sm:text-base font-semibold text-green-600">
-          {item.price.toFixed(2)} {locale === "ar" ? "د.م." : "MAD"}
-        </span>
-      ),
-    },
-  ];
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
 
   if (error) {
     return (
@@ -176,58 +120,28 @@ const ProductsPage: React.FC = () => {
 
   return (
     <div className="px-2 sm:px-0">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-        <h1 className="text-xl sm:text-3xl font-bold text-gray-800 self-start md:self-center">
-          {t("title")} ({products.length})
-        </h1>
-        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-          <SearchInput
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder={t("searchPlaceholder")}
-            // className="w-full md:w-auto"
-          />
-          <button
-            onClick={handleOpenAddModal}
-            className="bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center gap-2 hover:bg-green-800 transition-colors w-full md:w-auto justify-center text-sm sm:text-base"
-          >
-            <PlusCircle size={18} className="sm:w-5 sm:h-5" />
-            <span className="hidden sm:inline">{t("addProduct")}</span>
-            <span className="sm:hidden">{t("addProduct")}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* DataTable with built-in mobile cards */}
-      <DataTable
-        columns={columns}
-        data={paginatedProducts}
-        isLoading={isLoading && products.length === 0}
-        itemsPerPage={itemsPerPage}
-        emptyMessage={t("emptyMessage")}
-        renderActions={(item: Product) => (
-          <ActionButtons
-            t={t}
-            item={item}
-            onEdit={handleOpenEditModal}
-            onDelete={handleDelete}
-            getId={(item) => item.id}
-          />
-        )}
+      <ProductsHeader
+        t={t}
+        productsCount={products.length}
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        onAddClick={handleOpenAddModal}
       />
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      )}
+      <ProductsTable
+        t={t}
+        locale={locale}
+        products={paginatedProducts}
+        isLoading={isLoading && products.length === 0}
+        onEdit={handleOpenEditModal}
+        onDelete={handleDelete}
+      />
+
+      <ProductsPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
 
       {/* Modal */}
       {isModalOpen && (

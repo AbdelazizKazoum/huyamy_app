@@ -10,14 +10,14 @@ import {
 } from "@/types";
 import { PlusCircle, Trash2, UploadCloud, X, Palette } from "lucide-react";
 import Image from "next/image";
-import FormInput from "../ui/FormInput";
-import FormTextarea from "../ui/FormTextarea";
-import CustomSelect from "../ui/CustomSelect";
-import FormToggle from "../ui/FormToggle";
-import SubmitButton from "../ui/SubmitButton";
-import CancelButton from "../ui/CancelButton";
-import ColorPickerModal from "./ColorPickerModal";
-import ProductSelector from "../ProductSelector";
+import FormInput from "@/components/admin/ui/FormInput";
+import FormTextarea from "@/components/admin/ui/FormTextarea";
+import CustomSelect from "@/components/admin/ui/CustomSelect";
+import FormToggle from "@/components/admin/ui/FormToggle";
+import SubmitButton from "@/components/admin/ui/SubmitButton";
+import CancelButton from "@/components/admin/ui/CancelButton";
+import ColorPickerModal from "@/components/admin/modals/ColorPickerModal";
+import ProductSelector from "@/components/admin/ProductSelector";
 import { useProductStore } from "@/store/useProductStore";
 import { useTranslations } from "next-intl";
 
