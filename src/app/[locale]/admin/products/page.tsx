@@ -3,8 +3,9 @@
 import DataTable from "@/components/admin/DataTable";
 import Pagination from "@/components/admin/Pagination";
 import SearchInput from "@/components/admin/ui/SearchInput";
+import ActionButtons from "@/components/admin/ui/ActionButtons";
 import { Category, Language, Product } from "@/types";
-import { Edit, Eye, PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import Image from "next/image";
 import { useMemo, useState, useEffect } from "react";
 import ProductFormModal from "@/components/admin/modals/ProductFormModal";
@@ -209,31 +210,13 @@ const ProductsPage: React.FC = () => {
         itemsPerPage={itemsPerPage}
         emptyMessage={t("emptyMessage")}
         renderActions={(item: Product) => (
-          <div className="flex items-center justify-center gap-2">
-            {/* <button
-              title={t("actions.view")}
-              className="flex items-center gap-1 px-3 py-1.5 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg text-sm transition-colors justify-center"
-            >
-              <Eye size={14} />
-              <span className="hidden sm:inline">{t("actions.view")}</span>
-            </button> */}
-            <button
-              title={t("actions.edit")}
-              onClick={() => handleOpenEditModal(item)}
-              className="flex items-center gap-1 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm transition-colors justify-center"
-            >
-              <Edit size={14} />
-              <span>{t("actions.edit")}</span>
-            </button>
-            <button
-              title={t("actions.delete")}
-              onClick={() => handleDelete(item.id)}
-              className="flex items-center gap-1 px-3 py-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-sm transition-colors justify-center"
-            >
-              <Trash2 size={14} />
-              <span>{t("actions.delete")}</span>
-            </button>
-          </div>
+          <ActionButtons
+            t={t}
+            item={item}
+            onEdit={handleOpenEditModal}
+            onDelete={handleDelete}
+            getId={(item) => item.id}
+          />
         )}
       />
 

@@ -1,8 +1,9 @@
 "use client";
 
 import DataTable from "@/components/admin/DataTable";
+import ActionButtons from "@/components/admin/ui/ActionButtons";
 import { Section, SectionWithProducts, Language } from "@/types";
-import { Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 
 interface SectionsTableProps {
   t: (key: string, values?: Record<string, string | number>) => string;
@@ -106,24 +107,13 @@ export default function SectionsTable({
       itemsPerPage={10}
       emptyMessage={t("emptyMessage")}
       renderActions={(item: Section) => (
-        <div className="flex items-center justify-center gap-2">
-          <button
-            onClick={() => onEdit(item)}
-            className="flex items-center gap-1 px-3 py-1.5 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm transition-colors justify-center"
-            title={t("actions.edit")}
-          >
-            <Edit size={14} />
-            <span>{t("actions.edit")}</span>
-          </button>
-          <button
-            onClick={() => onDelete(item.id)}
-            className="flex items-center gap-1 px-3 py-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg text-sm transition-colors justify-center"
-            title={t("actions.delete")}
-          >
-            <Trash2 size={14} />
-            <span>{t("actions.delete")}</span>
-          </button>
-        </div>
+        <ActionButtons
+          t={t}
+          item={item}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          getId={(item) => item.id}
+        />
       )}
     />
   );
