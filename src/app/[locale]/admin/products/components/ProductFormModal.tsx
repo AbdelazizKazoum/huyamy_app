@@ -72,6 +72,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   lang,
   isSubmitting = false,
 }) => {
+  console.log("🚀 ~ ProductFormModal ~ product:", product);
   const t = useTranslations("admin.products.modal");
 
   console.log("ProductFormModal render:", { isOpen, product });
@@ -269,9 +270,21 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
     const newCombinations = generateCombinations(variantOptions);
     setVariants((currentVariants) => {
+      // When opening the modal in edit mode the product variants are set
+      // in the initialization effect, but the generation effect can run
+      // before those state updates are applied. To avoid losing saved
+      // prices/images, fall back to product.variants when currentVariants
+      // is empty (edit mode).
+      const sourceVariants =
+        currentVariants && currentVariants.length > 0
+          ? currentVariants
+          : product && product.variants
+          ? product.variants.map((v) => ({ ...v, images: v.images || [] }))
+          : [];
+
       const newVariants = newCombinations.map((combo) => {
         const comboId = Object.values(combo).join("-");
-        const existingVariant = currentVariants.find(
+        const existingVariant = sourceVariants.find(
           (v) =>
             Object.entries(v.options).every(
               ([key, value]) => combo[key] === value
@@ -279,7 +292,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         );
         return {
           id: existingVariant?.id || comboId,
-          price: existingVariant?.price ?? 0, // Use nullish coalescing to preserve 0 values
+          price: existingVariant?.price ?? 0,
           originalPrice: existingVariant?.originalPrice ?? undefined,
           images: existingVariant?.images || [],
           options: combo,
@@ -287,7 +300,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       });
       return newVariants;
     });
-  }, [variantOptions, hasVariants]);
+  }, [variantOptions, hasVariants, product]);
 
   // --- Variant UI Handlers ---
   const addVariantOption = () => {
