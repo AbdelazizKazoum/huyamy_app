@@ -72,10 +72,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   lang,
   isSubmitting = false,
 }) => {
-  console.log("🚀 ~ ProductFormModal ~ product:", product);
   const t = useTranslations("admin.products.modal");
-
-  console.log("ProductFormModal render:", { isOpen, product });
 
   // --- Existing State ---
   const [nameAr, setNameAr] = useState("");
@@ -678,6 +675,32 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     }
 
     setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      const firstError = Object.keys(newErrors)[0];
+      let targetId = firstError;
+      if (firstError === "variants") {
+        targetId = "variants-list";
+      } else if (firstError === "purchaseOptions") {
+        targetId = "purchase-options";
+      } else if (firstError.startsWith("customSection")) {
+        targetId = "custom-sections";
+      } else if (firstError === "mainImage") {
+        targetId = "main-image";
+      } else if (firstError === "categoryId") {
+        targetId = "category";
+      }
+      const element = document.getElementById(targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (
+          element.tagName === "INPUT" ||
+          element.tagName === "TEXTAREA" ||
+          element.tagName === "SELECT"
+        ) {
+          element.focus();
+        }
+      }
+    }
     return Object.keys(newErrors).length === 0;
   };
 
@@ -945,6 +968,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     value={selectedCategoryJSON}
                     onChange={(value) => setSelectedCategoryJSON(value)}
                     error={errors.categoryId}
+                    id="category"
                   >
                     <option value="" disabled>
                       {t("placeholders.selectCategory")}
@@ -961,7 +985,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   checked={isNew}
                   onChange={(e) => setIsNew(e.target.checked)}
                 />
-                <div className="pt-4 mt-4 border-t border-gray-200">
+                <div
+                  id="purchase-options"
+                  className="pt-4 mt-4 border-t border-gray-200"
+                >
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t("labels.purchaseOptions")}
                   </label>
@@ -1041,7 +1068,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
 
             {/* --- Variants Section --- */}
-            <div className="space-y-4 pt-6 border-t border-gray-200">
+            <div
+              id="variants-section"
+              className="space-y-4 pt-6 border-t border-gray-200"
+            >
               <FormToggle
                 label={t("labels.hasVariants")}
                 checked={hasVariants}
@@ -1260,7 +1290,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
                   {/* 2. Generated Variants Table */}
                   {variants.length > 0 && (
-                    <div className="pt-8 border-t border-slate-200">
+                    <div
+                      id="variants-list"
+                      className="pt-8 border-t border-slate-200"
+                    >
                       <h3 className="text-lg font-semibold text-gray-800 mb-3">
                         {t("labels.variantsList")}
                       </h3>
@@ -1391,7 +1424,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
 
             {/* --- NEW: Product Sections --- */}
-            <div className="space-y-6 pt-6 border-t border-gray-200">
+            <div
+              id="custom-sections"
+              className="space-y-6 pt-6 border-t border-gray-200"
+            >
               {/* Related Products Section */}
               <div className="space-y-4">
                 <FormToggle
@@ -1607,7 +1643,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
               {/* Row 1: Main and Sub Images */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Main Image Upload */}
-                <div>
+                <div id="main-image">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t("labels.mainImage")}
                   </label>

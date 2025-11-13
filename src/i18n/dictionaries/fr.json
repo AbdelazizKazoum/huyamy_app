@@ -499,7 +499,7 @@
           "category": "Une catégorie doit être sélectionnée.",
           "mainImage": "L'image principale est requise pour un nouveau produit.",
           "purchaseOptions": "Au moins une option d'achat doit être activée.",
-          "variants": "Toutes les options de produit doivent être nommées dans les deux langues.",
+          "variants": "Le prix de la variante doit être rempli pour toutes les options.",
           "customSection": "La section doit être nommée dans les deux langues."
         },
         "messages": {

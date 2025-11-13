@@ -18,6 +18,7 @@ interface CustomSelectProps {
   onChange: (value: string) => void;
   children: ReactNode;
   error?: string;
+  id?: string;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -26,6 +27,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   onChange,
   children,
   error,
+  id,
 }) => {
   const options = (
     Children.map(children, (child) => {
@@ -47,6 +49,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         </Listbox.Label>
         <div className="relative mt-1">
           <Listbox.Button
+            id={id}
             className={`relative w-full cursor-default rounded-md border bg-white py-2.5 pl-3 pr-10 text-left shadow-sm focus:outline-none focus:ring-1 sm:text-sm ${
               error
                 ? "border-red-300 focus:border-red-500 focus:ring-red-500"
