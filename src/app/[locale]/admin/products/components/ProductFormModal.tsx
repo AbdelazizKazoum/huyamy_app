@@ -30,7 +30,13 @@ const PREDEFINED_OPTIONS = [
   { ar: "السعة", fr: "Capacité", placeholder: "مثال: 1L, 500ml, 2L" },
 ];
 
-// --- Helper function to generate variant combinations ---
+/**
+ * Generates all possible combinations of variant options.
+ * Used to create product variants from selected options.
+ *
+ * @param options - Array of variant options with their values
+ * @returns Array of combination objects where keys are option names and values are selected values
+ */
 const generateCombinations = (
   options: VariantOption[]
 ): { [key: string]: string }[] => {
@@ -53,6 +59,63 @@ const generateCombinations = (
   return combinations;
 };
 
+/**
+ * Utility function to handle adding new images to an image array.
+ * Creates file objects and preview URLs for display.
+ *
+ * @param e - File input change event
+ * @param setImages - State setter for the images array
+ * @param setImagePreviews - State setter for the preview URLs array
+ */
+const handleImageArrayChange = (
+  e: ChangeEvent<HTMLInputElement>,
+  setImages: React.Dispatch<React.SetStateAction<File[]>>,
+  setImagePreviews: React.Dispatch<React.SetStateAction<string[]>>
+) => {
+  if (e.target.files) {
+    const newFiles = Array.from(e.target.files);
+    setImages((prev) => [...prev, ...newFiles]);
+
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
+  }
+};
+
+/**
+ * Utility function to remove an image from an image array.
+ * Handles both new (blob URLs) and existing images appropriately.
+ *
+ * @param index - Index of the image to remove in the previews array
+ * @param previewUrl - URL of the image preview to remove
+ * @param imagePreviews - Current array of image preview URLs
+ * @param images - Current array of image files
+ * @param setImages - State setter for the images array
+ * @param setImagePreviews - State setter for the preview URLs array
+ * @param setDeletedImageUrls - State setter for deleted image URLs (for existing images)
+ */
+const removeImageFromArray = (
+  index: number,
+  previewUrl: string,
+  imagePreviews: string[],
+  images: File[],
+  setImages: React.Dispatch<React.SetStateAction<File[]>>,
+  setImagePreviews: React.Dispatch<React.SetStateAction<string[]>>,
+  setDeletedImageUrls: React.Dispatch<React.SetStateAction<string[]>>
+) => {
+  if (previewUrl.startsWith("blob:")) {
+    const fileIndexToRemove = imagePreviews
+      .slice(imagePreviews.length - images.length)
+      .findIndex((p) => p === previewUrl);
+
+    if (fileIndexToRemove !== -1) {
+      setImages((prev) => prev.filter((_, i) => i !== fileIndexToRemove));
+    }
+  } else {
+    setDeletedImageUrls((prev) => [...prev, previewUrl]);
+  }
+  setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+};
+
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -63,6 +126,18 @@ interface ProductFormModalProps {
   isSubmitting?: boolean;
 }
 
+/**
+ * ProductFormModal - A comprehensive modal component for creating and editing products.
+ * Handles product details, variants, images, and custom sections with full validation.
+ *
+ * @param isOpen - Whether the modal is visible
+ * @param onClose - Callback to close the modal
+ * @param onSubmit - Callback when form is submitted with FormData
+ * @param product - Product to edit (null for new product)
+ * @param categories - Available categories for selection
+ * @param lang - Current language ('ar' or 'fr')
+ * @param isSubmitting - Whether form submission is in progress
+ */
 const ProductFormModal: React.FC<ProductFormModalProps> = ({
   isOpen,
   onClose,
@@ -74,7 +149,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 }) => {
   const t = useTranslations("admin.products.modal");
 
-  // --- Existing State ---
+  // --- Basic Product Information State ---
   const [nameAr, setNameAr] = useState("");
   const [nameFr, setNameFr] = useState("");
   const [descriptionAr, setDescriptionAr] = useState("");
@@ -85,22 +160,10 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [isNew, setIsNew] = useState(true);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [keywordsInput, setKeywordsInput] = useState("");
-  const [mainImage, setMainImage] = useState<File | null>(null);
-  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
-  const [subImages, setSubImages] = useState<File[]>([]);
-  const [subImagePreviews, setSubImagePreviews] = useState<string[]>([]);
-  const [deletedSubImageUrls, setDeletedSubImageUrls] = useState<string[]>([]);
-  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [allowDirectPurchase, setAllowDirectPurchase] = useState(true);
   const [allowAddToCart, setAllowAddToCart] = useState(true);
-  const [certificationImages, setCertificationImages] = useState<File[]>([]);
-  const [certificationImagePreviews, setCertificationImagePreviews] = useState<
-    string[]
-  >([]);
-  const [deletedCertificationImageUrls, setDeletedCertificationImageUrls] =
-    useState<string[]>([]);
 
-  // --- Variant State ---
+  // --- Variant Management State ---
   const [hasVariants, setHasVariants] = useState(false);
   const [variantOptions, setVariantOptions] = useState<VariantOption[]>([]);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
@@ -111,14 +174,18 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     [key: number]: boolean;
   }>({});
 
-  // --- Color Picker State ---
-  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
-  const [currentColorPickerIndex, setCurrentColorPickerIndex] = useState<
-    number | null
-  >(null);
-  const [pickerColor, setPickerColor] = useState("#ffffff");
-
-  // --- MODIFIED: Per-Variant Image State ---
+  // --- Image Management State ---
+  const [mainImage, setMainImage] = useState<File | null>(null);
+  const [mainImagePreview, setMainImagePreview] = useState<string | null>(null);
+  const [subImages, setSubImages] = useState<File[]>([]);
+  const [subImagePreviews, setSubImagePreviews] = useState<string[]>([]);
+  const [deletedSubImageUrls, setDeletedSubImageUrls] = useState<string[]>([]);
+  const [certificationImages, setCertificationImages] = useState<File[]>([]);
+  const [certificationImagePreviews, setCertificationImagePreviews] = useState<
+    string[]
+  >([]);
+  const [deletedCertificationImageUrls, setDeletedCertificationImageUrls] =
+    useState<string[]>([]);
   const [newVariantImages, setNewVariantImages] = useState<{
     [variantId: string]: File[];
   }>({});
@@ -126,7 +193,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     string[]
   >([]);
 
-  // --- NEW: Product Sections State ---
+  // --- Product Sections State ---
   const [hasRelatedProducts, setHasRelatedProducts] = useState(false);
   const [selectedRelatedProducts, setSelectedRelatedProducts] = useState<
     Product[]
@@ -142,13 +209,25 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       descriptionFr: string;
     }[]
   >([]);
-  // --- END NEW ---
 
-  // --- NEW: Get products from store for filtering ---
+  // --- UI State ---
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const [currentColorPickerIndex, setCurrentColorPickerIndex] = useState<
+    number | null
+  >(null);
+  const [pickerColor, setPickerColor] = useState("#ffffff");
+
+  // --- External Dependencies ---
   const { products: allProducts } = useProductStore();
   // --- END NEW ---
 
   // --- State Initialization Effect ---
+  /**
+   * Initializes or resets form state when the modal opens or product changes.
+   * Handles both new product creation and existing product editing scenarios.
+   * Resets section-related state and populates form fields with product data.
+   */
   useEffect(() => {
     // --- NEW: Reset section state on modal open/product change ---
     setHasRelatedProducts(false);
@@ -189,7 +268,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         ...v,
         images: v.images || [],
       }));
-      console.log("Loading product variants:", productVariants);
       setVariants(productVariants);
 
       // Initialize custom flags for existing product
@@ -259,6 +337,12 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   }, [product, isOpen]);
 
   // --- Variant Generation Effect ---
+  /**
+   * Automatically generates product variants when variant options change.
+   * Creates all possible combinations of variant options and preserves existing
+   * variant data (prices, images) when editing products. Falls back to product.variants
+   * when current variants state is empty to avoid losing saved data during edit mode.
+   */
   useEffect(() => {
     if (!hasVariants) {
       setVariants([]);
@@ -558,58 +642,41 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   };
 
   const handleSubImagesChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setSubImages((prev) => [...prev, ...newFiles]);
-
-      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
-      setSubImagePreviews((prev) => [...prev, ...newPreviews]);
-    }
+    handleImageArrayChange(e, setSubImages, setSubImagePreviews);
   };
 
   const handleCertificationImagesChange = (
     e: ChangeEvent<HTMLInputElement>
   ) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setCertificationImages((prev) => [...prev, ...newFiles]);
-
-      const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
-      setCertificationImagePreviews((prev) => [...prev, ...newPreviews]);
-    }
+    handleImageArrayChange(
+      e,
+      setCertificationImages,
+      setCertificationImagePreviews
+    );
   };
 
   const removeSubImage = (index: number, previewUrl: string) => {
-    if (previewUrl.startsWith("blob:")) {
-      const fileIndexToRemove = subImagePreviews
-        .slice(subImagePreviews.length - subImages.length)
-        .findIndex((p) => p === previewUrl);
-
-      if (fileIndexToRemove !== -1) {
-        setSubImages((prev) => prev.filter((_, i) => i !== fileIndexToRemove));
-      }
-    } else {
-      setDeletedSubImageUrls((prev) => [...prev, previewUrl]);
-    }
-    setSubImagePreviews((prev) => prev.filter((_, i) => i !== index));
+    removeImageFromArray(
+      index,
+      previewUrl,
+      subImagePreviews,
+      subImages,
+      setSubImages,
+      setSubImagePreviews,
+      setDeletedSubImageUrls
+    );
   };
 
   const removeCertificationImage = (index: number, previewUrl: string) => {
-    if (previewUrl.startsWith("blob:")) {
-      const fileIndexToRemove = certificationImagePreviews
-        .slice(certificationImagePreviews.length - certificationImages.length)
-        .findIndex((p) => p === previewUrl);
-
-      if (fileIndexToRemove !== -1) {
-        setCertificationImages((prev) =>
-          prev.filter((_, i) => i !== fileIndexToRemove)
-        );
-      }
-    } else {
-      setDeletedCertificationImageUrls((prev) => [...prev, previewUrl]);
-    }
-
-    setCertificationImagePreviews((prev) => prev.filter((_, i) => i !== index));
+    removeImageFromArray(
+      index,
+      previewUrl,
+      certificationImagePreviews,
+      certificationImages,
+      setCertificationImages,
+      setCertificationImagePreviews,
+      setDeletedCertificationImageUrls
+    );
   };
 
   const handleKeywordsChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -631,6 +698,13 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     setKeywords(keywords.filter((keyword) => keyword !== keywordToRemove));
   };
 
+  /**
+   * Validates the entire product form before submission.
+   * Checks required fields, variant configurations, and custom sections.
+   * Scrolls to and focuses the first error field for better UX.
+   *
+   * @returns true if form is valid, false otherwise
+   */
   const validate = (): boolean => {
     const newErrors: Partial<Record<string, string>> = {};
 
@@ -705,6 +779,13 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   };
 
   // --- Handle Form Submit ---
+  /**
+   * Handles form submission with validation and data preparation.
+   * Prevents submission during ongoing requests and validates all form data.
+   * Constructs FormData with product information, images, and metadata for API submission.
+   *
+   * @param e - Form submission event
+   */
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!validate() || isSubmitting) {
@@ -802,35 +883,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
         formData.append(variantId, file);
       });
     });
-
-    // --- For Debugging ---
-    console.log("--- Submitting Product Data (JSON) ---");
-    console.log(JSON.parse(formData.get("productData") as string));
-
-    console.log("--- Submitting Files ---");
-    if (mainImage) {
-      console.log(
-        `mainImage: File { name: "${mainImage.name}", size: ${mainImage.size} }`
-      );
-    }
-    subImages.forEach((file, index) => {
-      console.log(
-        `subImages[${index}]: File { name: "${file.name}", size: ${file.size} }`
-      );
-    });
-    certificationImages.forEach((file, index) => {
-      console.log(
-        `certificationImages[${index}]: File { name: "${file.name}", size: ${file.size} }`
-      );
-    });
-    Object.entries(newVariantImages).forEach(([variantId, files]) => {
-      files.forEach((file, index) => {
-        console.log(
-          `variantImage[${variantId}][${index}]: File { name: "${file.name}", size: ${file.size} }`
-        );
-      });
-    });
-    console.log("--------------------------");
 
     onSubmit(formData);
   };
