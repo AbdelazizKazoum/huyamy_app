@@ -82,6 +82,7 @@ export const useProductVariants = (
           id: existingVariant?.id || comboId,
           price: existingVariant?.price ?? 0,
           originalPrice: existingVariant?.originalPrice ?? undefined,
+          isActive: existingVariant?.isActive ?? true,
           images: existingVariant?.images || [],
           options: combo,
         };
@@ -154,12 +155,15 @@ export const useProductVariants = (
 
   const updateVariantPrice = (
     variantId: string,
-    field: "price" | "originalPrice",
-    value: number | string
+    field: "price" | "originalPrice" | "isActive",
+    value: number | string | boolean
   ) => {
     setVariants(
       variants.map((v) => {
         if (v.id === variantId) {
+          if (field === "isActive") {
+            return { ...v, [field]: Boolean(value) };
+          }
           if (field === "originalPrice") {
             const numValue =
               value === "" ? undefined : Number(value) || undefined;

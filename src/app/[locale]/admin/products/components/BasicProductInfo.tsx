@@ -17,6 +17,7 @@ interface BasicProductInfoProps {
   originalPrice: number | string;
   selectedCategoryJSON: string;
   isNew: boolean;
+  isActive: boolean;
   keywords: string[];
   keywordsInput: string;
   allowDirectPurchase: boolean;
@@ -33,6 +34,7 @@ interface BasicProductInfoProps {
   onOriginalPriceChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
   onIsNewChange: (checked: boolean) => void;
+  onIsActiveChange: (checked: boolean) => void;
   onKeywordsInputChange: (value: string) => void;
   onKeywordKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onRemoveKeyword: (keyword: string) => void;
@@ -53,6 +55,7 @@ export const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
   originalPrice,
   selectedCategoryJSON,
   isNew,
+  isActive,
   keywords,
   keywordsInput,
   allowDirectPurchase,
@@ -69,6 +72,7 @@ export const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
   onOriginalPriceChange,
   onCategoryChange,
   onIsNewChange,
+  onIsActiveChange,
   onKeywordsInputChange,
   onKeywordKeyDown,
   onRemoveKeyword,
@@ -186,11 +190,18 @@ export const BasicProductInfo: React.FC<BasicProductInfoProps> = ({
             ))}
           </CustomSelect>
         )}
-        <FormToggle
-          label={t("labels.isNew")}
-          checked={isNew}
-          onChange={(e) => onIsNewChange(e.target.checked)}
-        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormToggle
+            label={t("labels.isNew")}
+            checked={isNew}
+            onChange={(e) => onIsNewChange(e.target.checked)}
+          />
+          <FormToggle
+            label={t("labels.isActive")}
+            checked={isActive}
+            onChange={(e) => onIsActiveChange(e.target.checked)}
+          />
+        </div>
         <div
           id="purchase-options"
           className="pt-4 mt-4 border-t border-gray-200"

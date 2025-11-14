@@ -479,7 +479,8 @@
           "uploadImage": "تحميل صورة",
           "subImages": "الصور الفرعية",
           "certificationImages": "صور الشهادات (اختياري)",
-          "isNew": "منتج جديد؟"
+          "isNew": "منتج جديد؟",
+          "isActive": "فعال؟"
         },
         "placeholders": {
           "selectCategory": "-- اختر فئة --",

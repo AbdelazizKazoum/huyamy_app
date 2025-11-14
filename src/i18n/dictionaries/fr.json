@@ -473,7 +473,8 @@
           "uploadImage": "Télécharger une image",
           "subImages": "Images secondaires",
           "certificationImages": "Images de certification (optionnel)",
-          "isNew": "Nouveau produit ?"
+          "isNew": "Nouveau produit ?",
+          "isActive": "Actif ?"
         },
         "placeholders": {
           "selectCategory": "-- Sélectionner une catégorie --",

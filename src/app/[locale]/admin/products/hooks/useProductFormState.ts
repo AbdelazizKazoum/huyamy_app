@@ -16,6 +16,7 @@ export const useProductFormState = (
   const [originalPrice, setOriginalPrice] = useState<number | string>("");
   const [selectedCategoryJSON, setSelectedCategoryJSON] = useState("");
   const [isNew, setIsNew] = useState(true);
+  const [isActive, setIsActive] = useState(true);
   const [keywords, setKeywords] = useState<string[]>([]);
   const [keywordsInput, setKeywordsInput] = useState("");
   const [allowDirectPurchase, setAllowDirectPurchase] = useState(true);
@@ -34,6 +35,7 @@ export const useProductFormState = (
         product.category ? JSON.stringify(product.category) : ""
       );
       setIsNew(product.isNew);
+      setIsActive(product.isActive ?? true);
       setKeywords(product.keywords || []);
       setAllowDirectPurchase(product.allowDirectPurchase ?? true);
       setAllowAddToCart(product.allowAddToCart ?? true);
@@ -46,6 +48,7 @@ export const useProductFormState = (
       setOriginalPrice("");
       setSelectedCategoryJSON("");
       setIsNew(true);
+      setIsActive(true);
       setKeywords([]);
       setKeywordsInput("");
       setAllowDirectPurchase(true);
@@ -85,6 +88,8 @@ export const useProductFormState = (
     setSelectedCategoryJSON,
     isNew,
     setIsNew,
+    isActive,
+    setIsActive,
     keywords,
     setKeywords,
     keywordsInput,

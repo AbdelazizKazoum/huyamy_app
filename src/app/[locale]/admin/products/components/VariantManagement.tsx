@@ -31,8 +31,8 @@ interface VariantManagementProps {
   onRemoveOptionValue: (optionIndex: number, value: string) => void;
   onUpdateVariantPrice: (
     variantId: string,
-    field: "price" | "originalPrice",
-    value: number | string
+    field: "price" | "originalPrice" | "isActive",
+    value: number | string | boolean
   ) => void;
   onVariantImagesChange: (
     e: ChangeEvent<HTMLInputElement>,
@@ -135,10 +135,10 @@ export const VariantManagement: React.FC<VariantManagementProps> = ({
         onChange={(e) => onHasVariantsChange(e.target.checked)}
       />
       {hasVariants && (
-        <div className="p-5 border border-slate-200 rounded-lg bg-slate-50 space-y-8">
+        <div className="p-3 sm:p-5 border border-slate-200 rounded-lg bg-slate-50 space-y-6 sm:space-y-8">
           {/* Variant Options Definition */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-800">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800">
               {t("labels.variantOptions")}
             </h3>
             {variantOptions.map((option, index) => {
@@ -180,7 +180,7 @@ export const VariantManagement: React.FC<VariantManagementProps> = ({
                       </CustomSelect>
 
                       {customOptionFlags[index] && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-green-50/50 rounded-md border border-green-200">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-green-50/50 rounded-md border border-green-200">
                           <FormInput
                             label={t("labels.customOptionAr")}
                             value={option.name.ar}
@@ -330,8 +330,11 @@ export const VariantManagement: React.FC<VariantManagementProps> = ({
 
           {/* Generated Variants List */}
           {variants.length > 0 && (
-            <div id="variants-list" className="pt-8 border-t border-slate-200">
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+            <div
+              id="variants-list"
+              className="pt-6 sm:pt-8 border-t border-slate-200"
+            >
+              <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3">
                 {t("labels.variantsList")}
               </h3>
               <div className="flow-root">
@@ -341,11 +344,11 @@ export const VariantManagement: React.FC<VariantManagementProps> = ({
                       {variants.map((variant, index) => (
                         <div
                           key={variant.id}
-                          className={`p-4 ${
+                          className={`p-4 sm:p-6 ${
                             index % 2 !== 0 ? "bg-slate-50" : ""
                           }`}
                         >
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                             <div className="space-y-3">
                               <div className="flex flex-wrap items-center gap-2">
                                 {Object.entries(variant.options).map(
@@ -364,11 +367,11 @@ export const VariantManagement: React.FC<VariantManagementProps> = ({
                                         {isColor ? (
                                           <span className="flex items-center gap-1.5">
                                             <span
-                                              className="w-5 h-5 rounded-full border-2 border-gray-300 shadow-sm"
+                                              className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 border-gray-300 shadow-sm"
                                               style={{ backgroundColor: value }}
                                               title={value}
                                             />
-                                            <span className="text-xs text-gray-600">
+                                            <span className="text-xs text-gray-600 hidden sm:inline">
                                               {value}
                                             </span>
                                           </span>
@@ -380,7 +383,7 @@ export const VariantManagement: React.FC<VariantManagementProps> = ({
                                   }
                                 )}
                               </div>
-                              <div className="grid grid-cols-2 gap-3">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                                 <FormInput
                                   label={t("labels.price")}
                                   type="number"
@@ -406,6 +409,19 @@ export const VariantManagement: React.FC<VariantManagementProps> = ({
                                     )
                                   }
                                 />
+                                <div className="flex items-end sm:col-span-2 lg:col-span-1">
+                                  <FormToggle
+                                    label={t("labels.isActive")}
+                                    checked={variant.isActive ?? true}
+                                    onChange={(e) =>
+                                      onUpdateVariantPrice(
+                                        variant.id,
+                                        "isActive",
+                                        e.target.checked
+                                      )
+                                    }
+                                  />
+                                </div>
                               </div>
                             </div>
 
@@ -413,50 +429,49 @@ export const VariantManagement: React.FC<VariantManagementProps> = ({
                               <label className="block text-sm font-medium text-gray-700 mb-2">
                                 {t("labels.variantImages")}
                               </label>
-                              <div className="flex flex-wrap gap-2">
+                              <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
                                 {(variant.images || []).map((img, imgIndex) => (
                                   <div
                                     key={imgIndex}
-                                    className="relative group"
+                                    className="relative group aspect-square"
                                   >
                                     <Image
                                       src={img}
                                       alt={`variant-${variant.id}-${imgIndex}`}
-                                      width={64}
-                                      height={64}
-                                      className="w-16 h-16 object-cover rounded-md border border-gray-200"
+                                      fill
+                                      className="object-cover rounded-md border border-gray-200"
                                     />
                                     <button
                                       type="button"
                                       onClick={() =>
                                         onRemoveVariantImage(variant.id, img)
                                       }
-                                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
                                     >
-                                      <X size={12} />
+                                      <X size={10} />
                                     </button>
                                   </div>
                                 ))}
                                 <label
                                   htmlFor={`variant-images-${variant.id}`}
-                                  className="flex flex-col items-center justify-center w-16 h-16 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:bg-gray-50"
+                                  className="flex flex-col items-center justify-center aspect-square border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
                                 >
                                   <PlusCircle
-                                    size={20}
+                                    size={16}
                                     className="text-gray-400"
-                                  />
-                                  <input
-                                    id={`variant-images-${variant.id}`}
-                                    type="file"
-                                    multiple
-                                    className="sr-only"
-                                    onChange={(e) =>
-                                      onVariantImagesChange(e, variant.id)
-                                    }
-                                    accept="image/*"
                                   />
                                 </label>
                               </div>
+                              <input
+                                id={`variant-images-${variant.id}`}
+                                type="file"
+                                multiple
+                                className="sr-only"
+                                onChange={(e) =>
+                                  onVariantImagesChange(e, variant.id)
+                                }
+                                accept="image/*"
+                              />
                             </div>
                           </div>
                         </div>

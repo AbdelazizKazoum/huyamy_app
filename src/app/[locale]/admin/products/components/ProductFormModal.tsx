@@ -154,6 +154,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       categoryId: selectedCategory?.id || "",
       category: selectedCategory,
       isNew: productFormState.isNew,
+      isActive: productFormState.isActive,
       keywords: productFormState.keywords,
       allowDirectPurchase: productFormState.allowDirectPurchase,
       allowAddToCart: productFormState.allowAddToCart,
@@ -267,6 +268,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
               originalPrice={productFormState.originalPrice}
               selectedCategoryJSON={productFormState.selectedCategoryJSON}
               isNew={productFormState.isNew}
+              isActive={productFormState.isActive}
               keywords={productFormState.keywords}
               keywordsInput={productFormState.keywordsInput}
               allowDirectPurchase={productFormState.allowDirectPurchase}
@@ -283,6 +285,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
               onOriginalPriceChange={productFormState.setOriginalPrice}
               onCategoryChange={productFormState.setSelectedCategoryJSON}
               onIsNewChange={productFormState.setIsNew}
+              onIsActiveChange={productFormState.setIsActive}
               onKeywordsInputChange={productFormState.setKeywordsInput}
               onKeywordKeyDown={productFormState.handleKeywordKeyDown}
               onRemoveKeyword={productFormState.removeKeyword}
