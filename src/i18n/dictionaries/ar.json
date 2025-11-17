@@ -722,6 +722,26 @@
       },
       "buttons": {
         "saveChanges": "حفظ التغييرات"
+      },
+      "validation": {
+        "storeNameRequired": "اسم المتجر مطلوب",
+        "brandNameRequired": "اسم العلامة التجارية مطلوب",
+        "invalidUrl": "رابط غير صالح",
+        "categoryRequired": "التصنيف مطلوب",
+        "arabicCurrencyRequired": "العملة العربية مطلوبة",
+        "frenchCurrencyRequired": "العملة الفرنسية مطلوبة",
+        "titleTemplateRequired": "قالب العنوان مطلوب",
+        "titleRequired": "العنوان مطلوب",
+        "descriptionRequired": "الوصف مطلوب",
+        "nicheRequired": "المجال مطلوب",
+        "locationRequired": "الموقع مطلوب",
+        "invalidEmail": "بريد إلكتروني غير صالح",
+        "phoneRequired": "الهاتف مطلوب",
+        "whatsappRequired": "واتساب مطلوب",
+        "twitterHandleRequired": "معرف تويتر مطلوب",
+        "invalidFacebookUrl": "رابط فيسبوك غير صالح",
+        "invalidInstagramUrl": "رابط انستغرام غير صالح",
+        "invalidTwitterUrl": "رابط تويتر غير صالح"
       }
     }
   }

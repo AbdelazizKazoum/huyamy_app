@@ -724,6 +724,26 @@
       },
       "buttons": {
         "saveChanges": "Enregistrer les modifications"
+      },
+      "validation": {
+        "storeNameRequired": "Le nom de la boutique est requis",
+        "brandNameRequired": "Le nom de la marque est requis",
+        "invalidUrl": "URL invalide",
+        "categoryRequired": "La catégorie est requise",
+        "arabicCurrencyRequired": "La devise arabe est requise",
+        "frenchCurrencyRequired": "La devise française est requise",
+        "titleTemplateRequired": "Le modèle de titre est requis",
+        "titleRequired": "Le titre est requis",
+        "descriptionRequired": "La description est requise",
+        "nicheRequired": "La niche est requise",
+        "locationRequired": "L'emplacement est requis",
+        "invalidEmail": "Email invalide",
+        "phoneRequired": "Le téléphone est requis",
+        "whatsappRequired": "WhatsApp est requis",
+        "twitterHandleRequired": "L'identifiant Twitter est requis",
+        "invalidFacebookUrl": "Lien Facebook invalide",
+        "invalidInstagramUrl": "Lien Instagram invalide",
+        "invalidTwitterUrl": "Lien Twitter invalide"
       }
     }
   }
