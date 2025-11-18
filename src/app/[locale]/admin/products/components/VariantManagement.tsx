@@ -383,33 +383,37 @@ export const VariantManagement: React.FC<VariantManagementProps> = ({
                                   }
                                 )}
                               </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                                <FormInput
-                                  label={t("labels.price")}
-                                  type="number"
-                                  value={variant.price}
-                                  onChange={(e) =>
-                                    onUpdateVariantPrice(
-                                      variant.id,
-                                      "price",
-                                      e.target.value
-                                    )
-                                  }
-                                  required
-                                />
-                                <FormInput
-                                  label={t("labels.originalPrice")}
-                                  type="number"
-                                  value={variant.originalPrice || ""}
-                                  onChange={(e) =>
-                                    onUpdateVariantPrice(
-                                      variant.id,
-                                      "originalPrice",
-                                      e.target.value
-                                    )
-                                  }
-                                />
-                                <div className="flex items-end sm:col-span-2 lg:col-span-1">
+                              <div className="flex flex-col lg:flex-row gap-3">
+                                <div className="flex-1">
+                                  <FormInput
+                                    label={t("labels.price")}
+                                    type="number"
+                                    value={variant.price}
+                                    onChange={(e) =>
+                                      onUpdateVariantPrice(
+                                        variant.id,
+                                        "price",
+                                        e.target.value
+                                      )
+                                    }
+                                    required
+                                  />
+                                </div>
+                                <div className="flex-1">
+                                  <FormInput
+                                    label={t("labels.originalPrice")}
+                                    type="number"
+                                    value={variant.originalPrice || ""}
+                                    onChange={(e) =>
+                                      onUpdateVariantPrice(
+                                        variant.id,
+                                        "originalPrice",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </div>
+                                <div className="flex-1 flex items-end">
                                   <FormToggle
                                     label={t("labels.isActive")}
                                     checked={variant.isActive ?? true}
