@@ -9,6 +9,7 @@ export const CACHE_TAGS = {
   PRODUCT_DETAIL: "product-detail",
   CATEGORIES: "categories",
   SECTIONS: "sections",
+  CONFIG: "config",
 } as const;
 
 /**
@@ -105,6 +106,15 @@ export const CACHE_CONFIG = {
     ],
     revalidate: 604800, // 7 days
     key: ["landing-page-sections"],
+  },
+  CONFIG: {
+    tags: [
+      CACHE_TAGS.CONFIG,
+      MASTER_CACHE_TAGS.ALL_CONTENT,
+      MASTER_CACHE_TAGS.SEO_META,
+    ],
+    revalidate: 604800, // 7 days
+    key: ["site-config"],
   },
 };
 

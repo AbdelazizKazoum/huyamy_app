@@ -26,6 +26,7 @@ import { siteConfig } from "@/config/site";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
 import SearchModal from "../SearchModal";
+import { useConfig } from "@/hooks/useConfig";
 
 type HeaderProps = Record<string, never>;
 
@@ -56,8 +57,15 @@ const Header: React.FC<HeaderProps> = () => {
   const router = useRouter();
   const searchRef = useRef<HTMLDivElement>(null);
 
-  const currency = siteConfig.currencies[currentLocale];
-  const logoPath = siteConfig.logo || "/images/huyami_logo.jpeg";
+  // Use config hook that works on both server and client
+  const { config: activeConfig } = useConfig();
+
+  // Fallback to static config if no dynamic config available
+  const currency =
+    activeConfig?.currencies?.[currentLocale] ||
+    siteConfig.currencies[currentLocale];
+  const logoPath =
+    activeConfig?.logo || siteConfig.logo || "/images/huyami_logo.jpeg";
 
   // Update menuItems to use translation keys:
   const menuItems: MenuItem[] = [

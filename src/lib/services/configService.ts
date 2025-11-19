@@ -69,6 +69,14 @@ export interface SiteConfig {
     instagram?: string;
     twitter?: string;
   };
+
+  // Additional metadata (from site config)
+  authors?: { name: string; url?: string }[];
+  creator?: string;
+  publisher?: string;
+  baseUrl?: string;
+  manifest?: string;
+  themeColor?: string;
 }
 
 const CONFIG_DOC_ID = "site-config";
@@ -79,15 +87,16 @@ export async function getSiteConfig(): Promise<SiteConfig | null> {
     const doc = await adminDb.collection("config").doc(CONFIG_DOC_ID).get();
 
     if (!doc.exists) {
-      if (process.env.NODE_ENV !== "production") {
-        console.log("Site config document not found, returning null");
+      // Only log in development and not on every request to avoid spam
+      if (process.env.NODE_ENV !== "production" && Math.random() < 0.01) {
+        console.log("Site config document not found, returning null (showing 1% of the time to avoid spam)");
       }
       return null;
     }
 
     const data = doc.data();
-    if (process.env.NODE_ENV !== "production") {
-      console.log("Retrieved site config:", data);
+    if (process.env.NODE_ENV !== "production" && Math.random() < 0.01) {
+      console.log("Retrieved site config (showing 1% of the time to avoid spam)");
     }
 
     return data as SiteConfig;
@@ -326,5 +335,71 @@ export async function testConfigService(): Promise<void> {
     console.log("✅ Config service test completed successfully!");
   } catch (error) {
     console.error("❌ Config service test failed:", error);
+  }
+}
+
+/**
+ * Initialize the config document with default values
+ * This should be called once to create the initial config document
+ */
+export async function initializeSiteConfig(): Promise<void> {
+  try {
+    const configRef = adminDb.collection("config").doc(CONFIG_DOC_ID);
+
+    // Check if document already exists
+    const doc = await configRef.get();
+    if (doc.exists) {
+      console.log("✅ Config document already exists, skipping initialization");
+      return;
+    }
+
+    // Import default config values
+    const { siteConfig: defaultConfig } = await import("@/config/site");
+
+    // Create the config document with default values
+    const initialConfig: SiteConfig = {
+      // Basic Info
+      name: defaultConfig.name,
+      brandName: defaultConfig.brandName,
+      url: defaultConfig.url,
+
+      // Brand Assets
+      logo: defaultConfig.logo,
+
+      // Store Settings
+      category: defaultConfig.category,
+      i18n: defaultConfig.i18n,
+      currencies: defaultConfig.currencies,
+
+      // Translated Content
+      titleTemplate: defaultConfig.titleTemplate,
+      title: defaultConfig.title,
+      description: defaultConfig.description,
+      niche: defaultConfig.niche,
+      keywords: defaultConfig.keywords,
+
+      // Location & Verification
+      location: defaultConfig.location,
+      locationCoordinates: defaultConfig.locationCoordinates,
+      verification: defaultConfig.verification,
+
+      // Contact Info
+      contact: defaultConfig.contact,
+
+      // Social Media
+      social: defaultConfig.social,
+      socialLinks: defaultConfig.socialLinks,
+    };
+
+    await configRef.set({
+      ...initialConfig,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    console.log("✅ Site config document initialized with default values");
+  } catch (error) {
+    console.error("❌ Error initializing site config:", error);
+    throw new Error("Failed to initialize site configuration");
   }
 }
