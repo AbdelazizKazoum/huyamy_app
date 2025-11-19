@@ -89,14 +89,18 @@ export async function getSiteConfig(): Promise<SiteConfig | null> {
     if (!doc.exists) {
       // Only log in development and not on every request to avoid spam
       if (process.env.NODE_ENV !== "production" && Math.random() < 0.01) {
-        console.log("Site config document not found, returning null (showing 1% of the time to avoid spam)");
+        console.log(
+          "Site config document not found, returning null (showing 1% of the time to avoid spam)"
+        );
       }
       return null;
     }
 
     const data = doc.data();
     if (process.env.NODE_ENV !== "production" && Math.random() < 0.01) {
-      console.log("Retrieved site config (showing 1% of the time to avoid spam)");
+      console.log(
+        "Retrieved site config (showing 1% of the time to avoid spam)"
+      );
     }
 
     return data as SiteConfig;
