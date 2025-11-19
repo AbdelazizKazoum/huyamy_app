@@ -38,17 +38,42 @@ export const updateBasicInfoAPI = async (data: {
  * Updates brand assets via the API.
  */
 export const updateBrandAssetsAPI = async (data: {
-  logo?: string;
-  banner?: string;
-  favicon?: string;
+  logo?: File | string;
+  banner?: File | string;
+  favicon?: File | string;
 }): Promise<{ success: boolean }> => {
+  const formData = new FormData();
+
+  // Add files or URLs to FormData
+  if (data.logo) {
+    if (data.logo instanceof File) {
+      formData.append("logo", data.logo);
+    } else {
+      formData.append("logoUrl", data.logo);
+    }
+  }
+
+  if (data.banner) {
+    if (data.banner instanceof File) {
+      formData.append("banner", data.banner);
+    } else {
+      formData.append("bannerUrl", data.banner);
+    }
+  }
+
+  if (data.favicon) {
+    if (data.favicon instanceof File) {
+      formData.append("favicon", data.favicon);
+    } else {
+      formData.append("faviconUrl", data.favicon);
+    }
+  }
+
   const response = await fetch("/api/parameters/brand-assets", {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
+    body: formData,
   });
+
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.error || "Failed to update brand assets");

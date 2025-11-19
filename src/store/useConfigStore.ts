@@ -24,9 +24,9 @@ interface ConfigState {
     url?: string;
   }) => Promise<void>;
   updateBrandAssets: (data: {
-    logo?: string;
-    banner?: string;
-    favicon?: string;
+    logo?: File | string;
+    banner?: File | string;
+    favicon?: File | string;
   }) => Promise<void>;
   updateStoreSettings: (data: {
     category?: string;
@@ -125,14 +125,9 @@ export const useConfigStore = create<ConfigState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       await updateBrandAssetsAPI(data);
-      // Update local state
-      set((state) => ({
-        config: {
-          ...state.config,
-          ...data,
-        } as SiteConfig,
-        isLoading: false,
-      }));
+      // After successful upload, refetch the config to get the new URLs
+      const config = await fetchSiteConfigAPI();
+      set({ config, isLoading: false });
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
       throw error;

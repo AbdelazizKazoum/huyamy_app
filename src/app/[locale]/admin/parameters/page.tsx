@@ -26,6 +26,8 @@ import ImageUpload from "@/components/admin/ui/ImageUpload";
 import { siteConfig as siteConfigData } from "@/config/site";
 import { Language } from "@/types";
 import { useTranslations, useLocale } from "next-intl";
+import { useConfigStore } from "@/store/useConfigStore";
+import { uploadImageToR2 } from "@/lib/services/R2Service";
 
 // --- Type Definitions ---
 // Using a simplified type for the page state, derived from the imported config.
@@ -187,14 +189,34 @@ export default function SettingsPage() {
   const t = useTranslations("admin.parameters");
   const locale = useLocale() as Language;
 
-  const [config, setConfig] = useState<PageSiteConfig>(siteConfigData);
+  // Use Zustand store
+  const {
+    config,
+    isLoading,
+    updateBasicInfo,
+    updateBrandAssets,
+    updateStoreSettings,
+    updateTranslatedContent,
+    updateLocationVerification,
+    updateContactInfo,
+    updateSocialMedia,
+  } = useConfigStore();
+
   const [langTab, setLangTab] = useState<Language>("ar");
+  const [selectedFiles, setSelectedFiles] = useState<{
+    logo?: File;
+    banner?: File;
+    favicon?: File;
+  }>({});
+
+  // Fallback to static config if store config is not loaded
+  const currentConfig = config || siteConfigData;
 
   // Define schemas with translations
   const basicInfoSchema = z.object({
-    name: z.string().min(1, t("validation.storeNameRequired")),
-    brandName: z.string().min(1, t("validation.brandNameRequired")),
-    url: z.string().url(t("validation.invalidUrl")),
+    name: z.string().min(1, t("validation.storeNameRequired")).optional(),
+    brandName: z.string().min(1, t("validation.brandNameRequired")).optional(),
+    url: z.string().url(t("validation.invalidUrl")).optional(),
   });
 
   const brandAssetsSchema = z.object({
@@ -204,28 +226,43 @@ export default function SettingsPage() {
   });
 
   const storeSettingsSchema = z.object({
-    category: z.string().min(1, t("validation.categoryRequired")),
-    defaultLocale: z.enum(["ar", "fr"]),
-    currencies: z.object({
-      ar: z.string().min(1, t("validation.arabicCurrencyRequired")),
-      fr: z.string().min(1, t("validation.frenchCurrencyRequired")),
-    }),
+    category: z.string().min(1, t("validation.categoryRequired")).optional(),
+    defaultLocale: z.enum(["ar", "fr"]).optional(),
+    currencies: z
+      .object({
+        ar: z
+          .string()
+          .min(1, t("validation.arabicCurrencyRequired"))
+          .optional(),
+        fr: z
+          .string()
+          .min(1, t("validation.frenchCurrencyRequired"))
+          .optional(),
+      })
+      .optional(),
   });
 
   const translatedContentSchema = z.object({
-    titleTemplate: z.string().min(1, t("validation.titleTemplateRequired")),
-    title: z.record(z.enum(["ar", "fr"]), z.string().optional()),
-    description: z.record(z.enum(["ar", "fr"]), z.string().optional()),
-    niche: z.record(z.enum(["ar", "fr"]), z.string().optional()),
-    keywords: z.record(z.enum(["ar", "fr"]), z.array(z.string()).optional()),
+    titleTemplate: z
+      .string()
+      .min(1, t("validation.titleTemplateRequired"))
+      .optional(),
+    title: z.record(z.enum(["ar", "fr"]), z.string().optional()).optional(),
+    description: z
+      .record(z.enum(["ar", "fr"]), z.string().optional())
+      .optional(),
+    niche: z.record(z.enum(["ar", "fr"]), z.string().optional()).optional(),
+    keywords: z
+      .record(z.enum(["ar", "fr"]), z.array(z.string()).optional())
+      .optional(),
   });
 
   const locationVerificationSchema = z.object({
-    location: z.string().min(1, t("validation.locationRequired")),
+    location: z.string().min(1, t("validation.locationRequired")).optional(),
     locationCoordinates: z
       .object({
-        lat: z.coerce.number().min(-90).max(90),
-        lng: z.coerce.number().min(-180).max(180),
+        lat: z.coerce.number().min(-90).max(90).optional(),
+        lng: z.coerce.number().min(-180).max(180).optional(),
       })
       .optional(),
     verification: z
@@ -236,171 +273,207 @@ export default function SettingsPage() {
   });
 
   const contactInfoSchema = z.object({
-    contact: z.object({
-      email: z.string().email(t("validation.invalidEmail")),
-      phone: z.string().min(1, t("validation.phoneRequired")),
-      whatsapp: z.string().min(1, t("validation.whatsappRequired")),
-    }),
+    contact: z
+      .object({
+        email: z.string().email(t("validation.invalidEmail")).optional(),
+        phone: z.string().min(1, t("validation.phoneRequired")).optional(),
+        whatsapp: z
+          .string()
+          .min(1, t("validation.whatsappRequired"))
+          .optional(),
+      })
+      .optional(),
   });
 
   const socialMediaSchema = z.object({
-    social: z.object({
-      twitter: z.string().min(1, t("validation.twitterHandleRequired")),
-    }),
-    socialLinks: z.object({
-      facebook: z
-        .string()
-        .url(t("validation.invalidFacebookUrl"))
-        .optional()
-        .or(z.literal("")),
-      instagram: z
-        .string()
-        .url(t("validation.invalidInstagramUrl"))
-        .optional()
-        .or(z.literal("")),
-      twitter: z
-        .string()
-        .url(t("validation.invalidTwitterUrl"))
-        .optional()
-        .or(z.literal("")),
-    }),
+    social: z
+      .object({
+        twitter: z
+          .string()
+          .min(1, t("validation.twitterHandleRequired"))
+          .optional(),
+      })
+      .optional(),
+    socialLinks: z
+      .object({
+        facebook: z
+          .string()
+          .url(t("validation.invalidFacebookUrl"))
+          .optional()
+          .or(z.literal("")),
+        instagram: z
+          .string()
+          .url(t("validation.invalidInstagramUrl"))
+          .optional()
+          .or(z.literal("")),
+        twitter: z
+          .string()
+          .url(t("validation.invalidTwitterUrl"))
+          .optional()
+          .or(z.literal("")),
+      })
+      .optional(),
   });
 
   // Forms for each section
   const basicInfoForm = useForm({
     resolver: zodResolver(basicInfoSchema),
     defaultValues: {
-      name: config.name,
-      brandName: config.brandName,
-      url: config.url,
+      name: currentConfig.name,
+      brandName: currentConfig.brandName,
+      url: currentConfig.url,
     },
   });
 
   const brandAssetsForm = useForm({
     resolver: zodResolver(brandAssetsSchema),
     defaultValues: {
-      logo: config.logo,
-      banner: "",
-      favicon: "",
+      logo: currentConfig.logo || "",
+      banner: (currentConfig as any).banner || "",
+      favicon: (currentConfig as any).favicon || "",
     },
   });
 
   const storeSettingsForm = useForm({
     resolver: zodResolver(storeSettingsSchema),
     defaultValues: {
-      category: config.category,
-      defaultLocale: config.i18n.defaultLocale,
-      currencies: config.currencies,
+      category: currentConfig.category,
+      defaultLocale: currentConfig.i18n?.defaultLocale || "ar",
+      currencies: currentConfig.currencies,
     },
   });
 
   const translatedContentForm = useForm({
     resolver: zodResolver(translatedContentSchema),
     defaultValues: {
-      titleTemplate: config.titleTemplate,
-      title: config.title,
-      description: config.description,
-      niche: config.niche,
-      keywords: config.keywords,
+      titleTemplate: currentConfig.titleTemplate,
+      title: currentConfig.title,
+      description: currentConfig.description,
+      niche: currentConfig.niche,
+      keywords: currentConfig.keywords,
     },
   });
 
   const locationVerificationForm = useForm({
     resolver: zodResolver(locationVerificationSchema),
     defaultValues: {
-      location: config.location,
-      locationCoordinates: config.locationCoordinates,
-      verification: config.verification,
+      location: currentConfig.location,
+      locationCoordinates: currentConfig.locationCoordinates,
+      verification: currentConfig.verification,
     },
   });
 
   const contactInfoForm = useForm({
     resolver: zodResolver(contactInfoSchema),
     defaultValues: {
-      contact: config.contact,
+      contact: currentConfig.contact,
     },
   });
 
   const socialMediaForm = useForm({
     resolver: zodResolver(socialMediaSchema),
     defaultValues: {
-      social: config.social,
-      socialLinks: config.socialLinks,
+      social: currentConfig.social,
+      socialLinks: currentConfig.socialLinks,
     },
   });
 
   // Submit handlers
-  const onBasicInfoSubmit = (data: any) => {
-    console.log("Basic Info data:", data);
-    setConfig((prev) => ({ ...prev, ...data }));
+  const onBasicInfoSubmit = async (data: any) => {
+    try {
+      await updateBasicInfo(data);
+    } catch (error) {
+      console.error("Error updating basic info:", error);
+    }
   };
 
-  const onBrandAssetsSubmit = (data: any) => {
-    console.log("Brand Assets data:", data);
-    setConfig((prev) => ({ ...prev, ...data }));
+  const onBrandAssetsSubmit = async (data: any) => {
+    try {
+      const updateData: { logo?: string; banner?: string; favicon?: string } =
+        {};
+
+      // Upload files if selected
+      if (selectedFiles.logo) {
+        const logoUrl = await uploadImageToR2(selectedFiles.logo);
+        updateData.logo = logoUrl;
+      } else if (data.logo) {
+        updateData.logo = data.logo;
+      }
+
+      if (selectedFiles.banner) {
+        const bannerUrl = await uploadImageToR2(selectedFiles.banner);
+        updateData.banner = bannerUrl;
+      } else if (data.banner) {
+        updateData.banner = data.banner;
+      }
+
+      if (selectedFiles.favicon) {
+        const faviconUrl = await uploadImageToR2(selectedFiles.favicon);
+        updateData.favicon = faviconUrl;
+      } else if (data.favicon) {
+        updateData.favicon = data.favicon;
+      }
+
+      await updateBrandAssets(updateData);
+
+      // Clear selected files after successful upload
+      setSelectedFiles({});
+    } catch (error) {
+      console.error("Error updating brand assets:", error);
+    }
   };
 
-  const onStoreSettingsSubmit = (data: any) => {
-    console.log("Store Settings data:", data);
-    setConfig((prev) => ({
-      ...prev,
-      category: data.category,
-      i18n: { ...prev.i18n, defaultLocale: data.defaultLocale },
-      currencies: data.currencies,
-    }));
+  const onStoreSettingsSubmit = async (data: any) => {
+    try {
+      await updateStoreSettings(data);
+    } catch (error) {
+      console.error("Error updating store settings:", error);
+    }
   };
 
-  const onTranslatedContentSubmit = (data: any) => {
-    console.log("Translated Content data:", data);
-    setConfig((prev) => ({
-      ...prev,
-      titleTemplate: data.titleTemplate,
-      title: data.title,
-      description: data.description,
-      niche: data.niche,
-      keywords: data.keywords,
-    }));
+  const onTranslatedContentSubmit = async (data: any) => {
+    try {
+      await updateTranslatedContent(data);
+    } catch (error) {
+      console.error("Error updating translated content:", error);
+    }
   };
 
-  const onLocationVerificationSubmit = (data: any) => {
-    console.log("Location Verification data:", data);
-    setConfig((prev) => ({
-      ...prev,
-      location: data.location,
-      locationCoordinates: data.locationCoordinates,
-      verification: data.verification,
-    }));
+  const onLocationVerificationSubmit = async (data: any) => {
+    try {
+      await updateLocationVerification(data);
+    } catch (error) {
+      console.error("Error updating location verification:", error);
+    }
   };
 
-  const onContactInfoSubmit = (data: any) => {
-    console.log("Contact Info data:", data);
-    setConfig((prev) => ({
-      ...prev,
-      contact: data.contact,
-    }));
+  const onContactInfoSubmit = async (data: any) => {
+    try {
+      await updateContactInfo(data);
+    } catch (error) {
+      console.error("Error updating contact info:", error);
+    }
   };
 
-  const onSocialMediaSubmit = (data: any) => {
-    console.log("Social Media data:", data);
-    setConfig((prev) => ({
-      ...prev,
-      social: data.social,
-      socialLinks: data.socialLinks,
-    }));
+  const onSocialMediaSubmit = async (data: any) => {
+    try {
+      await updateSocialMedia(data);
+    } catch (error) {
+      console.error("Error updating social media:", error);
+    }
   };
 
   const handleImageChange = (
     name: "logo" | "banner" | "favicon",
     file: File
   ) => {
-    // In a real app, you'd upload the file and get a URL from your storage service.
-    // For this mock, we'll use a blob URL for instant preview.
-    // This blob URL will replace the existing path or URL in the state.
-    setConfig((prev) => ({ ...prev, [name]: URL.createObjectURL(file) }));
+    // Store the selected file for upload when form is submitted
+    setSelectedFiles((prev) => ({ ...prev, [name]: file }));
   };
 
   const handleImageRemove = (name: "logo" | "banner" | "favicon") => {
-    setConfig((prev) => ({ ...prev, [name]: "" }));
+    // Remove the asset by setting it to empty string
+    updateBrandAssets({ [name]: "" });
   };
 
   const NavButton = ({
@@ -513,14 +586,14 @@ export default function SettingsPage() {
               <ImageUpload
                 label={t("cards.brandAssets.labels.storeLogo")}
                 description={t("cards.brandAssets.descriptions.logo")}
-                currentImage={config.logo}
+                currentImage={currentConfig.logo || ""}
                 onImageChange={(file) => handleImageChange("logo", file)}
                 onImageRemove={() => handleImageRemove("logo")}
               />
               <ImageUpload
                 label={t("cards.brandAssets.labels.storeBanner")}
                 description={t("cards.brandAssets.descriptions.banner")}
-                currentImage={""} // Assuming banner is not in site.ts, add it if needed
+                currentImage={(currentConfig as any).banner || ""}
                 onImageChange={(file) => handleImageChange("banner", file)}
                 onImageRemove={() => handleImageRemove("banner")}
                 aspectRatio="aspect-video"
@@ -528,7 +601,7 @@ export default function SettingsPage() {
               <ImageUpload
                 label={t("cards.brandAssets.labels.favicon")}
                 description={t("cards.brandAssets.descriptions.favicon")}
-                currentImage={""} // Assuming favicon is not in site.ts, add it if needed
+                currentImage={(currentConfig as any).favicon || ""}
                 onImageChange={(file) => handleImageChange("favicon", file)}
                 onImageRemove={() => handleImageRemove("favicon")}
               />
@@ -565,7 +638,7 @@ export default function SettingsPage() {
                       id="i18n.defaultLocale"
                       className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-primary-700 focus:border-primary-700 border-gray-300"
                     >
-                      {config.i18n.locales.map((loc) => (
+                      {currentConfig.i18n?.locales.map((loc) => (
                         <option key={loc} value={loc}>
                           {t(`cards.storeSettings.languages.${loc}`)}
                         </option>
