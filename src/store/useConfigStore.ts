@@ -11,6 +11,8 @@ import {
   updateContactInfoAPI,
   updateSocialMediaAPI,
 } from "@/lib/api/config";
+import toast from "react-hot-toast";
+import { getDictionary } from "@/lib/getDictionary";
 
 // Define the state structure
 interface ConfigState {
@@ -18,70 +20,91 @@ interface ConfigState {
   isLoading: boolean;
   error: string | null;
   fetchConfig: () => Promise<void>;
-  updateBasicInfo: (data: {
-    name?: string;
-    brandName?: string;
-    url?: string;
-  }) => Promise<void>;
-  updateBrandAssets: (data: {
-    logo?: File | string;
-    banner?: File | string;
-    favicon?: File | string;
-  }) => Promise<void>;
-  updateStoreSettings: (data: {
-    category?: string;
-    defaultLocale?: "ar" | "fr";
-    currencies?: {
-      ar: string;
-      fr: string;
-    };
-  }) => Promise<void>;
-  updateTranslatedContent: (data: {
-    titleTemplate?: string;
-    title?: {
-      ar?: string;
-      fr?: string;
-    };
-    description?: {
-      ar?: string;
-      fr?: string;
-    };
-    niche?: {
-      ar?: string;
-      fr?: string;
-    };
-    keywords?: {
-      ar?: string[];
-      fr?: string[];
-    };
-  }) => Promise<void>;
-  updateLocationVerification: (data: {
-    location?: string;
-    locationCoordinates?: {
-      lat?: number;
-      lng?: number;
-    };
-    verification?: {
-      google?: string;
-    };
-  }) => Promise<void>;
-  updateContactInfo: (data: {
-    contact?: {
-      email?: string;
-      phone?: string;
-      whatsapp?: string;
-    };
-  }) => Promise<void>;
-  updateSocialMedia: (data: {
-    social?: {
-      twitter?: string;
-    };
-    socialLinks?: {
-      facebook?: string;
-      instagram?: string;
-      twitter?: string;
-    };
-  }) => Promise<void>;
+  updateBasicInfo: (
+    data: {
+      name?: string;
+      brandName?: string;
+      url?: string;
+    },
+    locale?: string
+  ) => Promise<void>;
+  updateBrandAssets: (
+    data: {
+      logo?: File | string;
+      banner?: File | string;
+      favicon?: File | string;
+    },
+    locale?: string
+  ) => Promise<void>;
+  updateStoreSettings: (
+    data: {
+      category?: string;
+      defaultLocale?: "ar" | "fr";
+      currencies?: {
+        ar: string;
+        fr: string;
+      };
+    },
+    locale?: string
+  ) => Promise<void>;
+  updateTranslatedContent: (
+    data: {
+      titleTemplate?: string;
+      title?: {
+        ar?: string;
+        fr?: string;
+      };
+      description?: {
+        ar?: string;
+        fr?: string;
+      };
+      niche?: {
+        ar?: string;
+        fr?: string;
+      };
+      keywords?: {
+        ar?: string[];
+        fr?: string[];
+      };
+    },
+    locale?: string
+  ) => Promise<void>;
+  updateLocationVerification: (
+    data: {
+      location?: string;
+      locationCoordinates?: {
+        lat?: number;
+        lng?: number;
+      };
+      verification?: {
+        google?: string;
+      };
+    },
+    locale?: string
+  ) => Promise<void>;
+  updateContactInfo: (
+    data: {
+      contact?: {
+        email?: string;
+        phone?: string;
+        whatsapp?: string;
+      };
+    },
+    locale?: string
+  ) => Promise<void>;
+  updateSocialMedia: (
+    data: {
+      social?: {
+        twitter?: string;
+      };
+      socialLinks?: {
+        facebook?: string;
+        instagram?: string;
+        twitter?: string;
+      };
+    },
+    locale?: string
+  ) => Promise<void>;
 }
 
 // Create the store
@@ -102,7 +125,7 @@ export const useConfigStore = create<ConfigState>((set) => ({
   },
 
   // Action to update basic info
-  updateBasicInfo: async (data) => {
+  updateBasicInfo: async (data, locale = "ar") => {
     set({ isLoading: true, error: null });
     try {
       await updateBasicInfoAPI(data);
@@ -114,28 +137,44 @@ export const useConfigStore = create<ConfigState>((set) => ({
         } as SiteConfig,
         isLoading: false,
       }));
+      const dict = await getDictionary(locale);
+      toast.success(
+        dict["admin"]["parameters"]["messages"]["basicInfo"]["success"]
+      );
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
+      const dict = await getDictionary(locale);
+      toast.error(
+        dict["admin"]["parameters"]["messages"]["basicInfo"]["error"]
+      );
       throw error; // Re-throw to be caught in the component
     }
   },
 
   // Action to update brand assets
-  updateBrandAssets: async (data) => {
+  updateBrandAssets: async (data, locale = "ar") => {
     set({ isLoading: true, error: null });
     try {
       await updateBrandAssetsAPI(data);
       // After successful upload, refetch the config to get the new URLs
       const config = await fetchSiteConfigAPI();
       set({ config, isLoading: false });
+      const dict = await getDictionary(locale);
+      toast.success(
+        dict["admin"]["parameters"]["messages"]["brandAssets"]["success"]
+      );
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
+      const dict = await getDictionary(locale);
+      toast.error(
+        dict["admin"]["parameters"]["messages"]["brandAssets"]["error"]
+      );
       throw error;
     }
   },
 
   // Action to update store settings
-  updateStoreSettings: async (data) => {
+  updateStoreSettings: async (data, locale = "ar") => {
     set({ isLoading: true, error: null });
     try {
       await updateStoreSettingsAPI(data);
@@ -154,14 +193,22 @@ export const useConfigStore = create<ConfigState>((set) => ({
         } as SiteConfig,
         isLoading: false,
       }));
+      const dict = await getDictionary(locale);
+      toast.success(
+        dict["admin"]["parameters"]["messages"]["storeSettings"]["success"]
+      );
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
+      const dict = await getDictionary(locale);
+      toast.error(
+        dict["admin"]["parameters"]["messages"]["storeSettings"]["error"]
+      );
       throw error;
     }
   },
 
   // Action to update translated content
-  updateTranslatedContent: async (data) => {
+  updateTranslatedContent: async (data, locale = "ar") => {
     set({ isLoading: true, error: null });
     try {
       await updateTranslatedContentAPI(data);
@@ -177,14 +224,22 @@ export const useConfigStore = create<ConfigState>((set) => ({
         } as SiteConfig,
         isLoading: false,
       }));
+      const dict = await getDictionary(locale);
+      toast.success(
+        dict["admin"]["parameters"]["messages"]["translatedContent"]["success"]
+      );
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
+      const dict = await getDictionary(locale);
+      toast.error(
+        dict["admin"]["parameters"]["messages"]["translatedContent"]["error"]
+      );
       throw error;
     }
   },
 
   // Action to update location verification
-  updateLocationVerification: async (data) => {
+  updateLocationVerification: async (data, locale = "ar") => {
     set({ isLoading: true, error: null });
     try {
       await updateLocationVerificationAPI(data);
@@ -199,14 +254,24 @@ export const useConfigStore = create<ConfigState>((set) => ({
         } as SiteConfig,
         isLoading: false,
       }));
+      const dict = await getDictionary(locale);
+      toast.success(
+        dict["admin"]["parameters"]["messages"]["locationVerification"][
+          "success"
+        ]
+      );
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
+      const dict = await getDictionary(locale);
+      toast.error(
+        dict["admin"]["parameters"]["messages"]["locationVerification"]["error"]
+      );
       throw error;
     }
   },
 
   // Action to update contact info
-  updateContactInfo: async (data) => {
+  updateContactInfo: async (data, locale = "ar") => {
     set({ isLoading: true, error: null });
     try {
       await updateContactInfoAPI(data);
@@ -218,14 +283,22 @@ export const useConfigStore = create<ConfigState>((set) => ({
         } as SiteConfig,
         isLoading: false,
       }));
+      const dict = await getDictionary(locale);
+      toast.success(
+        dict["admin"]["parameters"]["messages"]["contactInfo"]["success"]
+      );
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
+      const dict = await getDictionary(locale);
+      toast.error(
+        dict["admin"]["parameters"]["messages"]["contactInfo"]["error"]
+      );
       throw error;
     }
   },
 
   // Action to update social media
-  updateSocialMedia: async (data) => {
+  updateSocialMedia: async (data, locale = "ar") => {
     set({ isLoading: true, error: null });
     try {
       await updateSocialMediaAPI(data);
@@ -238,8 +311,16 @@ export const useConfigStore = create<ConfigState>((set) => ({
         } as SiteConfig,
         isLoading: false,
       }));
+      const dict = await getDictionary(locale);
+      toast.success(
+        dict["admin"]["parameters"]["messages"]["socialMedia"]["success"]
+      );
     } catch (error) {
       set({ error: (error as Error).message, isLoading: false });
+      const dict = await getDictionary(locale);
+      toast.error(
+        dict["admin"]["parameters"]["messages"]["socialMedia"]["error"]
+      );
       throw error;
     }
   },

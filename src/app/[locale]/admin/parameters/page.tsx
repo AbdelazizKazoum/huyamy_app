@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   X,
   Settings,
@@ -27,7 +27,6 @@ import { siteConfig as siteConfigData } from "@/config/site";
 import { Language } from "@/types";
 import { useTranslations, useLocale } from "next-intl";
 import { useConfigStore } from "@/store/useConfigStore";
-import { uploadImageToR2 } from "@/lib/services/R2Service";
 
 // --- Type Definitions ---
 // Using a simplified type for the page state, derived from the imported config.
@@ -193,6 +192,7 @@ export default function SettingsPage() {
   const {
     config,
     isLoading,
+    fetchConfig,
     updateBasicInfo,
     updateBrandAssets,
     updateStoreSettings,
@@ -208,6 +208,13 @@ export default function SettingsPage() {
     banner?: File;
     favicon?: File;
   }>({});
+
+  // Fetch config from API if not loaded
+  useEffect(() => {
+    if (!config) {
+      fetchConfig();
+    }
+  }, [config, fetchConfig]);
 
   // Fallback to static config if store config is not loaded
   const currentConfig = config || siteConfigData;
@@ -378,10 +385,66 @@ export default function SettingsPage() {
     },
   });
 
+  // Update form values when config changes
+  useEffect(() => {
+    basicInfoForm.reset({
+      name: currentConfig.name,
+      brandName: currentConfig.brandName,
+      url: currentConfig.url,
+    });
+  }, [currentConfig, basicInfoForm]);
+
+  useEffect(() => {
+    brandAssetsForm.reset({
+      logo: currentConfig.logo || "",
+      banner: (currentConfig as any).banner || "",
+      favicon: (currentConfig as any).favicon || "",
+    });
+  }, [currentConfig, brandAssetsForm]);
+
+  useEffect(() => {
+    storeSettingsForm.reset({
+      category: currentConfig.category,
+      defaultLocale: currentConfig.i18n?.defaultLocale || "ar",
+      currencies: currentConfig.currencies,
+    });
+  }, [currentConfig, storeSettingsForm]);
+
+  useEffect(() => {
+    translatedContentForm.reset({
+      titleTemplate: currentConfig.titleTemplate,
+      title: currentConfig.title,
+      description: currentConfig.description,
+      niche: currentConfig.niche,
+      keywords: currentConfig.keywords,
+    });
+  }, [currentConfig, translatedContentForm]);
+
+  useEffect(() => {
+    locationVerificationForm.reset({
+      location: currentConfig.location,
+      locationCoordinates: currentConfig.locationCoordinates,
+      verification: currentConfig.verification,
+    });
+  }, [currentConfig, locationVerificationForm]);
+
+  useEffect(() => {
+    contactInfoForm.reset({
+      contact: currentConfig.contact,
+    });
+  }, [currentConfig, contactInfoForm]);
+
+  useEffect(() => {
+    socialMediaForm.reset({
+      social: currentConfig.social,
+      socialLinks: currentConfig.socialLinks,
+    });
+  }, [currentConfig, socialMediaForm]);
+
   // Submit handlers
   const onBasicInfoSubmit = async (data: any) => {
     try {
-      await updateBasicInfo(data);
+      await updateBasicInfo(data, locale);
     } catch (error) {
       console.error("Error updating basic info:", error);
     }
@@ -389,32 +452,34 @@ export default function SettingsPage() {
 
   const onBrandAssetsSubmit = async (data: any) => {
     try {
-      const updateData: { logo?: string; banner?: string; favicon?: string } =
-        {};
+      // Pass the selected files and form data to the store
+      // The API route will handle file uploads and URL processing
+      const updateData: {
+        logo?: File | string;
+        banner?: File | string;
+        favicon?: File | string;
+      } = {};
 
-      // Upload files if selected
+      // Add selected files or existing URLs
       if (selectedFiles.logo) {
-        const logoUrl = await uploadImageToR2(selectedFiles.logo);
-        updateData.logo = logoUrl;
+        updateData.logo = selectedFiles.logo;
       } else if (data.logo) {
         updateData.logo = data.logo;
       }
 
       if (selectedFiles.banner) {
-        const bannerUrl = await uploadImageToR2(selectedFiles.banner);
-        updateData.banner = bannerUrl;
+        updateData.banner = selectedFiles.banner;
       } else if (data.banner) {
         updateData.banner = data.banner;
       }
 
       if (selectedFiles.favicon) {
-        const faviconUrl = await uploadImageToR2(selectedFiles.favicon);
-        updateData.favicon = faviconUrl;
+        updateData.favicon = selectedFiles.favicon;
       } else if (data.favicon) {
         updateData.favicon = data.favicon;
       }
 
-      await updateBrandAssets(updateData);
+      await updateBrandAssets(updateData, locale);
 
       // Clear selected files after successful upload
       setSelectedFiles({});
@@ -425,7 +490,7 @@ export default function SettingsPage() {
 
   const onStoreSettingsSubmit = async (data: any) => {
     try {
-      await updateStoreSettings(data);
+      await updateStoreSettings(data, locale);
     } catch (error) {
       console.error("Error updating store settings:", error);
     }
@@ -433,7 +498,7 @@ export default function SettingsPage() {
 
   const onTranslatedContentSubmit = async (data: any) => {
     try {
-      await updateTranslatedContent(data);
+      await updateTranslatedContent(data, locale);
     } catch (error) {
       console.error("Error updating translated content:", error);
     }
@@ -441,7 +506,7 @@ export default function SettingsPage() {
 
   const onLocationVerificationSubmit = async (data: any) => {
     try {
-      await updateLocationVerification(data);
+      await updateLocationVerification(data, locale);
     } catch (error) {
       console.error("Error updating location verification:", error);
     }
@@ -449,7 +514,7 @@ export default function SettingsPage() {
 
   const onContactInfoSubmit = async (data: any) => {
     try {
-      await updateContactInfo(data);
+      await updateContactInfo(data, locale);
     } catch (error) {
       console.error("Error updating contact info:", error);
     }
@@ -457,7 +522,7 @@ export default function SettingsPage() {
 
   const onSocialMediaSubmit = async (data: any) => {
     try {
-      await updateSocialMedia(data);
+      await updateSocialMedia(data, locale);
     } catch (error) {
       console.error("Error updating social media:", error);
     }
@@ -473,7 +538,7 @@ export default function SettingsPage() {
 
   const handleImageRemove = (name: "logo" | "banner" | "favicon") => {
     // Remove the asset by setting it to empty string
-    updateBrandAssets({ [name]: "" });
+    updateBrandAssets({ [name]: "" }, locale);
   };
 
   const NavButton = ({
@@ -497,14 +562,25 @@ export default function SettingsPage() {
     </button>
   );
 
-  const SaveButton = ({ formId }: { formId: string }) => (
+  const SaveButton = ({
+    formId,
+    isLoading,
+  }: {
+    formId: string;
+    isLoading?: boolean;
+  }) => (
     <button
       type="submit"
       form={formId}
-      className="bg-primary-700 text-white font-bold py-2.5 px-5 rounded-lg hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 transition-colors flex items-center gap-2"
+      disabled={isLoading}
+      className="bg-primary-700 text-white font-bold py-2.5 px-5 rounded-lg hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      <Save size={16} />
-      <span>{t("buttons.saveChanges")}</span>
+      {isLoading ? (
+        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+      ) : (
+        <Save size={16} />
+      )}
+      <span>{isLoading ? t("buttons.saving") : t("buttons.saveChanges")}</span>
     </button>
   );
 
@@ -546,7 +622,9 @@ export default function SettingsPage() {
               icon={<Settings size={24} />}
               title={t("cards.basicInfo.title")}
               description={t("cards.basicInfo.description")}
-              footer={<SaveButton formId="basic-info-form" />}
+              footer={
+                <SaveButton formId="basic-info-form" isLoading={isLoading} />
+              }
               formId="basic-info-form"
               onSubmit={onBasicInfoSubmit}
               form={basicInfoForm}
@@ -578,7 +656,9 @@ export default function SettingsPage() {
               icon={<Store size={24} />}
               title={t("cards.brandAssets.title")}
               description={t("cards.brandAssets.description")}
-              footer={<SaveButton formId="brand-assets-form" />}
+              footer={
+                <SaveButton formId="brand-assets-form" isLoading={isLoading} />
+              }
               formId="brand-assets-form"
               onSubmit={onBrandAssetsSubmit}
               form={brandAssetsForm}
@@ -611,7 +691,12 @@ export default function SettingsPage() {
               icon={<Store size={24} />}
               title={t("cards.storeSettings.title")}
               description={t("cards.storeSettings.description")}
-              footer={<SaveButton formId="store-settings-form" />}
+              footer={
+                <SaveButton
+                  formId="store-settings-form"
+                  isLoading={isLoading}
+                />
+              }
               formId="store-settings-form"
               onSubmit={onStoreSettingsSubmit}
               form={storeSettingsForm}
@@ -666,7 +751,12 @@ export default function SettingsPage() {
             <SettingsCard
               title={t("cards.translatedContent.title")}
               description={t("cards.translatedContent.description")}
-              footer={<SaveButton formId="translated-content-form" />}
+              footer={
+                <SaveButton
+                  formId="translated-content-form"
+                  isLoading={isLoading}
+                />
+              }
               formId="translated-content-form"
               onSubmit={onTranslatedContentSubmit}
               form={translatedContentForm}
@@ -791,7 +881,12 @@ export default function SettingsPage() {
               icon={<MapPin size={24} />}
               title={t("cards.locationVerification.title")}
               description={t("cards.locationVerification.description")}
-              footer={<SaveButton formId="location-verification-form" />}
+              footer={
+                <SaveButton
+                  formId="location-verification-form"
+                  isLoading={isLoading}
+                />
+              }
               formId="location-verification-form"
               onSubmit={onLocationVerificationSubmit}
               form={locationVerificationForm}
@@ -840,7 +935,9 @@ export default function SettingsPage() {
               icon={<Fingerprint size={24} />}
               title={t("cards.contactInfo.title")}
               description={t("cards.contactInfo.description")}
-              footer={<SaveButton formId="contact-info-form" />}
+              footer={
+                <SaveButton formId="contact-info-form" isLoading={isLoading} />
+              }
               formId="contact-info-form"
               onSubmit={onContactInfoSubmit}
               form={contactInfoForm}
@@ -873,7 +970,9 @@ export default function SettingsPage() {
             <SettingsCard
               title={t("cards.socialMedia.title")}
               description={t("cards.socialMedia.description")}
-              footer={<SaveButton formId="social-media-form" />}
+              footer={
+                <SaveButton formId="social-media-form" isLoading={isLoading} />
+              }
               formId="social-media-form"
               onSubmit={onSocialMediaSubmit}
               form={socialMediaForm}

@@ -20,7 +20,7 @@ export async function GET() {
     return NextResponse.json(
       { error: "Failed to fetch brand assets" },
       { status: 500 }
-    );
+    );  
   }
 }
 

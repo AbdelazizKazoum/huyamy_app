@@ -160,11 +160,15 @@ export async function updateBasicInfo(data: {
   url?: string;
 }): Promise<void> {
   try {
-    await updateSiteConfig({
-      name: data.name,
-      brandName: data.brandName,
-      url: data.url,
-    });
+    const updateData: Partial<SiteConfig> = {};
+
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.brandName !== undefined) updateData.brandName = data.brandName;
+    if (data.url !== undefined) updateData.url = data.url;
+
+    if (Object.keys(updateData).length > 0) {
+      await updateSiteConfig(updateData);
+    }
   } catch (error) {
     console.error("Error updating basic info:", error);
     throw error;
@@ -177,11 +181,23 @@ export async function updateBrandAssets(data: {
   favicon?: string;
 }): Promise<void> {
   try {
-    await updateSiteConfig({
-      logo: data.logo,
-      banner: data.banner,
-      favicon: data.favicon,
-    });
+    const updateData: Partial<SiteConfig> = {};
+
+    // Only include fields that have actual values (not undefined)
+    if (data.logo !== undefined) {
+      updateData.logo = data.logo;
+    }
+    if (data.banner !== undefined) {
+      updateData.banner = data.banner;
+    }
+    if (data.favicon !== undefined) {
+      updateData.favicon = data.favicon;
+    }
+
+    // Only update if there are fields to update
+    if (Object.keys(updateData).length > 0) {
+      await updateSiteConfig(updateData);
+    }
   } catch (error) {
     console.error("Error updating brand assets:", error);
     throw error;
@@ -239,13 +255,19 @@ export async function updateTranslatedContent(data: {
   };
 }): Promise<void> {
   try {
-    await updateSiteConfig({
-      titleTemplate: data.titleTemplate,
-      title: data.title,
-      description: data.description,
-      niche: data.niche,
-      keywords: data.keywords,
-    });
+    const updateData: Partial<SiteConfig> = {};
+
+    if (data.titleTemplate !== undefined)
+      updateData.titleTemplate = data.titleTemplate;
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.description !== undefined)
+      updateData.description = data.description;
+    if (data.niche !== undefined) updateData.niche = data.niche;
+    if (data.keywords !== undefined) updateData.keywords = data.keywords;
+
+    if (Object.keys(updateData).length > 0) {
+      await updateSiteConfig(updateData);
+    }
   } catch (error) {
     console.error("Error updating translated content:", error);
     throw error;
@@ -263,11 +285,17 @@ export async function updateLocationVerification(data: {
   };
 }): Promise<void> {
   try {
-    await updateSiteConfig({
-      location: data.location,
-      locationCoordinates: data.locationCoordinates,
-      verification: data.verification,
-    });
+    const updateData: Partial<SiteConfig> = {};
+
+    if (data.location !== undefined) updateData.location = data.location;
+    if (data.locationCoordinates !== undefined)
+      updateData.locationCoordinates = data.locationCoordinates;
+    if (data.verification !== undefined)
+      updateData.verification = data.verification;
+
+    if (Object.keys(updateData).length > 0) {
+      await updateSiteConfig(updateData);
+    }
   } catch (error) {
     console.error("Error updating location verification:", error);
     throw error;
@@ -282,9 +310,13 @@ export async function updateContactInfo(data: {
   };
 }): Promise<void> {
   try {
-    await updateSiteConfig({
-      contact: data.contact,
-    });
+    const updateData: Partial<SiteConfig> = {};
+
+    if (data.contact !== undefined) updateData.contact = data.contact;
+
+    if (Object.keys(updateData).length > 0) {
+      await updateSiteConfig(updateData);
+    }
   } catch (error) {
     console.error("Error updating contact info:", error);
     throw error;
@@ -302,10 +334,15 @@ export async function updateSocialMedia(data: {
   };
 }): Promise<void> {
   try {
-    await updateSiteConfig({
-      social: data.social,
-      socialLinks: data.socialLinks,
-    });
+    const updateData: Partial<SiteConfig> = {};
+
+    if (data.social !== undefined) updateData.social = data.social;
+    if (data.socialLinks !== undefined)
+      updateData.socialLinks = data.socialLinks;
+
+    if (Object.keys(updateData).length > 0) {
+      await updateSiteConfig(updateData);
+    }
   } catch (error) {
     console.error("Error updating social media:", error);
     throw error;
