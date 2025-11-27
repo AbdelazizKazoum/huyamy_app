@@ -352,7 +352,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
               locale === "ar" ? "القسم الرئيسي" : "Section principale"
             }
           >
-            <HeroSection />
+            <HeroSection config={config} />
           </section>
 
           {/* Categories Section with SEO structure */}

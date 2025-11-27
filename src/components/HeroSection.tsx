@@ -5,11 +5,18 @@ import React from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { heroFeatures, getFeatureIcon } from "@/data/heroFeatures";
-import { Locale } from "@/types";
+import { Locale, SiteConfig } from "@/types";
 
-const HeroSection: React.FC = () => {
+interface HeroSectionProps {
+  config?: SiteConfig | null;
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({ config }) => {
   const t = useTranslations("hero");
   const currentLocale = useLocale() as Locale;
+
+  // Get banner image from config or fallback to default
+  const bannerImage = config?.banner || "/images/banner4.jpg";
 
   const cardContainerVariants = {
     hidden: { opacity: 0 },
@@ -46,7 +53,7 @@ const HeroSection: React.FC = () => {
       >
         <a href="#" className="block">
           <Image
-            src="/images/banner4.jpg"
+            src={bannerImage}
             alt={t("promoAlt")}
             width={1600}
             height={450}

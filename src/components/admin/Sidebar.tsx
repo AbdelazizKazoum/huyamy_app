@@ -3,6 +3,7 @@ import {
   Layers,
   LayoutDashboard,
   Package,
+  Settings,
   ShoppingCart,
   Tag,
   X,
@@ -59,6 +60,12 @@ const Sidebar: React.FC<{
       label: { ar: "الأقسام", fr: "Sections" },
       icon: Layers,
       href: `${baseAdminPath}/sections`,
+    },
+    {
+      id: "parameters",
+      label: { ar: "الإعدادات", fr: "Paramètres" },
+      icon: Settings,
+      href: `${baseAdminPath}/parameters`,
     },
   ];
 
@@ -177,6 +184,12 @@ const MobileSidebar: React.FC<{
       label: { ar: "الأقسام", fr: "Sections" },
       icon: Layers,
       href: `${baseAdminPath}/sections`,
+    },
+    {
+      id: "parameters",
+      label: { ar: "الإعدادات", fr: "Paramètres" },
+      icon: Settings,
+      href: `${baseAdminPath}/parameters`,
     },
   ];
 
