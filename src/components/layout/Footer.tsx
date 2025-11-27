@@ -1,14 +1,22 @@
 import Image from "next/image";
 import { useTranslations, useLocale } from "next-intl";
 import { siteConfig } from "@/config/site";
+import { SiteConfig as ConfigType } from "@/types/config";
 
-const Footer: React.FC = () => {
+type FooterProps = {
+  config?: ConfigType | null;
+};
+
+const Footer: React.FC<FooterProps> = ({ config }) => {
   const t = useTranslations("footer");
   const locale = useLocale();
 
-  // Get logo path and social links from siteConfig
-  const logoPath = siteConfig.logo || "/images/huyami_logo.jpeg";
-  const { socialLinks } = siteConfig;
+  // Priority: server config -> static config
+  const activeConfig = config || siteConfig;
+
+  // Get logo path and social links from active config
+  const logoPath = activeConfig.logo || "/images/huyami_logo.jpeg";
+  const { socialLinks } = activeConfig;
 
   return (
     <footer className="bg-neutral-50 text-neutral-800 border-t border-neutral-200">

@@ -723,7 +723,58 @@
         }
       },
       "buttons": {
-        "saveChanges": "Enregistrer les modifications"
+        "saveChanges": "Enregistrer les modifications",
+        "saving": "Enregistrement..."
+      },
+      "messages": {
+        "basicInfo": {
+          "success": "Informations de base mises à jour avec succès",
+          "error": "Échec de la mise à jour des informations de base"
+        },
+        "brandAssets": {
+          "success": "Éléments de marque mis à jour avec succès",
+          "error": "Échec de la mise à jour des éléments de marque"
+        },
+        "storeSettings": {
+          "success": "Paramètres de la boutique mis à jour avec succès",
+          "error": "Échec de la mise à jour des paramètres de la boutique"
+        },
+        "translatedContent": {
+          "success": "Contenu traduit mis à jour avec succès",
+          "error": "Échec de la mise à jour du contenu traduit"
+        },
+        "locationVerification": {
+          "success": "Emplacement et vérification mis à jour avec succès",
+          "error": "Échec de la mise à jour de l'emplacement et de la vérification"
+        },
+        "contactInfo": {
+          "success": "Informations de contact mises à jour avec succès",
+          "error": "Échec de la mise à jour des informations de contact"
+        },
+        "socialMedia": {
+          "success": "Réseaux sociaux mis à jour avec succès",
+          "error": "Échec de la mise à jour des réseaux sociaux"
+        }
+      },
+      "validation": {
+        "storeNameRequired": "Le nom de la boutique est requis",
+        "brandNameRequired": "Le nom de la marque est requis",
+        "invalidUrl": "URL invalide",
+        "categoryRequired": "La catégorie est requise",
+        "arabicCurrencyRequired": "La devise arabe est requise",
+        "frenchCurrencyRequired": "La devise française est requise",
+        "titleTemplateRequired": "Le modèle de titre est requis",
+        "titleRequired": "Le titre est requis",
+        "descriptionRequired": "La description est requise",
+        "nicheRequired": "La niche est requise",
+        "locationRequired": "L'emplacement est requis",
+        "invalidEmail": "Email invalide",
+        "phoneRequired": "Le téléphone est requis",
+        "whatsappRequired": "WhatsApp est requis",
+        "twitterHandleRequired": "L'identifiant Twitter est requis",
+        "invalidFacebookUrl": "Lien Facebook invalide",
+        "invalidInstagramUrl": "Lien Instagram invalide",
+        "invalidTwitterUrl": "Lien Twitter invalide"
       }
     }
   }

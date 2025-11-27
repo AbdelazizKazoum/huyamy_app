@@ -1,6 +1,6 @@
-import { Locale, Product } from "@/types";
+import { Locale, Product, SiteConfig } from "@/types";
 import SectionTitle from "./SectionTitle";
-import ProductCard from "./ProductCard";
+import LazyProductCard from "./LazyProductCard";
 import { ButtonSecondary } from "./ui";
 import { useLocale, useTranslations } from "next-intl";
 import { siteConfig } from "@/config/site";
@@ -12,6 +12,7 @@ interface ProductSectionProps {
   products: Product[];
   showButton?: boolean;
   bgColor?: string;
+  config?: SiteConfig | null;
 }
 
 const ProductSection: React.FC<ProductSectionProps> = ({
@@ -20,10 +21,12 @@ const ProductSection: React.FC<ProductSectionProps> = ({
   products,
   showButton = false,
   bgColor = "bg-neutral-50",
+  config,
 }) => {
   const t = useTranslations("products");
   const currentLocale = useLocale() as Locale;
-  const currency = siteConfig.currencies[currentLocale];
+  const currency =
+    config?.currencies?.[currentLocale] || siteConfig.currencies[currentLocale];
 
   return (
     <section
@@ -75,7 +78,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({
             >
               <meta itemProp="position" content={(index + 1).toString()} />
               <div itemProp="item">
-                <ProductCard
+                <LazyProductCard
                   product={product}
                   lang={currentLocale}
                   currency={currency}

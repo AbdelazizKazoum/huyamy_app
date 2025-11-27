@@ -6,6 +6,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import InstallPrompt from "@/components/InstallPrompt";
 import AdminShell from "@/components/admin/AdminShell";
+import ToasterProvider from "@/providers/ToasterProvider";
 
 export default function RootLayout({
   children,
@@ -14,6 +15,8 @@ export default function RootLayout({
 }>) {
   return (
     <>
+      <ToasterProvider />
+
       <ServiceWorkerRegister />
       <InstallPrompt />
       <div

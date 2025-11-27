@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   X,
   Settings,
@@ -10,11 +11,22 @@ import {
   Fingerprint,
   Store,
 } from "lucide-react";
+import {
+  useForm,
+  UseFormRegister,
+  FieldError,
+  Controller,
+  FieldErrorsImpl,
+  Merge,
+} from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import FormInput from "@/components/admin/ui/FormInput";
 import ImageUpload from "@/components/admin/ui/ImageUpload";
 import { siteConfig as siteConfigData } from "@/config/site";
 import { Language } from "@/types";
 import { useTranslations, useLocale } from "next-intl";
+import { useConfigStore } from "@/store/useConfigStore";
 
 // --- Type Definitions ---
 // Using a simplified type for the page state, derived from the imported config.
@@ -25,12 +37,16 @@ type PageSiteConfig = typeof siteConfigData;
 interface FormTextAreaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
-  error?: string;
+  error?: FieldError | Merge<FieldError, FieldErrorsImpl<any>>;
+  register?: UseFormRegister<any>;
+  name?: string;
 }
 const FormTextArea: React.FC<FormTextAreaProps> = ({
   label,
   id,
   error,
+  register,
+  name,
   ...props
 }) => (
   <div>
@@ -46,9 +62,12 @@ const FormTextArea: React.FC<FormTextAreaProps> = ({
       className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-primary-700 focus:border-primary-700 ${
         error ? "border-red-500" : "border-gray-300"
       }`}
+      {...(register && name ? register(name) : {})}
       {...props}
     />
-    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    {error && typeof error.message === "string" && (
+      <p className="text-red-500 text-xs mt-1">{error.message}</p>
+    )}
   </div>
 );
 
@@ -120,6 +139,9 @@ interface SettingsCardProps {
   children: React.ReactNode;
   footer?: React.ReactNode;
   icon?: React.ReactNode;
+  formId?: string;
+  onSubmit?: (data: any) => void;
+  form?: any;
 }
 const SettingsCard: React.FC<SettingsCardProps> = ({
   title,
@@ -127,94 +149,396 @@ const SettingsCard: React.FC<SettingsCardProps> = ({
   children,
   footer,
   icon,
-}) => (
-  <div className="bg-white rounded-xl shadow-md border border-neutral-200/80">
-    <div className="p-6 border-b border-neutral-200/80 flex items-start gap-4">
-      {icon && <div className="text-primary-700 mt-1">{icon}</div>}
-      <div>
-        <h3 className="text-xl font-semibold text-neutral-900">{title}</h3>
-        {description && (
-          <p className="mt-1 text-sm text-neutral-500">{description}</p>
+  formId,
+  onSubmit,
+  form,
+}) => {
+  const handleSubmit = form
+    ? form.handleSubmit(onSubmit)
+    : (e: React.FormEvent) => {
+        e.preventDefault();
+        if (onSubmit) onSubmit({});
+      };
+
+  return (
+    <div className="bg-white rounded-xl shadow-md border border-neutral-200/80">
+      <div className="p-6 border-b border-neutral-200/80 flex items-start gap-4">
+        {icon && <div className="text-primary-700 mt-1">{icon}</div>}
+        <div>
+          <h3 className="text-xl font-semibold text-neutral-900">{title}</h3>
+          {description && (
+            <p className="mt-1 text-sm text-neutral-500">{description}</p>
+          )}
+        </div>
+      </div>
+      <form id={formId} onSubmit={handleSubmit}>
+        <div className="p-6 space-y-8">{children}</div>
+        {footer && (
+          <div className="bg-neutral-50 p-4 rounded-b-xl border-t border-neutral-200/80 flex justify-end">
+            {footer}
+          </div>
         )}
-      </div>
+      </form>
     </div>
-    <div className="p-6 space-y-8">{children}</div>
-    {footer && (
-      <div className="bg-neutral-50 p-4 rounded-b-xl border-t border-neutral-200/80 flex justify-end">
-        {footer}
-      </div>
-    )}
-  </div>
-);
+  );
+};
 
 // --- Settings Page Component ---
 export default function SettingsPage() {
   const t = useTranslations("admin.parameters");
   const locale = useLocale() as Language;
 
-  const [config, setConfig] = useState<PageSiteConfig>(siteConfigData);
+  // Use Zustand store
+  const {
+    config,
+    isLoading,
+    fetchConfig,
+    updateBasicInfo,
+    updateBrandAssets,
+    updateStoreSettings,
+    updateTranslatedContent,
+    updateLocationVerification,
+    updateContactInfo,
+    updateSocialMedia,
+  } = useConfigStore();
+
   const [langTab, setLangTab] = useState<Language>("ar");
+  const [selectedFiles, setSelectedFiles] = useState<{
+    logo?: File;
+    banner?: File;
+    favicon?: File;
+  }>({});
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    const keys = name.split(".");
+  // Fetch config from API if not loaded
+  useEffect(() => {
+    if (!config) {
+      fetchConfig();
+    }
+  }, [config, fetchConfig]);
 
-    setConfig((prev) => {
-      const newState = JSON.parse(JSON.stringify(prev)); // Deep copy
-      let currentLevel = newState;
+  // Fallback to static config if store config is not loaded
+  const currentConfig = config || siteConfigData;
 
-      for (let i = 0; i < keys.length - 1; i++) {
-        currentLevel = currentLevel[keys[i]];
+  // Define schemas with translations
+  const basicInfoSchema = z.object({
+    name: z.string().min(1, t("validation.storeNameRequired")).optional(),
+    brandName: z.string().min(1, t("validation.brandNameRequired")).optional(),
+    url: z.string().url(t("validation.invalidUrl")).optional(),
+  });
+
+  const brandAssetsSchema = z.object({
+    logo: z.string().optional(),
+    banner: z.string().optional(),
+    favicon: z.string().optional(),
+  });
+
+  const storeSettingsSchema = z.object({
+    category: z.string().min(1, t("validation.categoryRequired")).optional(),
+    defaultLocale: z.enum(["ar", "fr"]).optional(),
+    currencies: z
+      .object({
+        ar: z
+          .string()
+          .min(1, t("validation.arabicCurrencyRequired"))
+          .optional(),
+        fr: z
+          .string()
+          .min(1, t("validation.frenchCurrencyRequired"))
+          .optional(),
+      })
+      .optional(),
+  });
+
+  const translatedContentSchema = z.object({
+    titleTemplate: z
+      .string()
+      .min(1, t("validation.titleTemplateRequired"))
+      .optional(),
+    title: z.record(z.enum(["ar", "fr"]), z.string().optional()).optional(),
+    description: z
+      .record(z.enum(["ar", "fr"]), z.string().optional())
+      .optional(),
+    niche: z.record(z.enum(["ar", "fr"]), z.string().optional()).optional(),
+    keywords: z
+      .record(z.enum(["ar", "fr"]), z.array(z.string()).optional())
+      .optional(),
+  });
+
+  const locationVerificationSchema = z.object({
+    location: z.string().min(1, t("validation.locationRequired")).optional(),
+    locationCoordinates: z
+      .object({
+        lat: z.coerce.number().min(-90).max(90).optional(),
+        lng: z.coerce.number().min(-180).max(180).optional(),
+      })
+      .optional(),
+    verification: z
+      .object({
+        google: z.string().optional(),
+      })
+      .optional(),
+  });
+
+  const contactInfoSchema = z.object({
+    contact: z
+      .object({
+        email: z.string().email(t("validation.invalidEmail")).optional(),
+        phone: z.string().min(1, t("validation.phoneRequired")).optional(),
+        whatsapp: z
+          .string()
+          .min(1, t("validation.whatsappRequired"))
+          .optional(),
+      })
+      .optional(),
+  });
+
+  const socialMediaSchema = z.object({
+    social: z
+      .object({
+        twitter: z
+          .string()
+          .min(1, t("validation.twitterHandleRequired"))
+          .optional(),
+      })
+      .optional(),
+    socialLinks: z
+      .object({
+        facebook: z
+          .string()
+          .url(t("validation.invalidFacebookUrl"))
+          .optional()
+          .or(z.literal("")),
+        instagram: z
+          .string()
+          .url(t("validation.invalidInstagramUrl"))
+          .optional()
+          .or(z.literal("")),
+        twitter: z
+          .string()
+          .url(t("validation.invalidTwitterUrl"))
+          .optional()
+          .or(z.literal("")),
+      })
+      .optional(),
+  });
+
+  // Forms for each section
+  const basicInfoForm = useForm({
+    resolver: zodResolver(basicInfoSchema),
+    defaultValues: {
+      name: currentConfig.name,
+      brandName: currentConfig.brandName,
+      url: currentConfig.url,
+    },
+  });
+
+  const brandAssetsForm = useForm({
+    resolver: zodResolver(brandAssetsSchema),
+    defaultValues: {
+      logo: currentConfig.logo || "",
+      banner: (currentConfig as any).banner || "",
+      favicon: (currentConfig as any).favicon || "",
+    },
+  });
+
+  const storeSettingsForm = useForm({
+    resolver: zodResolver(storeSettingsSchema),
+    defaultValues: {
+      category: currentConfig.category,
+      defaultLocale: currentConfig.i18n?.defaultLocale || "ar",
+      currencies: currentConfig.currencies,
+    },
+  });
+
+  const translatedContentForm = useForm({
+    resolver: zodResolver(translatedContentSchema),
+    defaultValues: {
+      titleTemplate: currentConfig.titleTemplate,
+      title: currentConfig.title,
+      description: currentConfig.description,
+      niche: currentConfig.niche,
+      keywords: currentConfig.keywords,
+    },
+  });
+
+  const locationVerificationForm = useForm({
+    resolver: zodResolver(locationVerificationSchema),
+    defaultValues: {
+      location: currentConfig.location,
+      locationCoordinates: currentConfig.locationCoordinates,
+      verification: currentConfig.verification,
+    },
+  });
+
+  const contactInfoForm = useForm({
+    resolver: zodResolver(contactInfoSchema),
+    defaultValues: {
+      contact: currentConfig.contact,
+    },
+  });
+
+  const socialMediaForm = useForm({
+    resolver: zodResolver(socialMediaSchema),
+    defaultValues: {
+      social: currentConfig.social,
+      socialLinks: currentConfig.socialLinks,
+    },
+  });
+
+  // Update form values when config changes
+  useEffect(() => {
+    basicInfoForm.reset({
+      name: currentConfig.name,
+      brandName: currentConfig.brandName,
+      url: currentConfig.url,
+    });
+  }, [currentConfig, basicInfoForm]);
+
+  useEffect(() => {
+    brandAssetsForm.reset({
+      logo: currentConfig.logo || "",
+      banner: (currentConfig as any).banner || "",
+      favicon: (currentConfig as any).favicon || "",
+    });
+  }, [currentConfig, brandAssetsForm]);
+
+  useEffect(() => {
+    storeSettingsForm.reset({
+      category: currentConfig.category,
+      defaultLocale: currentConfig.i18n?.defaultLocale || "ar",
+      currencies: currentConfig.currencies,
+    });
+  }, [currentConfig, storeSettingsForm]);
+
+  useEffect(() => {
+    translatedContentForm.reset({
+      titleTemplate: currentConfig.titleTemplate,
+      title: currentConfig.title,
+      description: currentConfig.description,
+      niche: currentConfig.niche,
+      keywords: currentConfig.keywords,
+    });
+  }, [currentConfig, translatedContentForm]);
+
+  useEffect(() => {
+    locationVerificationForm.reset({
+      location: currentConfig.location,
+      locationCoordinates: currentConfig.locationCoordinates,
+      verification: currentConfig.verification,
+    });
+  }, [currentConfig, locationVerificationForm]);
+
+  useEffect(() => {
+    contactInfoForm.reset({
+      contact: currentConfig.contact,
+    });
+  }, [currentConfig, contactInfoForm]);
+
+  useEffect(() => {
+    socialMediaForm.reset({
+      social: currentConfig.social,
+      socialLinks: currentConfig.socialLinks,
+    });
+  }, [currentConfig, socialMediaForm]);
+
+  // Submit handlers
+  const onBasicInfoSubmit = async (data: any) => {
+    try {
+      await updateBasicInfo(data, locale);
+    } catch (error) {
+      console.error("Error updating basic info:", error);
+    }
+  };
+
+  const onBrandAssetsSubmit = async (data: any) => {
+    try {
+      // Pass the selected files and form data to the store
+      // The API route will handle file uploads and URL processing
+      const updateData: {
+        logo?: File | string;
+        banner?: File | string;
+        favicon?: File | string;
+      } = {};
+
+      // Add selected files or existing URLs
+      if (selectedFiles.logo) {
+        updateData.logo = selectedFiles.logo;
+      } else if (data.logo) {
+        updateData.logo = data.logo;
       }
 
-      currentLevel[keys[keys.length - 1]] = value;
-      return newState;
-    });
+      if (selectedFiles.banner) {
+        updateData.banner = selectedFiles.banner;
+      } else if (data.banner) {
+        updateData.banner = data.banner;
+      }
+
+      if (selectedFiles.favicon) {
+        updateData.favicon = selectedFiles.favicon;
+      } else if (data.favicon) {
+        updateData.favicon = data.favicon;
+      }
+
+      await updateBrandAssets(updateData, locale);
+
+      // Clear selected files after successful upload
+      setSelectedFiles({});
+    } catch (error) {
+      console.error("Error updating brand assets:", error);
+    }
+  };
+
+  const onStoreSettingsSubmit = async (data: any) => {
+    try {
+      await updateStoreSettings(data, locale);
+    } catch (error) {
+      console.error("Error updating store settings:", error);
+    }
+  };
+
+  const onTranslatedContentSubmit = async (data: any) => {
+    try {
+      await updateTranslatedContent(data, locale);
+    } catch (error) {
+      console.error("Error updating translated content:", error);
+    }
+  };
+
+  const onLocationVerificationSubmit = async (data: any) => {
+    try {
+      await updateLocationVerification(data, locale);
+    } catch (error) {
+      console.error("Error updating location verification:", error);
+    }
+  };
+
+  const onContactInfoSubmit = async (data: any) => {
+    try {
+      await updateContactInfo(data, locale);
+    } catch (error) {
+      console.error("Error updating contact info:", error);
+    }
+  };
+
+  const onSocialMediaSubmit = async (data: any) => {
+    try {
+      await updateSocialMedia(data, locale);
+    } catch (error) {
+      console.error("Error updating social media:", error);
+    }
   };
 
   const handleImageChange = (
     name: "logo" | "banner" | "favicon",
     file: File
   ) => {
-    // In a real app, you'd upload the file and get a URL from your storage service.
-    // For this mock, we'll use a blob URL for instant preview.
-    // This blob URL will replace the existing path or URL in the state.
-    setConfig((prev) => ({ ...prev, [name]: URL.createObjectURL(file) }));
+    // Store the selected file for upload when form is submitted
+    setSelectedFiles((prev) => ({ ...prev, [name]: file }));
   };
 
   const handleImageRemove = (name: "logo" | "banner" | "favicon") => {
-    setConfig((prev) => ({ ...prev, [name]: "" }));
-  };
-
-  const handleLocalizedChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    const key = name.split(".")[0] as keyof PageSiteConfig;
-
-    setConfig((prev) => ({
-      ...prev,
-      [key]: {
-        ...(typeof prev[key] === "object" && prev[key] !== null
-          ? prev[key]
-          : {}),
-        [langTab]: value,
-      },
-    }));
-  };
-
-  const handleKeywordsChange = (lang: Language, newKeywords: string[]) => {
-    setConfig((prev) => ({
-      ...prev,
-      keywords: {
-        ...prev.keywords,
-        [lang]: newKeywords,
-      },
-    }));
+    // Remove the asset by setting it to empty string
+    updateBrandAssets({ [name]: "" }, locale);
   };
 
   const NavButton = ({
@@ -238,10 +562,25 @@ export default function SettingsPage() {
     </button>
   );
 
-  const SaveButton = () => (
-    <button className="bg-primary-700 text-white font-bold py-2.5 px-5 rounded-lg hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 transition-colors flex items-center gap-2">
-      <Save size={16} />
-      <span>{t("buttons.saveChanges")}</span>
+  const SaveButton = ({
+    formId,
+    isLoading,
+  }: {
+    formId: string;
+    isLoading?: boolean;
+  }) => (
+    <button
+      type="submit"
+      form={formId}
+      disabled={isLoading}
+      className="bg-primary-700 text-white font-bold py-2.5 px-5 rounded-lg hover:bg-primary-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      {isLoading ? (
+        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+      ) : (
+        <Save size={16} />
+      )}
+      <span>{isLoading ? t("buttons.saving") : t("buttons.saveChanges")}</span>
     </button>
   );
 
@@ -283,31 +622,33 @@ export default function SettingsPage() {
               icon={<Settings size={24} />}
               title={t("cards.basicInfo.title")}
               description={t("cards.basicInfo.description")}
-              footer={<SaveButton />}
+              footer={
+                <SaveButton formId="basic-info-form" isLoading={isLoading} />
+              }
+              formId="basic-info-form"
+              onSubmit={onBasicInfoSubmit}
+              form={basicInfoForm}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormInput
                   label={t("cards.basicInfo.labels.storeName")}
-                  id="name"
+                  register={basicInfoForm.register}
                   name="name"
-                  value={config.name}
-                  onChange={handleInputChange}
+                  error={basicInfoForm.formState.errors.name}
                 />
                 <FormInput
                   label={t("cards.basicInfo.labels.brandName")}
-                  id="brandName"
+                  register={basicInfoForm.register}
                   name="brandName"
-                  value={config.brandName}
-                  onChange={handleInputChange}
+                  error={basicInfoForm.formState.errors.brandName}
                 />
               </div>
               <FormInput
                 label={t("cards.basicInfo.labels.siteUrl")}
-                id="url"
+                register={basicInfoForm.register}
                 name="url"
                 type="url"
-                value={config.url}
-                onChange={handleInputChange}
+                error={basicInfoForm.formState.errors.url}
               />
             </SettingsCard>
 
@@ -315,19 +656,24 @@ export default function SettingsPage() {
               icon={<Store size={24} />}
               title={t("cards.brandAssets.title")}
               description={t("cards.brandAssets.description")}
-              footer={<SaveButton />}
+              footer={
+                <SaveButton formId="brand-assets-form" isLoading={isLoading} />
+              }
+              formId="brand-assets-form"
+              onSubmit={onBrandAssetsSubmit}
+              form={brandAssetsForm}
             >
               <ImageUpload
                 label={t("cards.brandAssets.labels.storeLogo")}
                 description={t("cards.brandAssets.descriptions.logo")}
-                currentImage={config.logo}
+                currentImage={currentConfig.logo || ""}
                 onImageChange={(file) => handleImageChange("logo", file)}
                 onImageRemove={() => handleImageRemove("logo")}
               />
               <ImageUpload
                 label={t("cards.brandAssets.labels.storeBanner")}
                 description={t("cards.brandAssets.descriptions.banner")}
-                currentImage={""} // Assuming banner is not in site.ts, add it if needed
+                currentImage={(currentConfig as any).banner || ""}
                 onImageChange={(file) => handleImageChange("banner", file)}
                 onImageRemove={() => handleImageRemove("banner")}
                 aspectRatio="aspect-video"
@@ -335,7 +681,7 @@ export default function SettingsPage() {
               <ImageUpload
                 label={t("cards.brandAssets.labels.favicon")}
                 description={t("cards.brandAssets.descriptions.favicon")}
-                currentImage={""} // Assuming favicon is not in site.ts, add it if needed
+                currentImage={(currentConfig as any).favicon || ""}
                 onImageChange={(file) => handleImageChange("favicon", file)}
                 onImageRemove={() => handleImageRemove("favicon")}
               />
@@ -345,50 +691,59 @@ export default function SettingsPage() {
               icon={<Store size={24} />}
               title={t("cards.storeSettings.title")}
               description={t("cards.storeSettings.description")}
-              footer={<SaveButton />}
+              footer={
+                <SaveButton
+                  formId="store-settings-form"
+                  isLoading={isLoading}
+                />
+              }
+              formId="store-settings-form"
+              onSubmit={onStoreSettingsSubmit}
+              form={storeSettingsForm}
             >
               <FormInput
                 label={t("cards.storeSettings.labels.storeCategory")}
-                id="category"
+                register={storeSettingsForm.register}
                 name="category"
-                value={config.category}
-                onChange={handleInputChange}
+                error={storeSettingsForm.formState.errors.category}
               />
-              <div>
-                <label
-                  htmlFor="i18n.defaultLocale"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  {t("cards.storeSettings.labels.defaultLanguage")}
-                </label>
-                <select
-                  id="i18n.defaultLocale"
-                  name="i18n.defaultLocale"
-                  value={config.i18n.defaultLocale}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-primary-700 focus:border-primary-700 border-gray-300"
-                >
-                  {config.i18n.locales.map((loc) => (
-                    <option key={loc} value={loc}>
-                      {t(`cards.storeSettings.languages.${loc}`)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <Controller
+                name="defaultLocale"
+                control={storeSettingsForm.control}
+                render={({ field }) => (
+                  <div>
+                    <label
+                      htmlFor="i18n.defaultLocale"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      {t("cards.storeSettings.labels.defaultLanguage")}
+                    </label>
+                    <select
+                      {...field}
+                      id="i18n.defaultLocale"
+                      className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-primary-700 focus:border-primary-700 border-gray-300"
+                    >
+                      {currentConfig.i18n?.locales.map((loc) => (
+                        <option key={loc} value={loc}>
+                          {t(`cards.storeSettings.languages.${loc}`)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormInput
                   label={t("cards.storeSettings.labels.currencyAr")}
-                  id="currencies.ar"
+                  register={storeSettingsForm.register}
                   name="currencies.ar"
-                  value={config.currencies.ar}
-                  onChange={handleInputChange}
+                  error={storeSettingsForm.formState.errors.currencies?.ar}
                 />
                 <FormInput
                   label={t("cards.storeSettings.labels.currencyFr")}
-                  id="currencies.fr"
+                  register={storeSettingsForm.register}
                   name="currencies.fr"
-                  value={config.currencies.fr}
-                  onChange={handleInputChange}
+                  error={storeSettingsForm.formState.errors.currencies?.fr}
                 />
               </div>
             </SettingsCard>
@@ -396,14 +751,21 @@ export default function SettingsPage() {
             <SettingsCard
               title={t("cards.translatedContent.title")}
               description={t("cards.translatedContent.description")}
-              footer={<SaveButton />}
+              footer={
+                <SaveButton
+                  formId="translated-content-form"
+                  isLoading={isLoading}
+                />
+              }
+              formId="translated-content-form"
+              onSubmit={onTranslatedContentSubmit}
+              form={translatedContentForm}
             >
               <FormInput
                 label={t("cards.translatedContent.labels.titleTemplate")}
-                id="titleTemplate"
+                register={translatedContentForm.register}
                 name="titleTemplate"
-                value={config.titleTemplate}
-                onChange={handleInputChange}
+                error={translatedContentForm.formState.errors.titleTemplate}
               />
               <div className="border-b border-neutral-200/80">
                 <nav
@@ -437,33 +799,38 @@ export default function SettingsPage() {
                   <>
                     <FormInput
                       label={t("cards.translatedContent.labels.siteTitleAr")}
-                      id="title.ar"
-                      name="title"
-                      value={config.title.ar}
-                      onChange={handleLocalizedChange}
+                      register={translatedContentForm.register}
+                      name="title.ar"
+                      error={translatedContentForm.formState.errors.title?.ar}
                     />
                     <FormTextArea
                       label={t(
                         "cards.translatedContent.labels.siteDescriptionAr"
                       )}
-                      id="description.ar"
-                      name="description"
-                      value={config.description.ar}
-                      onChange={handleLocalizedChange}
+                      register={translatedContentForm.register}
+                      name="description.ar"
+                      error={
+                        translatedContentForm.formState.errors.description?.ar
+                      }
                     />
                     <FormInput
                       label={t("cards.translatedContent.labels.storeNicheAr")}
-                      id="niche.ar"
-                      name="niche"
-                      value={config.niche.ar}
-                      onChange={handleLocalizedChange}
+                      register={translatedContentForm.register}
+                      name="niche.ar"
+                      error={translatedContentForm.formState.errors.niche?.ar}
                     />
-                    <TagInput
-                      label={t("cards.translatedContent.labels.keywordsAr")}
-                      tags={config.keywords.ar}
-                      onTagsChange={(tags) => handleKeywordsChange("ar", tags)}
-                      placeholder={t(
-                        "cards.translatedContent.placeholders.addKeywordAr"
+                    <Controller
+                      name="keywords.ar"
+                      control={translatedContentForm.control}
+                      render={({ field }) => (
+                        <TagInput
+                          label={t("cards.translatedContent.labels.keywordsAr")}
+                          tags={field.value || []}
+                          onTagsChange={field.onChange}
+                          placeholder={t(
+                            "cards.translatedContent.placeholders.addKeywordAr"
+                          )}
+                        />
                       )}
                     />
                   </>
@@ -471,33 +838,38 @@ export default function SettingsPage() {
                   <>
                     <FormInput
                       label={t("cards.translatedContent.labels.siteTitleFr")}
-                      id="title.fr"
-                      name="title"
-                      value={config.title.fr}
-                      onChange={handleLocalizedChange}
+                      register={translatedContentForm.register}
+                      name="title.fr"
+                      error={translatedContentForm.formState.errors.title?.fr}
                     />
                     <FormTextArea
                       label={t(
                         "cards.translatedContent.labels.siteDescriptionFr"
                       )}
-                      id="description.fr"
-                      name="description"
-                      value={config.description.fr}
-                      onChange={handleLocalizedChange}
+                      register={translatedContentForm.register}
+                      name="description.fr"
+                      error={
+                        translatedContentForm.formState.errors.description?.fr
+                      }
                     />
                     <FormInput
                       label={t("cards.translatedContent.labels.storeNicheFr")}
-                      id="niche.fr"
-                      name="niche"
-                      value={config.niche.fr}
-                      onChange={handleLocalizedChange}
+                      register={translatedContentForm.register}
+                      name="niche.fr"
+                      error={translatedContentForm.formState.errors.niche?.fr}
                     />
-                    <TagInput
-                      label={t("cards.translatedContent.labels.keywordsFr")}
-                      tags={config.keywords.fr}
-                      onTagsChange={(tags) => handleKeywordsChange("fr", tags)}
-                      placeholder={t(
-                        "cards.translatedContent.placeholders.addKeywordFr"
+                    <Controller
+                      name="keywords.fr"
+                      control={translatedContentForm.control}
+                      render={({ field }) => (
+                        <TagInput
+                          label={t("cards.translatedContent.labels.keywordsFr")}
+                          tags={field.value || []}
+                          onTagsChange={field.onChange}
+                          placeholder={t(
+                            "cards.translatedContent.placeholders.addKeywordFr"
+                          )}
+                        />
                       )}
                     />
                   </>
@@ -509,41 +881,53 @@ export default function SettingsPage() {
               icon={<MapPin size={24} />}
               title={t("cards.locationVerification.title")}
               description={t("cards.locationVerification.description")}
-              footer={<SaveButton />}
+              footer={
+                <SaveButton
+                  formId="location-verification-form"
+                  isLoading={isLoading}
+                />
+              }
+              formId="location-verification-form"
+              onSubmit={onLocationVerificationSubmit}
+              form={locationVerificationForm}
             >
               <FormInput
                 label={t("cards.locationVerification.labels.location")}
-                id="location"
+                register={locationVerificationForm.register}
                 name="location"
-                value={config.location}
-                onChange={handleInputChange}
+                error={locationVerificationForm.formState.errors.location}
               />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormInput
                   label={t("cards.locationVerification.labels.latitude")}
-                  id="locationCoordinates.lat"
+                  register={locationVerificationForm.register}
                   name="locationCoordinates.lat"
                   type="number"
-                  value={config.locationCoordinates?.lat}
-                  onChange={handleInputChange}
+                  error={
+                    locationVerificationForm.formState.errors
+                      .locationCoordinates?.lat
+                  }
                 />
                 <FormInput
                   label={t("cards.locationVerification.labels.longitude")}
-                  id="locationCoordinates.lng"
+                  register={locationVerificationForm.register}
                   name="locationCoordinates.lng"
                   type="number"
-                  value={config.locationCoordinates?.lng}
-                  onChange={handleInputChange}
+                  error={
+                    locationVerificationForm.formState.errors
+                      .locationCoordinates?.lng
+                  }
                 />
               </div>
               <FormInput
                 label={t(
                   "cards.locationVerification.labels.googleVerification"
                 )}
-                id="verification.google"
+                register={locationVerificationForm.register}
                 name="verification.google"
-                value={config.verification?.google}
-                onChange={handleInputChange}
+                error={
+                  locationVerificationForm.formState.errors.verification?.google
+                }
               />
             </SettingsCard>
 
@@ -551,32 +935,34 @@ export default function SettingsPage() {
               icon={<Fingerprint size={24} />}
               title={t("cards.contactInfo.title")}
               description={t("cards.contactInfo.description")}
-              footer={<SaveButton />}
+              footer={
+                <SaveButton formId="contact-info-form" isLoading={isLoading} />
+              }
+              formId="contact-info-form"
+              onSubmit={onContactInfoSubmit}
+              form={contactInfoForm}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormInput
                   label={t("cards.contactInfo.labels.email")}
-                  id="contact.email"
+                  register={contactInfoForm.register}
                   name="contact.email"
                   type="email"
-                  value={config.contact.email}
-                  onChange={handleInputChange}
+                  error={contactInfoForm.formState.errors.contact?.email}
                 />
                 <FormInput
                   label={t("cards.contactInfo.labels.phone")}
-                  id="contact.phone"
+                  register={contactInfoForm.register}
                   name="contact.phone"
                   type="tel"
-                  value={config.contact.phone}
-                  onChange={handleInputChange}
+                  error={contactInfoForm.formState.errors.contact?.phone}
                 />
                 <FormInput
                   label={t("cards.contactInfo.labels.whatsapp")}
-                  id="contact.whatsapp"
+                  register={contactInfoForm.register}
                   name="contact.whatsapp"
                   type="tel"
-                  value={config.contact.whatsapp}
-                  onChange={handleInputChange}
+                  error={contactInfoForm.formState.errors.contact?.whatsapp}
                 />
               </div>
             </SettingsCard>
@@ -584,38 +970,39 @@ export default function SettingsPage() {
             <SettingsCard
               title={t("cards.socialMedia.title")}
               description={t("cards.socialMedia.description")}
-              footer={<SaveButton />}
+              footer={
+                <SaveButton formId="social-media-form" isLoading={isLoading} />
+              }
+              formId="social-media-form"
+              onSubmit={onSocialMediaSubmit}
+              form={socialMediaForm}
             >
               <FormInput
                 label={t("cards.socialMedia.labels.twitterHandle")}
-                id="social.twitter"
+                register={socialMediaForm.register}
                 name="social.twitter"
-                value={config.social.twitter}
-                onChange={handleInputChange}
+                error={socialMediaForm.formState.errors.social?.twitter}
               />
               <FormInput
                 label={t("cards.socialMedia.labels.facebookLink")}
-                id="socialLinks.facebook"
+                register={socialMediaForm.register}
                 name="socialLinks.facebook"
                 type="url"
-                value={config.socialLinks.facebook}
-                onChange={handleInputChange}
+                error={socialMediaForm.formState.errors.socialLinks?.facebook}
               />
               <FormInput
                 label={t("cards.socialMedia.labels.instagramLink")}
-                id="socialLinks.instagram"
+                register={socialMediaForm.register}
                 name="socialLinks.instagram"
                 type="url"
-                value={config.socialLinks.instagram}
-                onChange={handleInputChange}
+                error={socialMediaForm.formState.errors.socialLinks?.instagram}
               />
               <FormInput
                 label={t("cards.socialMedia.labels.twitterLink")}
-                id="socialLinks.twitter"
+                register={socialMediaForm.register}
                 name="socialLinks.twitter"
                 type="url"
-                value={config.socialLinks.twitter}
-                onChange={handleInputChange}
+                error={socialMediaForm.formState.errors.socialLinks?.twitter}
               />
             </SettingsCard>
           </main>

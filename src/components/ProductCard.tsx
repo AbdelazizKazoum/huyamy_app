@@ -23,7 +23,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
   lang = "ar",
   currency,
 }) => {
-  console.log("🚀 ~ ProductCard ~ product:", product);
   const t = useTranslations("products");
   const { addItem } = useCartStore();
   const router = useRouter();
@@ -53,8 +52,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
       : ""
   } - ${
     lang === "ar"
-      ? `منتج طبيعي من ${siteConfig.brandName}`
-      : `Produit naturel de ${siteConfig.brandName}`
+      ? `منتج من ${siteConfig.brandName}`
+      : `Produit de ${siteConfig.brandName}`
   }`;
 
   const hasMultipleOptions =

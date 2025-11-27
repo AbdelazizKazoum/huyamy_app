@@ -8,7 +8,7 @@ import FilterSidebar from "./FilterSidebar";
 import ProductsHeader from "./ProductsHeader";
 import ProductsPagination from "./ProductsPagination";
 import MobileFilterOverlay from "./MobileFilterOverlay";
-import ProductCard from "@/components/ProductCard";
+import LazyProductCard from "@/components/LazyProductCard";
 import { useSearchParams } from "next/navigation";
 
 const PRODUCTS_PER_PAGE = 12;
@@ -108,7 +108,7 @@ export default function ProductsClient({
     searchQuery,
     priceRange,
     sortOption,
-    locale,
+    isCategoryPage,
   ]);
 
   // Reset page when filters change
@@ -195,7 +195,7 @@ export default function ProductsClient({
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                 {paginatedProducts.map((product) => (
-                  <ProductCard
+                  <LazyProductCard
                     key={product.id}
                     product={product}
                     lang={locale}

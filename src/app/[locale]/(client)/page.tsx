@@ -15,6 +15,7 @@ import { CACHE_CONFIG } from "@/lib/cache/tags";
 import { Locale } from "@/types/common";
 import { Language } from "firebase/ai";
 import { Category, Product } from "@/types";
+import { getCachedSiteConfig } from "@/lib/actions/config";
 import { siteConfig } from "@/config/site";
 
 // ISR Configuration - Revalidate every week (604800 seconds = 7 days)
@@ -47,6 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // Cache the data for metadata generation - only what we need
   const categories = await getCachedCategories();
   const landingPageSections = await getCachedLandingPageSections();
+  const config = await getCachedSiteConfig();
 
   // Extract products from landing page sections (much lighter than getAllProducts)
   const landingPageProducts = landingPageSections
@@ -63,7 +65,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         p.name?.[typedLocale] ||
         p.name?.ar ||
         p.name?.fr ||
-        `${siteConfig.brandName} Product`
+        `${config?.brandName || siteConfig.brandName} Product`
     );
 
   const categoryNames = categories
@@ -73,27 +75,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     );
   const seoContent = {
     ar: {
-      title: `${siteConfig.name} - ${featuredProductNames
+      title: `${config?.name || siteConfig.name} - ${featuredProductNames
         .slice(0, 3)
-        .join(" | ")} | ${siteConfig.niche.ar}`,
-      description: `${siteConfig.description.ar} ${featuredProductNames.join(
-        ", "
-      )}. ${categoryNames.join(", ")}.`,
+        .join(" | ")} | ${config?.niche?.ar || siteConfig.niche.ar}`,
+      description: `${
+        config?.description?.ar || siteConfig.description.ar
+      } ${featuredProductNames.join(", ")}. ${categoryNames.join(", ")}.`,
       keywords: [
-        ...siteConfig.keywords.ar,
+        ...(config?.keywords?.ar || siteConfig.keywords.ar),
         ...featuredProductNames,
         ...categoryNames,
       ],
     },
     fr: {
-      title: `${siteConfig.name} - ${featuredProductNames
+      title: `${config?.name || siteConfig.name} - ${featuredProductNames
         .slice(0, 3)
-        .join(" | ")} | ${siteConfig.niche.fr}`,
-      description: `${siteConfig.description.fr} ${featuredProductNames.join(
-        ", "
-      )}. ${categoryNames.join(", ")}.`,
+        .join(" | ")} | ${config?.niche?.fr || siteConfig.niche.fr}`,
+      description: `${
+        config?.description?.fr || siteConfig.description.fr
+      } ${featuredProductNames.join(", ")}. ${categoryNames.join(", ")}.`,
       keywords: [
-        ...siteConfig.keywords.fr,
+        ...(config?.keywords?.fr || siteConfig.keywords.fr),
         ...featuredProductNames,
         ...categoryNames,
       ],
@@ -110,23 +112,31 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "website",
       locale: isArabic ? "ar_MA" : "fr_MA",
       alternateLocale: isArabic ? "fr_MA" : "ar_MA",
-      url: `${siteConfig.url}/${typedLocale}`,
-      siteName: siteConfig.name,
+      url: `${config?.url || siteConfig.url}/${typedLocale}`,
+      siteName: config?.name || siteConfig.name,
       title: content.title,
       description: content.description,
       images: [
         {
-          url: `${siteConfig.url}${siteConfig.logo}`,
+          url: `${config?.url || siteConfig.url}${
+            config?.logo || siteConfig.logo
+          }`,
           width: 1200,
           height: 630,
           alt: content.title,
         },
         // Add featured product images
         ...landingPageProducts.slice(0, 3).map((product) => ({
-          url: product.image || `${siteConfig.url}${siteConfig.logo}`,
+          url:
+            product.image ||
+            `${config?.url || siteConfig.url}${
+              config?.logo || siteConfig.logo
+            }`,
           width: 800,
           height: 600,
-          alt: product.name?.[typedLocale] || `${siteConfig.brandName} Product`,
+          alt:
+            product.name?.[typedLocale] ||
+            `${config?.brandName || siteConfig.brandName} Product`,
         })),
       ],
     },
@@ -134,13 +144,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: content.title,
       description: content.description,
-      images: [landingPageProducts[0]?.image || siteConfig.logo],
+      images: [
+        landingPageProducts[0]?.image || config?.logo || siteConfig.logo,
+      ],
     },
     alternates: {
-      canonical: `${siteConfig.url}/${typedLocale}`,
+      canonical: `${config?.url || siteConfig.url}/${typedLocale}`,
       languages: {
-        "ar-MA": `${siteConfig.url}/ar`,
-        "fr-MA": `${siteConfig.url}/fr`,
+        "ar-MA": `${config?.url || siteConfig.url}/ar`,
+        "fr-MA": `${config?.url || siteConfig.url}/fr`,
       },
     },
     other: {
@@ -188,6 +200,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
 
   const categoriesData = await getCachedCategories();
   const landingPageSectionsData = await getCachedLandingPageSections();
+  const config = await getCachedSiteConfig();
 
   // Use the more efficient serialization function
   const landingPageSections = landingPageSectionsData.map((section: any) => ({
@@ -209,38 +222,44 @@ export default async function EcommerceLandingPage({ params }: Props) {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: siteConfig.name,
-    url: `${siteConfig.url}/${locale}`,
-    description: siteConfig.description[locale as "ar" | "fr"],
+    name: config?.name || siteConfig.name,
+    url: `${config?.url || siteConfig.url}/${locale}`,
+    description:
+      config?.description?.[locale as "ar" | "fr"] ||
+      siteConfig.description[locale as "ar" | "fr"],
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `${siteConfig.url}/${locale}/products?search={search_term_string}`,
+        urlTemplate: `${
+          config?.url || siteConfig.url
+        }/${locale}/products?search={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },
     publisher: {
       "@type": "Organization",
-      "@id": `${siteConfig.url}/#organization`,
-      name: siteConfig.name,
-      url: siteConfig.url,
+      "@id": `${config?.url || siteConfig.url}/#organization`,
+      name: config?.name || siteConfig.name,
+      url: config?.url || siteConfig.url,
       logo: {
         "@type": "ImageObject",
-        url: `${siteConfig.url}${siteConfig.logo}`,
+        url: `${config?.url || siteConfig.url}${
+          config?.logo || siteConfig.logo
+        }`,
         width: 400,
         height: 400,
       },
       contactPoint: {
         "@type": "ContactPoint",
-        telephone: siteConfig.contact.whatsapp,
+        telephone: config?.contact?.whatsapp || siteConfig.contact.whatsapp,
         contactType: "customer service",
-        availableLanguage: siteConfig.i18n.locales,
+        availableLanguage: config?.i18n?.locales || siteConfig.i18n.locales,
       },
       sameAs: [
-        siteConfig.socialLinks.facebook,
-        siteConfig.socialLinks.instagram,
-        siteConfig.socialLinks.twitter,
+        config?.socialLinks?.facebook || siteConfig.socialLinks.facebook,
+        config?.socialLinks?.instagram || siteConfig.socialLinks.instagram,
+        config?.socialLinks?.twitter || siteConfig.socialLinks.twitter,
       ],
     },
     mainEntity: {
@@ -254,7 +273,9 @@ export default async function EcommerceLandingPage({ params }: Props) {
           position: index + 1,
           item: {
             "@type": "Product",
-            "@id": `${siteConfig.url}/${locale}/products/${product.id}`,
+            "@id": `${config?.url || siteConfig.url}/${locale}/products/${
+              product.id
+            }`,
             name:
               product.name?.[locale as "ar" | "fr"] ||
               product.name?.ar ||
@@ -263,10 +284,14 @@ export default async function EcommerceLandingPage({ params }: Props) {
               product.description?.[locale as "ar" | "fr"] ||
               product.description?.ar ||
               product.description?.fr,
-            image: product.image || `${siteConfig.url}${siteConfig.logo}`,
+            image:
+              product.image ||
+              `${config?.url || siteConfig.url}${
+                config?.logo || siteConfig.logo
+              }`,
             brand: {
               "@type": "Brand",
-              name: siteConfig.brandName,
+              name: config?.brandName || siteConfig.brandName,
             },
             offers: {
               "@type": "Offer",
@@ -275,7 +300,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
               availability: "https://schema.org/InStock",
               seller: {
                 "@type": "Organization",
-                name: siteConfig.name,
+                name: config?.name || siteConfig.name,
               },
             },
           },
@@ -291,7 +316,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
         "@type": "ListItem",
         position: 1,
         name: locale === "ar" ? "الرئيسية" : "Accueil",
-        item: `${siteConfig.url}/${locale}`,
+        item: `${config?.url || siteConfig.url}/${locale}`,
       },
     ],
   };
@@ -388,6 +413,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
                       products={section.products}
                       bgColor={index % 2 === 0 ? "bg-stone-50" : "bg-white"}
                       showButton={isLast}
+                      config={config}
                     />
                   </article>
                 );
@@ -423,6 +449,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
                   subtitle={t("popularProducts.subtitle")}
                   products={landingPageProducts.slice(0, 4)}
                   bgColor="bg-stone-50"
+                  config={config}
                 />
               </article>
               <article
@@ -441,6 +468,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
                   products={landingPageProducts.slice(0, 10)}
                   showButton={true}
                   bgColor="bg-white"
+                  config={config}
                 />
               </article>
             </section>
@@ -465,7 +493,9 @@ export default async function EcommerceLandingPage({ params }: Props) {
           className="whatsapp-contact"
         >
           <WhatsAppFloatingButton
-            phoneNumber={siteConfig.contact.whatsapp}
+            phoneNumber={
+              config?.contact?.whatsapp || siteConfig.contact.whatsapp
+            }
             message={t("whatsappMessage")}
           />
         </div>
@@ -479,8 +509,20 @@ export default async function EcommerceLandingPage({ params }: Props) {
           </h2>
           <p>
             {locale === "ar"
-              ? `متجر ${siteConfig.name} يوفر ${landingPageProducts.length} منتج طبيعي مغربي مميز عبر ${categories.length} فئة مختلفة. نحن متخصصون في ${siteConfig.niche.ar}.`
-              : `La boutique ${siteConfig.name} propose ${landingPageProducts.length} produits naturels marocains en vedette dans ${categories.length} catégories différentes. Nous sommes spécialisés dans les ${siteConfig.niche.fr}.`}
+              ? `متجر ${config?.name || siteConfig.name} يوفر ${
+                  landingPageProducts.length
+                } منتج طبيعي مغربي مميز عبر ${
+                  categories.length
+                } فئة مختلفة. نحن متخصصون في ${
+                  config?.niche?.ar || siteConfig.niche.ar
+                }.`
+              : `La boutique ${config?.name || siteConfig.name} propose ${
+                  landingPageProducts.length
+                } produits naturels marocains en vedette dans ${
+                  categories.length
+                } catégories différentes. Nous sommes spécialisés dans les ${
+                  config?.niche?.fr || siteConfig.niche.fr
+                }.`}
           </p>
           {categories.map((category: Category, index: number) => (
             <span key={category.id}>

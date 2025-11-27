@@ -7,6 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "init-config": "tsx scripts/initConfig.ts",
     "postinstall": "npm install --platform=linux --arch=x64 sharp"
   },
   "dependencies": {

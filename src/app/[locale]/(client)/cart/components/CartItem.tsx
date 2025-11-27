@@ -5,6 +5,8 @@ import { Minus, Plus, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Locale } from "@/types";
 import { CartItem } from "@/types/cart";
+import { useConfig } from "@/hooks/useConfig";
+import { siteConfig } from "@/config/site";
 
 interface CartItemProps {
   item: CartItem;
@@ -23,6 +25,11 @@ export default function CartItemComponent({
   onUpdateQuantity,
   onRemove,
 }: CartItemProps) {
+  // Get currency from config using the hook (fetches if not exists)
+  const { config } = useConfig();
+  const currency =
+    config?.currencies?.[locale] || siteConfig.currencies[locale];
+
   const itemPrice = item.selectedVariant?.price ?? item.product.price;
   const itemImage = item.selectedVariant?.images?.[0] ?? item.product.image;
 
@@ -129,7 +136,7 @@ export default function CartItemComponent({
 
           {/* Item Total Price */}
           <p className="mt-2 sm:mt-0 font-bold text-slate-800 text-base text-right">
-            {(itemPrice * item.quantity).toFixed(2)} {t("currency")}
+            {(itemPrice * item.quantity).toFixed(2)} {currency}
           </p>
         </div>
       </div>
