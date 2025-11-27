@@ -15,7 +15,7 @@ import { CACHE_CONFIG } from "@/lib/cache/tags";
 import { Locale } from "@/types/common";
 import { Language } from "firebase/ai";
 import { Category, Product } from "@/types";
-import { getConfigData } from "@/lib/actions/config";
+import { getCachedSiteConfig } from "@/lib/actions/config";
 import { siteConfig } from "@/config/site";
 
 // ISR Configuration - Revalidate every week (604800 seconds = 7 days)
@@ -48,7 +48,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // Cache the data for metadata generation - only what we need
   const categories = await getCachedCategories();
   const landingPageSections = await getCachedLandingPageSections();
-  const config = await getConfigData();
+  const config = await getCachedSiteConfig();
 
   // Extract products from landing page sections (much lighter than getAllProducts)
   const landingPageProducts = landingPageSections
@@ -200,7 +200,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
 
   const categoriesData = await getCachedCategories();
   const landingPageSectionsData = await getCachedLandingPageSections();
-  const config = await getConfigData();
+  const config = await getCachedSiteConfig();
 
   // Use the more efficient serialization function
   const landingPageSections = landingPageSectionsData.map((section: any) => ({

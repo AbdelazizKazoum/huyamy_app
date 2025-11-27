@@ -9,6 +9,7 @@ import { CACHE_CONFIG } from "@/lib/cache/tags";
 import { siteConfig } from "@/config/site";
 import ProductDisplay from "@/components/ProductDisplay"; // <-- Import the new display component
 import { getSectionsByType } from "@/lib/services/sectionService";
+import { getCachedSiteConfig } from "@/lib/actions/config";
 
 type Props = {
   params: Promise<{ locale: Language; slug: string }>;
@@ -90,54 +91,74 @@ const getCachedSectionsByType = unstable_cache(
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
 
-  // Get cached product data for metadata
+  // Get cached config and product data for metadata
+  const config = await getCachedSiteConfig();
   const product = await getCachedProductBySlug(slug);
 
   if (!product) {
     return {
       title: {
-        template: siteConfig.titleTemplate,
+        template: config?.titleTemplate || siteConfig.titleTemplate,
         default: locale === "ar" ? "منتج غير موجود" : "Produit non trouvé",
       },
       description:
         locale === "ar"
-          ? `المنتج المطلوب غير متوفر. تصفح مجموعتنا من منتجات ${siteConfig.niche.ar} المميزة.`
-          : `Le produit demandé n'est pas disponible. Découvrez notre collection de ${siteConfig.niche.fr} exceptionnels.`,
+          ? `المنتج المطلوب غير متوفر. تصفح مجموعتنا من منتجات ${
+              config?.niche?.ar || siteConfig.niche.ar
+            } المميزة.`
+          : `Le produit demandé n'est pas disponible. Découvrez notre collection de ${
+              config?.niche?.fr || siteConfig.niche.fr
+            } exceptionnels.`,
       robots: "noindex, nofollow",
     };
   }
 
-  const currency = siteConfig.currencies[locale];
+  const currency =
+    config?.currencies?.[locale] || siteConfig.currencies[locale];
   const productName = product.name[locale];
   const productDescription = product.description[locale];
   const categoryName = product.category?.name?.[locale] || "";
 
   // Create rich SEO titles
   const titles = {
-    ar: `${productName} | ${categoryName} | ${siteConfig.name} - ${siteConfig.niche.ar}`,
-    fr: `${productName} | ${categoryName} | ${siteConfig.name} - ${siteConfig.niche.fr}`,
+    ar: `${productName} | ${categoryName} | ${
+      config?.name || siteConfig.name
+    } - ${config?.niche?.ar || siteConfig.niche.ar}`,
+    fr: `${productName} | ${categoryName} | ${
+      config?.name || siteConfig.name
+    } - ${config?.niche?.fr || siteConfig.niche.fr}`,
   };
 
   // Create rich SEO descriptions
   const descriptions = {
-    ar: `اشتري ${productName} بأفضل سعر ${product.price} ${currency}. ${productDescription}. توصيل مجاني، دفع عند الاستلام. منتجات أصلية 100% من ${siteConfig.name}.`,
-    fr: `Achetez ${productName} au meilleur prix ${product.price} ${currency}. ${productDescription}. Livraison gratuite, paiement à la livraison. Produits 100% authentiques de ${siteConfig.name}.`,
+    ar: `اشتري ${productName} بأفضل سعر ${
+      product.price
+    } ${currency}. ${productDescription}. توصيل مجاني، دفع عند الاستلام. منتجات أصلية 100% من ${
+      config?.name || siteConfig.name
+    }.`,
+    fr: `Achetez ${productName} au meilleur prix ${
+      product.price
+    } ${currency}. ${productDescription}. Livraison gratuite, paiement à la livraison. Produits 100% authentiques de ${
+      config?.name || siteConfig.name
+    }.`,
   };
 
   // Generate keywords
   const keywords = [
     productName,
     categoryName,
-    ...siteConfig.keywords[locale],
+    ...(config?.keywords?.[locale] || siteConfig.keywords[locale]),
     ...product.keywords,
   ].filter(Boolean);
 
-  const productUrl = `${siteConfig.baseUrl}/${locale}/products/${slug}`;
+  const productUrl = `${
+    config?.url || siteConfig.url
+  }/${locale}/products/${slug}`;
 
   // Generate alternate language URLs
   const alternateLanguages = {
-    ar: `${siteConfig.baseUrl}/ar/products/${slug}`,
-    fr: `${siteConfig.baseUrl}/fr/products/${slug}`,
+    ar: `${config?.url || siteConfig.url}/ar/products/${slug}`,
+    fr: `${config?.url || siteConfig.url}/fr/products/${slug}`,
   };
 
   return {
@@ -150,7 +171,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: titles[locale],
       description: descriptions[locale],
       url: productUrl,
-      siteName: siteConfig.name,
+      siteName: config?.name || siteConfig.name,
       type: "website",
       locale: locale === "ar" ? "ar_MA" : "fr_FR",
       images: [
@@ -174,8 +195,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // Twitter Card
     twitter: {
       card: "summary_large_image",
-      site: siteConfig.social.twitter,
-      creator: siteConfig.social.twitter,
+      site: config?.social?.twitter || siteConfig.social.twitter,
+      creator: config?.social?.twitter || siteConfig.social.twitter,
       title: titles[locale],
       description: descriptions[locale],
       images: [product.image],
@@ -188,7 +209,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "product:price:currency": currency,
       "product:availability": "in stock",
       "product:condition": "new",
-      "product:brand": siteConfig.brandName,
+      "product:brand": config?.brandName || siteConfig.brandName,
       "product:category": categoryName,
 
       // E-commerce specific
@@ -218,13 +239,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       languages: {
         ar: alternateLanguages.ar,
         fr: alternateLanguages.fr,
-        "x-default": alternateLanguages[siteConfig.i18n.defaultLocale],
+        "x-default":
+          alternateLanguages[
+            config?.i18n?.defaultLocale || siteConfig.i18n.defaultLocale
+          ],
       },
     },
 
     // Verification tags
     verification: {
-      google: siteConfig.verification.google,
+      google: config?.verification?.google || siteConfig.verification.google,
     },
 
     // Manifest for PWA
@@ -237,21 +261,23 @@ function ProductStructuredData({
   product,
   locale,
   currency,
+  config,
 }: {
   product: Product;
   locale: Language;
   currency: string;
+  config: Awaited<ReturnType<typeof getCachedSiteConfig>>;
 }) {
   const baseOffer = {
     "@type": "Offer",
     priceCurrency: currency === "د.م." ? "MAD" : "MAD",
     price: product.price.toString(),
     availability: "https://schema.org/InStock",
-    url: `${siteConfig.baseUrl}/${locale}/products/${product.slug}`,
+    url: `${config?.url || siteConfig.url}/${locale}/products/${product.slug}`,
     seller: {
       "@type": "Organization",
-      name: siteConfig.name,
-      url: siteConfig.url,
+      name: config?.name || siteConfig.name,
+      url: config?.url || siteConfig.url,
     },
     itemCondition: "https://schema.org/NewCondition",
   };
@@ -265,7 +291,7 @@ function ProductStructuredData({
     sku: product.id,
     brand: {
       "@type": "Brand",
-      name: siteConfig.brandName,
+      name: config?.brandName || siteConfig.brandName,
     },
     category: product.category?.name?.[locale],
     offers: product.originalPrice
@@ -318,9 +344,11 @@ function ProductStructuredData({
 function BreadcrumbStructuredData({
   product,
   locale,
+  config,
 }: {
   product: Product;
   locale: Language;
+  config: Awaited<ReturnType<typeof getCachedSiteConfig>>;
 }) {
   const breadcrumbData = {
     "@context": "https://schema.org",
@@ -330,25 +358,29 @@ function BreadcrumbStructuredData({
         "@type": "ListItem",
         position: 1,
         name: locale === "ar" ? "الرئيسية" : "Accueil",
-        item: `${siteConfig.baseUrl}/${locale}`,
+        item: `${config?.url || siteConfig.url}/${locale}`,
       },
       {
         "@type": "ListItem",
         position: 2,
         name: locale === "ar" ? "المنتجات" : "Produits",
-        item: `${siteConfig.baseUrl}/${locale}/products`,
+        item: `${config?.url || siteConfig.url}/${locale}/products`,
       },
       {
         "@type": "ListItem",
         position: 3,
         name: product.category?.name?.[locale] || "",
-        item: `${siteConfig.baseUrl}/${locale}/categories/${product.category?.id}`,
+        item: `${config?.url || siteConfig.url}/${locale}/categories/${
+          product.category?.id
+        }`,
       },
       {
         "@type": "ListItem",
         position: 4,
         name: product.name[locale],
-        item: `${siteConfig.baseUrl}/${locale}/products/${product.slug}`,
+        item: `${config?.url || siteConfig.url}/${locale}/products/${
+          product.slug
+        }`,
       },
     ],
   };
@@ -366,7 +398,11 @@ function BreadcrumbStructuredData({
 // Main Page Component
 export default async function ProductDetailsPage({ params }: Props) {
   const { locale, slug } = await params;
-  const currency = siteConfig.currencies[locale];
+
+  // Get cached config and product data
+  const config = await getCachedSiteConfig();
+  const currency =
+    config?.currencies?.[locale] || siteConfig.currencies[locale];
 
   // Get cached product data
   const product = await getCachedProductBySlug(slug);
@@ -386,8 +422,13 @@ export default async function ProductDetailsPage({ params }: Props) {
         product={product}
         locale={locale}
         currency={currency}
+        config={config}
       />
-      <BreadcrumbStructuredData product={product} locale={locale} />
+      <BreadcrumbStructuredData
+        product={product}
+        locale={locale}
+        config={config}
+      />
 
       {/* Pass alsoChooseSections to ProductDisplay */}
       <ProductDisplay

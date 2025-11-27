@@ -26,8 +26,8 @@ import { siteConfig } from "@/config/site";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
 import SearchModal from "../SearchModal";
-import { useConfig } from "@/hooks/useConfig";
 import { SiteConfig as ConfigType } from "@/types/config";
+import { useConfigStore } from "@/store/useConfigStore";
 
 type HeaderProps = {
   config?: ConfigType | null;
@@ -59,137 +59,176 @@ const Header: React.FC<HeaderProps> = ({ config: serverConfig }) => {
   const pathname = usePathname();
   const router = useRouter();
   const searchRef = useRef<HTMLDivElement>(null);
+  const hasHydratedStore = useRef(false);
 
-  // Use config hook that works on both server and client (only for client-side updates)
-  const { config: clientConfig } = useConfig();
+  // Use the config from Zustand store
+  const { config: storeConfig } = useConfigStore();
 
-  // Priority: server config (SSR) -> client config (CSR updates) -> static config (fallback)
-  const activeConfig = serverConfig || clientConfig || siteConfig;
+  // Populate store with server config once on mount
+  useEffect(() => {
+    if (serverConfig && !hasHydratedStore.current) {
+      useConfigStore.setState({ config: serverConfig });
+      hasHydratedStore.current = true;
+    }
+  }, [serverConfig]);
 
-  // Get currency and logo from active config
-  const currency =
-    activeConfig?.currencies?.[currentLocale] ||
-    siteConfig.currencies[currentLocale];
-  const logoPath =
-    activeConfig?.logo || siteConfig.logo || "/images/huyami_logo.jpeg";
+  // Use server config directly (no fallback needed since we hydrate the store)
+  const activeConfig = serverConfig || storeConfig || siteConfig;
+
+  // Memoize derived values to prevent recalculation on every render
+  const currency = React.useMemo(
+    () =>
+      activeConfig?.currencies?.[currentLocale] ||
+      siteConfig.currencies[currentLocale],
+    [activeConfig?.currencies, currentLocale]
+  );
+
+  const logoPath = React.useMemo(
+    () => activeConfig?.logo || siteConfig.logo || "/images/huyami_logo.jpeg",
+    [activeConfig?.logo]
+  );
 
   // Update menuItems to use translation keys:
-  const menuItems: MenuItem[] = [
-    { href: "/", label: { ar: t("home"), fr: t("home") } },
-    { href: "/products", label: { ar: t("products"), fr: t("products") } },
-    { href: "/contact", label: { ar: t("contact"), fr: t("contact") } },
-  ];
+  const menuItems: MenuItem[] = React.useMemo(
+    () => [
+      { href: "/", label: { ar: t("home"), fr: t("home") } },
+      { href: "/products", label: { ar: t("products"), fr: t("products") } },
+      { href: "/contact", label: { ar: t("contact"), fr: t("contact") } },
+    ],
+    [t]
+  );
 
-  const handleLanguageChange = async (newLocale: Locale) => {
-    setIsLangLoading(true);
-    setIsLangMenuOpen(false);
-    setIsMobileLangMenuOpen(false);
-    await router.replace(pathname, { locale: newLocale });
-    setIsLangLoading(false);
-  };
+  const handleLanguageChange = React.useCallback(
+    async (newLocale: Locale) => {
+      setIsLangLoading(true);
+      setIsLangMenuOpen(false);
+      setIsMobileLangMenuOpen(false);
+      await router.replace(pathname, { locale: newLocale });
+      setIsLangLoading(false);
+    },
+    [pathname, router]
+  );
 
+  // Consolidated click-outside handler for better performance
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+
+      // Handle search modal
       if (
+        isSearchOpen &&
         searchRef.current &&
-        !searchRef.current.contains(event.target as Node)
+        !searchRef.current.contains(target)
       ) {
         setIsSearchOpen(false);
       }
-    }
-    if (isSearchOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isSearchOpen]);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+      // Handle auth menu
       if (
+        isAuthMenuOpen &&
         authMenuRef.current &&
-        !authMenuRef.current.contains(event.target as Node) &&
-        // Ensure mobileAuthMenuRef check is still valid if renderAuthDropdown is used by it
+        !authMenuRef.current.contains(target) &&
         (!mobileAuthMenuRef.current ||
-          !mobileAuthMenuRef.current.contains(event.target as Node))
+          !mobileAuthMenuRef.current.contains(target))
       ) {
         setIsAuthMenuOpen(false);
       }
     }
-    if (isAuthMenuOpen) {
+
+    // Only add listener if at least one menu is open
+    if (isSearchOpen || isAuthMenuOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isAuthMenuOpen]);
+  }, [isSearchOpen, isAuthMenuOpen]);
 
-  const searchButtonClasses =
-    "flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300";
-  const cartButtonClasses =
-    "flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300 relative";
-  const authButtonClasses =
-    "p-2 text-neutral-600 hover:text-primary-800 rounded-full transition-colors duration-300";
+  // Memoize static class names
+  const searchButtonClasses = React.useMemo(
+    () =>
+      "flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300",
+    []
+  );
+  const cartButtonClasses = React.useMemo(
+    () =>
+      "flex items-center px-3 py-2 text-neutral-600 hover:text-primary-800 rounded-full hover:bg-neutral-100 transition-colors duration-300 relative",
+    []
+  );
+  const authButtonClasses = React.useMemo(
+    () =>
+      "p-2 text-neutral-600 hover:text-primary-800 rounded-full transition-colors duration-300",
+    []
+  );
 
-  const renderAuthDropdown = () => (
-    <div
-      className={`absolute mt-2 w-56 bg-white border border-neutral-200/75 rounded-lg shadow-lg z-50 animate-fade-in-up overflow-hidden ${
-        currentLocale === "ar" ? "left-0" : "right-0"
-      }`}
-    >
-      {!isAuthenticated ? (
-        <div className="p-2 flex flex-col gap-1">
-          <button
-            className="flex items-center gap-3 w-full px-3 py-2 hover:bg-neutral-100 text-left text-neutral-700 font-medium transition-colors rounded-md"
-            onClick={() => {
-              router.push("/signin");
-              setIsAuthMenuOpen(false);
-            }}
-          >
-            <LogIn size={16} className="text-neutral-500" />
-            <span>{t("signin")}</span>
-          </button>
-          <button
-            className="flex items-center gap-3 w-full px-3 py-2 bg-primary-50 hover:bg-primary-100 text-left text-primary-700 font-medium transition-colors rounded-md"
-            onClick={() => {
-              router.push("/signup");
-              setIsAuthMenuOpen(false);
-            }}
-          >
-            <UserPlus size={16} />
-            <span>{t("signup")}</span>
-          </button>
-        </div>
-      ) : (
-        <div className="flex flex-col">
-          <div className="px-4 py-3 border-b border-neutral-200/75">
-            <p className="text-sm font-medium text-neutral-900 truncate">
-              {user?.displayName || t("yourName")}
-            </p>
-            <p className="text-xs text-neutral-500 truncate">
-              {user?.email || t("yourEmail")}
-            </p>
-          </div>
+  const renderAuthDropdown = React.useCallback(
+    () => (
+      <div
+        className={`absolute mt-2 w-56 bg-white border border-neutral-200/75 rounded-lg shadow-lg z-50 animate-fade-in-up overflow-hidden ${
+          currentLocale === "ar" ? "left-0" : "right-0"
+        }`}
+      >
+        {!isAuthenticated ? (
           <div className="p-2 flex flex-col gap-1">
-            <button className="flex items-center gap-3 w-full px-3 py-2 hover:bg-neutral-100 text-left text-neutral-700 font-medium transition-colors rounded-md">
-              <LayoutDashboard size={16} className="text-neutral-500" />
-              <span>{t("profile")}</span>
-            </button>
             <button
-              className="flex items-center gap-3 w-full px-3 py-2 hover:bg-red-50 text-left text-red-600 font-medium transition-colors rounded-md"
+              className="flex items-center gap-3 w-full px-3 py-2 hover:bg-neutral-100 text-left text-neutral-700 font-medium transition-colors rounded-md"
               onClick={() => {
-                signOut();
+                router.push("/signin");
                 setIsAuthMenuOpen(false);
               }}
             >
-              <LogOut size={16} />
-              <span>{t("logout")}</span>
+              <LogIn size={16} className="text-neutral-500" />
+              <span>{t("signin")}</span>
+            </button>
+            <button
+              className="flex items-center gap-3 w-full px-3 py-2 bg-primary-50 hover:bg-primary-100 text-left text-primary-700 font-medium transition-colors rounded-md"
+              onClick={() => {
+                router.push("/signup");
+                setIsAuthMenuOpen(false);
+              }}
+            >
+              <UserPlus size={16} />
+              <span>{t("signup")}</span>
             </button>
           </div>
-        </div>
-      )}
-    </div>
+        ) : (
+          <div className="flex flex-col">
+            <div className="px-4 py-3 border-b border-neutral-200/75">
+              <p className="text-sm font-medium text-neutral-900 truncate">
+                {user?.displayName || t("yourName")}
+              </p>
+              <p className="text-xs text-neutral-500 truncate">
+                {user?.email || t("yourEmail")}
+              </p>
+            </div>
+            <div className="p-2 flex flex-col gap-1">
+              <button className="flex items-center gap-3 w-full px-3 py-2 hover:bg-neutral-100 text-left text-neutral-700 font-medium transition-colors rounded-md">
+                <LayoutDashboard size={16} className="text-neutral-500" />
+                <span>{t("profile")}</span>
+              </button>
+              <button
+                className="flex items-center gap-3 w-full px-3 py-2 hover:bg-red-50 text-left text-red-600 font-medium transition-colors rounded-md"
+                onClick={() => {
+                  signOut();
+                  setIsAuthMenuOpen(false);
+                }}
+              >
+                <LogOut size={16} />
+                <span>{t("logout")}</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    ),
+    [
+      currentLocale,
+      isAuthenticated,
+      router,
+      t,
+      user?.displayName,
+      user?.email,
+      signOut,
+    ]
   );
 
   return (

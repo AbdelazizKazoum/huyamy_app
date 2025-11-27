@@ -4,6 +4,10 @@ import { ShoppingCart, ClipboardList, Truck } from "lucide-react";
 import { ButtonPrimary } from "@/components/ui";
 import { Link } from "@/i18n/config";
 import { useRouter } from "next/navigation";
+import { useConfig } from "@/hooks/useConfig";
+import { useLocale } from "next-intl";
+import { siteConfig } from "@/config/site";
+import { Language } from "@/types";
 
 interface CartOrderSummaryProps {
   t: (key: string) => string;
@@ -17,6 +21,12 @@ export default function CartOrderSummary({
   subtotal,
 }: CartOrderSummaryProps) {
   const router = useRouter();
+  const locale = useLocale() as Language;
+
+  // Get currency from config using the hook (fetches if not exists)
+  const { config } = useConfig();
+  const currency =
+    config?.currencies?.[locale] || siteConfig.currencies[locale];
 
   return (
     <div className="lg:col-span-1 mt-8 lg:mt-0">
@@ -32,7 +42,7 @@ export default function CartOrderSummary({
               {t("subtotal")} ({selectedItemsCount} {t("items")})
             </dt>
             <dd className="font-semibold text-slate-800">
-              {subtotal.toFixed(2)} {t("currency")}
+              {subtotal.toFixed(2)} {currency}
             </dd>
           </div>
           <div className="flex items-center justify-between">
@@ -47,7 +57,7 @@ export default function CartOrderSummary({
           <div className="flex items-center justify-between text-lg font-bold">
             <span className="text-slate-800">{t("total")}</span>
             <span className="text-green-600">
-              {subtotal.toFixed(2)} {t("currency")}
+              {subtotal.toFixed(2)} {currency}
             </span>
           </div>
         </div>

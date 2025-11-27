@@ -4,6 +4,7 @@ import MapWrapper from "@/components/MapWrapper";
 import { getTranslations } from "next-intl/server";
 import { Language } from "@/types";
 import { siteConfig } from "@/config/site";
+import { getCachedSiteConfig } from "@/lib/actions/config";
 
 // --- Type Definitions ---
 
@@ -63,8 +64,13 @@ export default async function ContactPage({ params }: ContactPageProps) {
   const t = await getTranslations("contact");
   const { locale } = await params;
 
-  // Get contact info from siteConfig
-  const { contact, socialLinks, location } = siteConfig;
+  // Get cached config data
+  const config = await getCachedSiteConfig();
+
+  // Get contact info from config with fallback to siteConfig
+  const contact = config?.contact || siteConfig.contact;
+  const socialLinks = config?.socialLinks || siteConfig.socialLinks;
+  const location = config?.location || siteConfig.location;
 
   return (
     <div
@@ -112,20 +118,23 @@ export default async function ContactPage({ params }: ContactPageProps) {
               <ContactItem
                 icon={<Phone size={28} />}
                 title={t("phone")}
-                value={contact.phone}
-                href={`tel:${contact.phone.replace(/\s+/g, "")}`}
+                value={contact?.phone || ""}
+                href={`tel:${(contact?.phone || "").replace(/\s+/g, "")}`}
               />
               <ContactItem
                 icon={<Mail size={28} />}
                 title={t("email")}
-                value={contact.email}
-                href={`mailto:${contact.email}`}
+                value={contact?.email || ""}
+                href={`mailto:${contact?.email || ""}`}
               />
               <ContactItem
                 icon={<WhatsAppIcon />}
                 title="WhatsApp"
-                value={contact.whatsapp}
-                href={`https://wa.me/${contact.whatsapp.replace(/\D/g, "")}`}
+                value={contact?.whatsapp || ""}
+                href={`https://wa.me/${(contact?.whatsapp || "").replace(
+                  /\D/g,
+                  ""
+                )}`}
               />
               <div className="text-center pt-8">
                 <h3 className="font-bold text-xl text-neutral-800 mb-6">

@@ -6,6 +6,8 @@ import { ButtonPrimary } from "@/components/ui";
 import { Language } from "@/types";
 import { Loader2, CreditCard } from "lucide-react";
 import { CartItem } from "@/types/cart";
+import { useConfig } from "@/hooks/useConfig";
+import { siteConfig } from "@/config/site";
 
 interface OrderSummaryProps {
   t: (key: string) => string;
@@ -30,6 +32,11 @@ export default function OrderSummary({
   clientSecret,
   onSubmit,
 }: OrderSummaryProps) {
+  // Get currency from config using the hook (fetches if not exists)
+  const { config } = useConfig();
+  const currency =
+    config?.currencies?.[locale] || siteConfig.currencies[locale];
+
   return (
     <div className="bg-white p-4 lg:p-8 rounded-2xl shadow-xl border border-slate-200/80">
       <h2 className="text-2xl font-bold text-slate-900 border-b border-slate-200 pb-4 mb-4 flex items-center gap-3">
@@ -84,7 +91,7 @@ export default function OrderSummary({
                 </div>
               </div>
               <p className="font-medium text-slate-800 whitespace-nowrap">
-                {(itemPrice * item.quantity).toFixed(2)} {t("currency")}
+                {(itemPrice * item.quantity).toFixed(2)} {currency}
               </p>
             </div>
           );
@@ -97,7 +104,7 @@ export default function OrderSummary({
             {t("subtotal")}
           </dt>
           <dd className="text-slate-800">
-            {subtotal.toFixed(2)} {t("currency")}
+            {subtotal.toFixed(2)} {currency}
           </dd>
         </div>
         <div className="flex items-center justify-between font-medium">
@@ -115,7 +122,7 @@ export default function OrderSummary({
             {t("total")}
           </dt>
           <dd className="text-primary-800">
-            {subtotal.toFixed(2)} {t("currency")}
+            {subtotal.toFixed(2)} {currency}
           </dd>
         </div>
       </dl>
@@ -144,7 +151,7 @@ export default function OrderSummary({
           <>
             <CreditCard className="h-5 w-5" />
             <span>
-              {t("payNow")} {subtotal.toFixed(2)} {t("currency")}
+              {t("payNow")} {subtotal.toFixed(2)} {currency}
             </span>
           </>
         ) : (
