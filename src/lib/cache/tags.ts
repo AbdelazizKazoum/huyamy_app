@@ -113,7 +113,7 @@ export const CACHE_CONFIG = {
       MASTER_CACHE_TAGS.ALL_CONTENT,
       MASTER_CACHE_TAGS.SEO_META,
     ],
-    revalidate: 604800, // 7 days
+    revalidate: false, // No automatic revalidation - manual only
     key: ["site-config"],
   },
 };

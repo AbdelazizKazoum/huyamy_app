@@ -4,6 +4,7 @@ import {
   getSiteConfig,
   updateLocationVerification,
 } from "@/lib/services/configService";
+import { revalidateConfigCache } from "@/lib/actions/config";
 
 export async function GET() {
   try {
@@ -66,6 +67,9 @@ export async function PUT(request: NextRequest) {
       locationCoordinates,
       verification,
     });
+
+    // Revalidate the config cache after update
+    await revalidateConfigCache();
 
     return NextResponse.json({ success: true });
   } catch (error) {

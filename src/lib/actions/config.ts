@@ -26,7 +26,7 @@ export const getCachedSiteConfig = unstable_cache(
   },
   CACHE_CONFIG.CONFIG.key,
   {
-    revalidate: CACHE_CONFIG.CONFIG.revalidate,
+    // No automatic revalidation - cache indefinitely until manually revalidated
     tags: CACHE_CONFIG.CONFIG.tags,
   }
 );
@@ -57,7 +57,7 @@ export const getCachedConfigSection = unstable_cache(
   },
   ["config-section"],
   {
-    revalidate: CACHE_CONFIG.CONFIG.revalidate,
+    // No automatic revalidation - cache indefinitely until manually revalidated
     tags: CACHE_CONFIG.CONFIG.tags,
   }
 );
@@ -77,7 +77,7 @@ export const hasSiteConfig = unstable_cache(
   },
   ["config-exists"],
   {
-    revalidate: CACHE_CONFIG.CONFIG.revalidate,
+    // No automatic revalidation - cache indefinitely until manually revalidated
     tags: CACHE_CONFIG.CONFIG.tags,
   }
 );

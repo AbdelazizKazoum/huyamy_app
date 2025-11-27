@@ -1,6 +1,7 @@
 // app/api/parameters/contact-info/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getSiteConfig, updateContactInfo } from "@/lib/services/configService";
+import { revalidateConfigCache } from "@/lib/actions/config";
 
 export async function GET() {
   try {
@@ -61,6 +62,9 @@ export async function PUT(request: NextRequest) {
         whatsapp,
       },
     });
+
+    // Revalidate the config cache after update
+    await revalidateConfigCache();
 
     return NextResponse.json({ success: true });
   } catch (error) {

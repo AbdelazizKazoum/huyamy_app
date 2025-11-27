@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSiteConfig, updateBrandAssets } from "@/lib/services/configService";
 import { uploadImageToR2 } from "@/lib/services/R2Service";
+import { revalidateConfigCache } from "@/lib/actions/config";
 
 export async function GET() {
   try {
@@ -20,7 +21,7 @@ export async function GET() {
     return NextResponse.json(
       { error: "Failed to fetch brand assets" },
       { status: 500 }
-    );  
+    );
   }
 }
 
@@ -64,6 +65,9 @@ export async function PUT(request: NextRequest) {
 
     // Update brand assets (all fields are optional)
     await updateBrandAssets(updateData);
+
+    // Revalidate the config cache after update
+    await revalidateConfigCache();
 
     return NextResponse.json({ success: true });
   } catch (error) {

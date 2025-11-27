@@ -1,6 +1,7 @@
 // app/api/parameters/basic-info/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getSiteConfig, updateBasicInfo } from "@/lib/services/configService";
+import { revalidateConfigCache } from "@/lib/actions/config";
 
 export async function GET() {
   try {
@@ -43,6 +44,9 @@ export async function PUT(request: NextRequest) {
       brandName,
       url,
     });
+
+    // Revalidate the config cache after update
+    await revalidateConfigCache();
 
     return NextResponse.json({ success: true });
   } catch (error) {

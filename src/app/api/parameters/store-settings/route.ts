@@ -4,6 +4,7 @@ import {
   getSiteConfig,
   updateStoreSettings,
 } from "@/lib/services/configService";
+import { revalidateConfigCache } from "@/lib/actions/config";
 
 export async function GET() {
   try {
@@ -60,6 +61,9 @@ export async function PUT(request: NextRequest) {
       defaultLocale,
       currencies,
     });
+
+    // Revalidate the config cache after update
+    await revalidateConfigCache();
 
     return NextResponse.json({ success: true });
   } catch (error) {
