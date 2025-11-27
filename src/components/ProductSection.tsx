@@ -1,6 +1,6 @@
 import { Locale, Product, SiteConfig } from "@/types";
 import SectionTitle from "./SectionTitle";
-import ProductCard from "./ProductCard";
+import LazyProductCard from "./LazyProductCard";
 import { ButtonSecondary } from "./ui";
 import { useLocale, useTranslations } from "next-intl";
 import { siteConfig } from "@/config/site";
@@ -78,7 +78,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({
             >
               <meta itemProp="position" content={(index + 1).toString()} />
               <div itemProp="item">
-                <ProductCard
+                <LazyProductCard
                   product={product}
                   lang={currentLocale}
                   currency={currency}

@@ -23,7 +23,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
   lang = "ar",
   currency,
 }) => {
-  console.log("🚀 ~ ProductCard ~ product:", product);
   const t = useTranslations("products");
   const { addItem } = useCartStore();
   const router = useRouter();
