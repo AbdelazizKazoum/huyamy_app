@@ -9,7 +9,7 @@ import {
 
 interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
-  error?: FieldError | Merge<FieldError, FieldErrorsImpl<any>>;
+  error?: FieldError | Merge<FieldError, FieldErrorsImpl<any>> | string;
   register?: UseFormRegister<any>;
   name?: string;
 }
@@ -38,8 +38,14 @@ const FormInput: React.FC<FormInputProps> = ({
         {...(register && name ? register(name) : {})}
         {...props}
       />
-      {error && typeof error.message === "string" && (
-        <p className="text-red-500 text-xs mt-1">{error.message}</p>
+      {error && (
+        <p className="text-red-500 text-xs mt-1">
+          {typeof error === "string"
+            ? error
+            : typeof error.message === "string"
+            ? error.message
+            : ""}
+        </p>
       )}
     </div>
   );
