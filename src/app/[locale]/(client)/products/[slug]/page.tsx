@@ -430,11 +430,12 @@ export default async function ProductDetailsPage({ params }: Props) {
         config={config}
       />
 
-      {/* Pass alsoChooseSections to ProductDisplay */}
+      {/* Pass alsoChooseSections and config to ProductDisplay */}
       <ProductDisplay
         product={product}
         locale={locale}
         alsoChooseSections={alsoChooseSections}
+        config={config}
       />
     </>
   );
