@@ -1,83 +1,7 @@
 // lib/services/configService.ts
 import { adminDb } from "@/lib/firebaseAdmin";
 import { FieldValue } from "firebase-admin/firestore";
-
-export interface SiteConfig {
-  // Basic Info
-  name?: string;
-  brandName?: string;
-  url?: string;
-
-  // Brand Assets
-  logo?: string;
-  banner?: string;
-  favicon?: string;
-
-  // Store Settings
-  category?: string;
-  i18n?: {
-    defaultLocale: "ar" | "fr";
-    locales: ("ar" | "fr")[];
-  };
-  currencies?: {
-    ar: string;
-    fr: string;
-  };
-
-  // Translated Content
-  titleTemplate?: string;
-  title?: {
-    ar?: string;
-    fr?: string;
-  };
-  description?: {
-    ar?: string;
-    fr?: string;
-  };
-  niche?: {
-    ar?: string;
-    fr?: string;
-  };
-  keywords?: {
-    ar?: string[];
-    fr?: string[];
-  };
-
-  // Location & Verification
-  location?: string;
-  locationCoordinates?: {
-    lat?: number;
-    lng?: number;
-  };
-  verification?: {
-    google?: string;
-  };
-
-  // Contact Info
-  contact?: {
-    email?: string;
-    phone?: string;
-    whatsapp?: string;
-  };
-
-  // Social Media
-  social?: {
-    twitter?: string;
-  };
-  socialLinks?: {
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-  };
-
-  // Additional metadata (from site config)
-  authors?: { name: string; url?: string }[];
-  creator?: string;
-  publisher?: string;
-  baseUrl?: string;
-  manifest?: string;
-  themeColor?: string;
-}
+import { SiteConfig } from "@/types/config";
 
 const CONFIG_DOC_ID = "site-config";
 
@@ -103,7 +27,10 @@ export async function getSiteConfig(): Promise<SiteConfig | null> {
       );
     }
 
-    return data as SiteConfig;
+    // Convert Firestore timestamps to plain objects for client components
+    const plainData = JSON.parse(JSON.stringify(data));
+
+    return plainData as SiteConfig;
   } catch (error) {
     console.error("Error fetching site config:", error);
     throw new Error("Failed to fetch site configuration");

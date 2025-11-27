@@ -27,8 +27,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
 import SearchModal from "../SearchModal";
 import { useConfig } from "@/hooks/useConfig";
+import { SiteConfig as ConfigType } from "@/types/config";
 
-type HeaderProps = Record<string, never>;
+type HeaderProps = {
+  config?: ConfigType | null;
+};
 
 // Menu items configuration
 interface MenuItem {
@@ -36,7 +39,7 @@ interface MenuItem {
   label: LocalizedString;
 }
 
-const Header: React.FC<HeaderProps> = () => {
+const Header: React.FC<HeaderProps> = ({ config: serverConfig }) => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isLangMenuOpen, setIsLangMenuOpen] = useState<boolean>(false);
@@ -57,10 +60,13 @@ const Header: React.FC<HeaderProps> = () => {
   const router = useRouter();
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Use config hook that works on both server and client
-  const { config: activeConfig } = useConfig();
+  // Use config hook that works on both server and client (only for client-side updates)
+  const { config: clientConfig } = useConfig();
 
-  // Fallback to static config if no dynamic config available
+  // Priority: server config (SSR) -> client config (CSR updates) -> static config (fallback)
+  const activeConfig = serverConfig || clientConfig || siteConfig;
+
+  // Get currency and logo from active config
   const currency =
     activeConfig?.currencies?.[currentLocale] ||
     siteConfig.currencies[currentLocale];

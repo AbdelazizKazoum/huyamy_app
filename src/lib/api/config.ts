@@ -1,5 +1,5 @@
 // lib/api/config.ts
-import { SiteConfig } from "@/lib/services/configService";
+import { SiteConfig } from "@/types/config";
 
 /**
  * Fetches the entire site configuration from the API.

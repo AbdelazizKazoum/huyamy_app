@@ -1,10 +1,11 @@
 // app/api/config/route.ts
 import { NextResponse } from "next/server";
-import { getSiteConfig } from "@/lib/services/configService";
+import { getCachedSiteConfig } from "@/lib/actions/config";
 
 export async function GET() {
   try {
-    const config = await getSiteConfig();
+    // Use cached server action to avoid excessive DB calls
+    const config = await getCachedSiteConfig();
 
     return NextResponse.json(config);
   } catch (error) {
