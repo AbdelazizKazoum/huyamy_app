@@ -1,4 +1,4 @@
-import { Locale, Product } from "@/types";
+import { Locale, Product, SiteConfig } from "@/types";
 import SectionTitle from "./SectionTitle";
 import ProductCard from "./ProductCard";
 import { ButtonSecondary } from "./ui";
@@ -12,6 +12,7 @@ interface ProductSectionProps {
   products: Product[];
   showButton?: boolean;
   bgColor?: string;
+  config?: SiteConfig | null;
 }
 
 const ProductSection: React.FC<ProductSectionProps> = ({
@@ -20,10 +21,12 @@ const ProductSection: React.FC<ProductSectionProps> = ({
   products,
   showButton = false,
   bgColor = "bg-neutral-50",
+  config,
 }) => {
   const t = useTranslations("products");
   const currentLocale = useLocale() as Locale;
-  const currency = siteConfig.currencies[currentLocale];
+  const currency =
+    config?.currencies?.[currentLocale] || siteConfig.currencies[currentLocale];
 
   return (
     <section

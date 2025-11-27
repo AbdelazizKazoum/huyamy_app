@@ -413,6 +413,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
                       products={section.products}
                       bgColor={index % 2 === 0 ? "bg-stone-50" : "bg-white"}
                       showButton={isLast}
+                      config={config}
                     />
                   </article>
                 );
@@ -448,6 +449,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
                   subtitle={t("popularProducts.subtitle")}
                   products={landingPageProducts.slice(0, 4)}
                   bgColor="bg-stone-50"
+                  config={config}
                 />
               </article>
               <article
@@ -466,6 +468,7 @@ export default async function EcommerceLandingPage({ params }: Props) {
                   products={landingPageProducts.slice(0, 10)}
                   showButton={true}
                   bgColor="bg-white"
+                  config={config}
                 />
               </article>
             </section>

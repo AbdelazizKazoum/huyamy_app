@@ -53,8 +53,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
       : ""
   } - ${
     lang === "ar"
-      ? `منتج طبيعي من ${siteConfig.brandName}`
-      : `Produit naturel de ${siteConfig.brandName}`
+      ? `منتج من ${siteConfig.brandName}`
+      : `Produit de ${siteConfig.brandName}`
   }`;
 
   const hasMultipleOptions =
