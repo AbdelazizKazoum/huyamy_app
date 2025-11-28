@@ -7,7 +7,7 @@ import { unstable_cache } from "next/cache";
 import { getProductBySlug } from "@/lib/services/productService";
 import { CACHE_CONFIG } from "@/lib/cache/tags";
 import { siteConfig } from "@/config/site";
-import ProductDisplay from "@/components/ProductDisplay"; // <-- Import the new display component
+import LazyProductDisplay from "@/components/LazyProductDisplay"; // <-- Import the lazy-loaded display component
 import { getSectionsByType } from "@/lib/services/sectionService";
 import { getCachedSiteConfig } from "@/lib/actions/config";
 
@@ -430,8 +430,8 @@ export default async function ProductDetailsPage({ params }: Props) {
         config={config}
       />
 
-      {/* Pass alsoChooseSections and config to ProductDisplay */}
-      <ProductDisplay
+      {/* Pass alsoChooseSections and config to LazyProductDisplay */}
+      <LazyProductDisplay
         product={product}
         locale={locale}
         alsoChooseSections={alsoChooseSections}
